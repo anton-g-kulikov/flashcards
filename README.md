@@ -25,7 +25,7 @@ their mechanics are the same; the shared DGT vocabulary became a per-user collec
 | Firebase access (Google sign-in, Firestore) | `public/src/core/cloud.js` — ES module loaded from Google's CDN |
 | Sign-in screen and account chip | `public/src/ui/auth-gate.js` |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js` — `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
-| App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it |
+| App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
 | Study app (modes, stats, progress) | `public/src/core/core.js`, `public/src/features/flashcards/` |
 | Adding and editing words | `public/src/features/vocabulary-manager/word-manager.js` |
 | Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |

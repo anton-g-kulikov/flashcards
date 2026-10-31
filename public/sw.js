@@ -1,5 +1,5 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.3.2";
+const CACHE_NAME = "flashcards-v1.3.3";
 const urlsToCache = [
   // Main pages
   "/",
@@ -37,12 +37,12 @@ const urlsToCache = [
   "/manifest.json",
 
   // Essential icons
-  "/icons/ios/16.png",
-  "/icons/ios/32.png",
-  "/icons/ios/152.png",
-  "/icons/ios/167.png",
-  "/icons/ios/180.png",
-  "/icons/ios/192.png",
+  "/icons/ios/16.png?v=2",
+  "/icons/ios/32.png?v=2",
+  "/icons/ios/152.png?v=2",
+  "/icons/ios/167.png?v=2",
+  "/icons/ios/180.png?v=2",
+  "/icons/ios/192.png?v=2",
 ];
 
 // Install event - cache resources
@@ -53,7 +53,10 @@ self.addEventListener("install", (event) => {
       .open(CACHE_NAME)
       .then((cache) => {
         console.log("Service Worker: Caching files");
-        return cache.addAll(urlsToCache);
+        // Straight from the network: the HTTP cache may still hold files from an older deploy
+        return cache.addAll(
+          urlsToCache.map((url) => new Request(url, { cache: "reload" }))
+        );
       })
       .then(() => {
         console.log("Service Worker: All files cached");
@@ -240,8 +243,8 @@ self.addEventListener("push", (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: "/icons/icon-192x192.png",
-      badge: "/icons/icon-72x72.png",
+      icon: "/icons/ios/192.png?v=2",
+      badge: "/icons/android/android-launchericon-72-72.png?v=2",
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
