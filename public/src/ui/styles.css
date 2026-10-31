@@ -832,7 +832,37 @@ button.armed:hover {
 }
 
 .page-foot {
+  flex-direction: column;
+  align-items: center;
   margin-top: var(--spacing-5);
+}
+
+/* The cookie note under the footer: small, with its way out as an inline link */
+.analytics-note {
+  max-width: 34em;
+  margin: var(--spacing-4) auto 0;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.link-btn {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent-strong);
+  font-size: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link-btn:hover {
+  background: none;
+  color: var(--color-accent-hover);
 }
 
 .theme-switch {

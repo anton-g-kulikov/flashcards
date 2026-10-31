@@ -105,3 +105,7 @@ With `npm run dev`, at http://127.0.0.1:5050:
    Progress makes all three due again. At phone width, the stats row fits in all three languages.
 10. Appearance: pick Dark at the foot of Study; My Cards and the privacy page open dark, with no
    light flash. Light holds while the device is dark; "Match the device" follows the device again.
+11. Cookie note: under the footer of Study and at the foot of My Cards. "Turn off analytics" deletes
+   the `_ga` cookies and switches the note to "Analytics is off on this device"; after a reload no
+   googletagmanager script loads (check on a deployed site, it never loads on localhost). "Turn it
+   back on" restores it.
