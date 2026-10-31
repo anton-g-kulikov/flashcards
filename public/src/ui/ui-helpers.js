@@ -76,10 +76,10 @@ function flipCard() {
   }
 }
 
-function resetProgress() {
+function resetProgress(button) {
   // Use the new ResetProgress utility instead of the old vocabApp method
   if (window.ResetProgress) {
-    window.ResetProgress.resetAllProgress();
+    window.ResetProgress.resetAllProgress(button);
   } else {
     console.error("ResetProgress utility not available");
     alert("Reset functionality is not available. Please reload the page.");

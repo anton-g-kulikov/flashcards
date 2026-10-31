@@ -38,23 +38,6 @@ class QuizMode {
 
     // Check if we have enough unknown cards to start the quiz
     if (unknownCards.length < 2) {
-      const selectedTopic = this.vocabApp.selectedTopic || "all";
-      const selectedCategory = this.vocabApp.selectedCategory || "all";
-
-      let filterText = "current filter";
-      if (selectedTopic !== "all" && selectedCategory !== "all") {
-        const topicName = window.TopicUtils
-          ? window.TopicUtils.getTopicName(selectedTopic)
-          : selectedTopic;
-        filterText = `${selectedCategory} category + ${topicName} topic`;
-      } else if (selectedTopic !== "all") {
-        const topicName = window.TopicUtils
-          ? window.TopicUtils.getTopicName(selectedTopic)
-          : selectedTopic;
-        filterText = `${topicName} topic`;
-      } else if (selectedCategory !== "all") {
-        filterText = `${selectedCategory} category`;
-      }
 
       // Show error in quiz interface with flashcard design
       const quizQuestion = document.getElementById("quizQuestion");
@@ -67,11 +50,11 @@ class QuizMode {
           <div class="flashcard-container" style="max-width: 500px; margin: 0 auto;">
             <div class="flashcard">
               <div class="card-face card-front" style="background: var(--color-warning); color: white;">
-                <div class="spanish-word">Need at least 2 unknown translated cards for quiz mode.</div>
+                <div class="spanish-word">A quiz needs at least 2 unknown words with a translation.</div>
               </div>
               <div class="card-face card-back">
-                <div class="translation">${filterText} has only ${unknownCards.length} unknown cards.</div>
-                <div class="example">Try changing the topic or category filter, or learn some cards in flashcard mode first.</div>
+                <div class="translation">You have ${unknownCards.length} right now.</div>
+                <div class="example">Add words or translations in My Words, or reset your progress to review known words.</div>
               </div>
             </div>
           </div>
@@ -247,7 +230,7 @@ class QuizMode {
               </div>
               <div class="card-face card-back">
                 <div class="translation">Switch to flashcard mode or add more vocabulary.</div>
-                <div class="example">Try changing filters or learning more cards first.</div>
+                <div class="example">Add more words with different translations in My Words.</div>
               </div>
             </div>
           </div>
@@ -495,23 +478,6 @@ class QuizMode {
   }
 
   showQuizCompletionCard() {
-    const selectedTopic = this.vocabApp.selectedTopic || "all";
-    const selectedCategory = this.vocabApp.selectedCategory || "all";
-
-    let filterText = "";
-    if (selectedTopic !== "all" && selectedCategory !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` in ${selectedCategory} category + ${topicName} topic`;
-    } else if (selectedTopic !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` for ${topicName} topic`;
-    } else if (selectedCategory !== "all") {
-      filterText = ` in ${selectedCategory} category`;
-    }
 
     // Clear question text
     const quizQuestion = document.getElementById("quizQuestion");
@@ -530,8 +496,8 @@ class QuizMode {
               <div class="spanish-word">¡Felicidades!</div>
             </div>
             <div class="card-face card-back">
-              <div class="translation">You know all cards${filterText}!</div>
-              <div class="example">Switch to flashcard mode or change filters to continue learning.</div>
+              <div class="translation">You know all your words!</div>
+              <div class="example">Add new words in My Words, or reset your progress to review them again.</div>
             </div>
           </div>
         </div>

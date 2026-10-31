@@ -1,16 +1,11 @@
 // Reset progress utility
 
 class ResetProgress {
-  static resetAllProgress() {
+  static resetAllProgress(button) {
     console.log("Reset progress button clicked...");
 
-    // Show confirmation dialog first
-    const confirmReset = confirm(
-      "Are you sure you want to reset all progress?\n\nThis will:\n• Clear all known/unknown cards\n• Reset your learning progress\n• Start fresh with all cards as unknown\n\nThis action cannot be undone."
-    );
-
-    if (!confirmReset) {
-      console.log("Reset cancelled by user");
+    // Ask for a second tap on the button before wiping progress
+    if (button && !window.confirmOnSecondTap(button, "Tap again to reset all progress")) {
       return;
     }
 
@@ -116,7 +111,6 @@ class ResetProgress {
       }
 
       console.log("Progress reset complete");
-      alert("Progress has been reset! All cards are now marked as unknown.");
     } catch (error) {
       console.error("Error resetting progress:", error);
       alert("There was an error resetting progress. Please try again.");
@@ -140,6 +134,6 @@ class ResetProgress {
 window.ResetProgress = ResetProgress;
 
 // Global resetProgress function for backward compatibility
-window.resetProgress = function () {
-  ResetProgress.resetAllProgress();
+window.resetProgress = function (button) {
+  ResetProgress.resetAllProgress(button);
 };

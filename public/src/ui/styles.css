@@ -2323,3 +2323,11 @@ body.auth-pending .auth-gate .auth-loading {
   width: 1%;
   white-space: nowrap;
 }
+
+/* Armed two-step confirmation button (see confirm-button.js) */
+button.armed,
+button.armed:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: white;
+}

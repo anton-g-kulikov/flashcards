@@ -23,31 +23,6 @@ class FlashcardMode {
     return window.ShuffleUtils.aggressiveShuffle(array, this.vocabApp);
   }
 
-  populateTopicSelector() {
-    // Get the topic selector element from the DOM
-    const topicSelector = document.getElementById("topicSelector");
-    if (!topicSelector) return;
-
-    // Get unique topics from the vocabulary data
-    const topics = new Set(
-      this.vocabApp.allCards.map((card) => card.topic).filter(Boolean)
-    );
-
-    // Add an "all" option to the topics
-    topics.add("all");
-
-    // Clear existing options first
-    topicSelector.innerHTML = "";
-
-    // Populate the selector with topic options
-    topics.forEach((topic) => {
-      const option = document.createElement("option");
-      option.value = topic;
-      option.textContent = topic === "all" ? "All Topics" : topic;
-      topicSelector.appendChild(option);
-    });
-  }
-
   showCurrentCard() {
     // Make sure we're using the current filtered cards
     if (this.vocabApp.currentCards.length === 0) {
@@ -109,15 +84,6 @@ class FlashcardMode {
     // Create front face
     const frontFace = document.createElement("div");
     frontFace.className = "card-face card-front";
-
-    // Add category badge if category exists
-    if (card.category) {
-      const categoryBadge = document.createElement("div");
-      categoryBadge.className = "category-badge";
-      categoryBadge.textContent =
-        card.category.charAt(0).toUpperCase() + card.category.slice(1);
-      frontFace.appendChild(categoryBadge);
-    }
 
     // Add Spanish word
     const spanishWord = document.createElement("div");
@@ -319,23 +285,6 @@ class FlashcardMode {
   }
 
   showCompletionMessage() {
-    const selectedTopic = this.vocabApp.selectedTopic || "all";
-    const selectedCategory = this.vocabApp.selectedCategory || "all";
-
-    let filterText = "";
-    if (selectedTopic !== "all" && selectedCategory !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` in ${selectedCategory} + ${topicName}`;
-    } else if (selectedTopic !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` for ${topicName}`;
-    } else if (selectedCategory !== "all") {
-      filterText = ` in ${selectedCategory} category`;
-    }
 
     const flashcard = document.getElementById("flashcard");
     if (!flashcard) return;
@@ -344,12 +293,12 @@ class FlashcardMode {
     flashcard.innerHTML = `
       <div class="card-face card-front">
         <div class="category-badge">🎉 Congratulations!</div>
-        <div class="spanish-word">All cards learned${filterText}!</div>
+        <div class="spanish-word">All cards learned!</div>
       </div>
       <div class="card-face card-back">
         <div class="translation">What would you like to do next?</div>
         <div class="example">
-          Try changing the topic/category filter above, or reset the progress to review everything you've learned.
+          Add new words in My Words, or reset your progress to review everything you've learned.
         </div>
       </div>
     `;
@@ -383,11 +332,6 @@ class FlashcardMode {
 
     this.vocabApp.updateStats();
     this.showCurrentCard();
-
-    // Update category info display
-    if (this.vocabApp.categoryManager) {
-      this.vocabApp.categoryManager.updateCategoryInfo();
-    }
   }
 
   // Replace shuffleCards method with aggressive shuffling to prevent patterns
@@ -402,58 +346,17 @@ class FlashcardMode {
     const flashcard = document.getElementById("flashcard");
     if (!flashcard) return;
 
-    const selectedTopic = this.vocabApp.selectedTopic || "all";
-    const selectedCategory = this.vocabApp.selectedCategory || "all";
-
-    let filterText = "";
-    if (selectedTopic !== "all" && selectedCategory !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` for ${selectedCategory} category + ${topicName} topic`;
-    } else if (selectedTopic !== "all") {
-      const topicName = window.TopicUtils
-        ? window.TopicUtils.getTopicName(selectedTopic)
-        : selectedTopic;
-      filterText = ` for ${topicName} topic`;
-    } else if (selectedCategory !== "all") {
-      filterText = ` for ${selectedCategory} category`;
-    }
 
     flashcard.innerHTML = `
       <div class="card-face card-front" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="no-cards-message">
-          <h3>No cards available${filterText}</h3>
-          <p>Try changing the topic or category filter, or switch to "All Cards" mode.</p>
+          <h3>No cards to study yet</h3>
+          <p>Add your first words in <a href="vocabulary-manager.html">My Words</a>.</p>
         </div>
       </div>
     `;
 
     // Remove flip functionality when showing no cards message
-    flashcard.onclick = null;
-
-    // Hide the action buttons
-    const cardActions = document.querySelector(".card-actions");
-    if (cardActions) {
-      cardActions.style.display = "none";
-    }
-  }
-
-  showSuccessCard(categoryText) {
-    const flashcard = document.getElementById("flashcard");
-    if (!flashcard) return;
-
-    flashcard.innerHTML = `
-      <div class="card-face card-front" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="success-message">
-          <h2>🎉 Congratulations!</h2>
-          <p>You've learned all unknown cards${categoryText}!</p>
-          <p>Switching to show all cards...</p>
-        </div>
-      </div>
-    `;
-
-    // Remove flip functionality for success message
     flashcard.onclick = null;
 
     // Hide the action buttons
@@ -488,117 +391,6 @@ class FlashcardMode {
     if (translation && card) {
       translation.textContent = card.translation || "No translation yet";
     }
-  }
-
-  refreshCards() {
-    // Get cards filtered by both topic and category
-    this.vocabApp.currentCards = this.vocabApp.getFilteredVocabulary(
-      this.vocabApp.vocabulary,
-      {
-        category: this.vocabApp.selectedCategory,
-        topic: this.currentTopic,
-        randomize: true,
-      }
-    );
-
-    // Update the UI to show the correct number of cards
-    this.vocabApp.totalCards = this.vocabApp.currentCards.length;
-    this.vocabApp.currentIndex = 0;
-
-    // Display the first card or a message if no cards
-    if (this.vocabApp.totalCards > 0) {
-      this.vocabApp.displayCard(this.vocabApp.currentCards[0]);
-    } else {
-      this.vocabApp.showNoCardsMessage();
-    }
-
-    // Update stats to reflect the new filtering
-    this.updateStats();
-  }
-
-  updateStats() {
-    // Filter cards based on current topic and category
-    const filteredCards = this.vocabApp.getFilteredVocabulary(
-      this.vocabApp.vocabulary,
-      {
-        category: this.vocabApp.selectedCategory,
-        topic: this.currentTopic,
-      }
-    );
-
-    // Update statistics display
-    const totalElement = document.querySelector(".stat-number.total");
-    if (totalElement) {
-      totalElement.textContent = filteredCards.length;
-    }
-
-    // Update other stats based on filtered cards
-    // ...existing stats update code...
-  }
-
-  // Fix 1: If the error is in an event listener, use arrow function or bind
-  setupEventListeners() {
-    // Wrong - this will cause context issues
-    // document.addEventListener('click', function() {
-    //   this.someMethod(); // Error: 'this' is undefined or not the class instance
-    // });
-
-    // Correct - use arrow function to preserve 'this' context
-    document.addEventListener("click", (e) => {
-      this.someMethod();
-    });
-
-    // Or use bind
-    document.addEventListener(
-      "click",
-      function () {
-        this.someMethod();
-      }.bind(this)
-    );
-  }
-
-  // Fix 2: If the error is in a method definition, ensure proper syntax
-  // Wrong syntax that could cause the error:
-  // methodName() {
-  //   this.property = value // Missing semicolon or other syntax issue
-  //   this // Unexpected 'this' due to previous syntax error
-  // }
-
-  // Correct syntax:
-  someMethod() {
-    this.property = value;
-    return this; // 'this' is properly used here
-  }
-
-  // Fix 3: If the error is in a callback, use arrow functions
-  handleAsyncOperation() {
-    // Wrong - 'this' context lost in callback
-    // setTimeout(function() {
-    //   this.updateUI(); // Error: 'this' is not the class instance
-    // }, 1000);
-
-    // Correct - arrow function preserves 'this'
-    setTimeout(() => {
-      this.updateUI();
-    }, 1000);
-  }
-
-  // Fix 4: Check for missing comma between methods
-  // Wrong:
-  // method1() {
-  //   // method body
-  // } // Missing comma here
-  // method2() {
-  //   this.something(); // This might cause the error
-  // }
-
-  // Correct:
-  method1() {
-    // method body
-  }
-
-  method2() {
-    this.something();
   }
 }
 

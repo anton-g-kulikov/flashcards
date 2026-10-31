@@ -66,8 +66,8 @@ class WordManager {
     }
   }
 
-  async deleteWord(card) {
-    if (!confirm(`Delete "${card.word}" from your collection?`)) return;
+  async deleteWord(card, button) {
+    if (!window.confirmOnSecondTap(button, "Sure?")) return;
 
     try {
       await window.Cloud.deleteCard(card.id);
@@ -112,7 +112,7 @@ class WordManager {
       const deleteButton = document.createElement("button");
       deleteButton.className = "delete-btn";
       deleteButton.textContent = "Delete";
-      deleteButton.addEventListener("click", () => this.deleteWord(card));
+      deleteButton.addEventListener("click", () => this.deleteWord(card, deleteButton));
       actionsCell.appendChild(deleteButton);
 
       row.append(wordCell, translationCell, actionsCell);
