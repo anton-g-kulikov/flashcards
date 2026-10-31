@@ -88,30 +88,3 @@ translation, and check the spelling (and, for nouns, the articles).
 
 Only share lists you made yourself or are allowed to share. I'll review the words, put the file in
 place and add it to the app's list.
-
-## How it works
-
-| Piece | Where |
-| --- | --- |
-| Static app, no build step | `public/` (served as-is by Firebase Hosting) |
-| Firebase access (Google sign-in, Firestore) | `public/src/core/cloud.js`, an ES module loaded from Google's CDN |
-| Sign-in screen, account chip, loading errors | `public/src/ui/auth-gate.js` |
-| Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
-| Study app (modes, stats, progress) | `public/src/core/core.js`, `public/src/features/flashcards/`, `public/src/utils/script.js` |
-| Collections and words | `public/src/features/vocabulary-manager/word-manager.js` |
-| CSV reading and writing | `public/src/utils/csv.js`, tested in `test/csv.test.js` |
-| Starter collections | `public/collections/` with `index.json` |
-| App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
-| Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |
-| Analytics | GA4 property `flashcards-ak-app` (measurement ID `G-E0J0MDFKE6`), tag in the `<head>` of both pages; skipped on localhost. Events go through `public/src/utils/analytics.js` |
-
-Data lives under each user's uid; the rules allow nobody else in:
-
-```text
-users/{uid}/collections/{id}  { name, active, createdAt, updatedAt }
-users/{uid}/cards/{cardId}    { word, translation, collectionId, createdAt, updatedAt }
-users/{uid}/meta/progress     { known: [cardId], history: { cardId: lastSeenMs }, updatedAt }
-```
-
-Cards saved before collections existed have no `collectionId` and belong to the `default`
-collection.
