@@ -228,6 +228,26 @@ button.armed:hover {
   margin-bottom: var(--spacing-4);
 }
 
+/* The full name ("YourFlashCards") needs about 385px of top bar next to the add button and the
+   account controls; narrower bars, such as on a 375px phone, get the short "YourCards". */
+.topbar {
+  container-type: inline-size;
+}
+
+.title-long {
+  display: none;
+}
+
+@container (min-width: 392px) {
+  .title-long {
+    display: inline;
+  }
+
+  .title-short {
+    display: none;
+  }
+}
+
 .topbar-title {
   flex: 0 1 auto;
   min-width: 0;

@@ -8,6 +8,7 @@
 const TRANSLATIONS = {
   en: {
     "app.title": "YourCards",
+    "app.titleLong": "YourFlashCards",
     "auth.tagline":
       "Your personal vocabulary collection. Add your own words, then learn them with flashcards and quizzes on any device.",
     "auth.signIn": "Sign in with Google",
@@ -116,6 +117,7 @@ const TRANSLATIONS = {
 
   ru: {
     "app.title": "YourCards",
+    "app.titleLong": "YourFlashCards",
     "auth.tagline":
       "Ваша личная коллекция слов. Добавляйте свои слова и учите их с помощью карточек и тестов на любом устройстве.",
     "auth.signIn": "Войти через Google",
@@ -225,6 +227,7 @@ const TRANSLATIONS = {
 
   es: {
     "app.title": "YourCards",
+    "app.titleLong": "YourFlashCards",
     "auth.tagline":
       "Tu colección personal de vocabulario. Añade tus propias palabras y apréndelas con tarjetas y tests en cualquier dispositivo.",
     "auth.signIn": "Iniciar sesión con Google",
@@ -385,7 +388,7 @@ class I18n {
 
   static apply(root = document) {
     document.documentElement.lang = I18n.lang;
-    document.title = I18n.t(document.body?.classList.contains("vocab-manager-page") ? "words.title" : "app.title");
+    document.title = I18n.t(document.body?.classList.contains("vocab-manager-page") ? "words.title" : "app.titleLong");
 
     root.querySelectorAll("[data-i18n]").forEach((el) => {
       // Buttons that icons.js decorated keep their icon; the label sits in the inner span
