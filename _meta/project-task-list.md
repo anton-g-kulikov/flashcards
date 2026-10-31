@@ -38,8 +38,38 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Verification:** 14 rules tests and 9 CSV/collection tests; manual check on the emulators at
   375px (library import, file import, toggles driving the study page, new/rename/delete).
 
+## Planned
+
+### TASK-003 — Spaced repetition (proposed 2026-10-31, awaiting approval)
+
+- **Goal:** Words come back for review at growing intervals instead of leaving the rotation
+  for good once known. Each session shows what is due first.
+- **Approach: Leitner boxes.** Simple to explain and to reason about; no tuning parameters.
+  - Every word sits in a box 0–5 with a due date. Box 0 = new.
+  - Correct (quiz right on the first try, or "I know this!") moves it up one box and schedules it:
+    box 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 16 days, 5 → 35 days.
+  - Wrong (any wrong quiz answer, or "I don't know") drops it to box 1, due again in the same
+    session.
+  - "Mastered" = box 5. It still comes back every 35 days.
+- **What you study:** due words first, oldest due first, then new words. When nothing is due, the
+  card says "All caught up" with the time of the next review.
+- **Quiz answer options** come from all words in the switched-on collections, not only unknown
+  ones, so the quiz works even when just one word is due.
+- **Stats row:** Due · Learning · Mastered (replaces Cards · Known · Unknown).
+- **Data:** the progress document gets `srs: { cardId: { box, due } }`; `known`/`history` are
+  migrated on first load (known words → box 2, due today, so they get one review) and then
+  dropped. About 40 bytes per word, well within the document limit for tens of thousands of words.
+  Rules updated in the same change.
+- **Reset Progress** returns the studied words to box 0.
+- **Tests first:** the scheduling (box moves, due dates, what is due, the migration) as pure
+  functions in `public/src/core/srs.js` with Node tests; rules tests for the new field; manual
+  check on the emulators at phone width.
+- **Docs:** README "How studying works" rewritten for the new rules.
+- **Out of scope for now:** daily limits on new words, per-word ease (SM-2/FSRS), review
+  reminders or notifications.
+- **Open decisions:** the interval ladder above; whether to cap new words per day.
+
 ## Backlog
 
 - Decide on a custom domain and add it to Firebase Auth's authorized domains.
-- Card-level spaced repetition (the study modes still use known/unknown plus last-seen ordering).
 - Account deletion (delete the user's cards and progress, then the Auth user).
