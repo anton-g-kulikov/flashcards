@@ -1,4 +1,4 @@
-# YourCards
+# YourFlashCards
 
 A personal flashcards PWA for learning vocabulary on your phone. Sign in with Google, organise
 words into collections, and learn them with flashcards and quizzes. Your collections and progress
