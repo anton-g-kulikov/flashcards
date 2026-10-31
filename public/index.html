@@ -78,108 +78,82 @@
     </div>
 
     <div class="app-container">
-      <div class="header">
-        <div class="header-top">
+      <header class="topbar">
+        <h1 class="topbar-title" data-i18n="app.title">Flashcards</h1>
+        <div class="topbar-actions">
           <div class="lang-dropdown" data-lang-switcher="select"></div>
+          <a
+            href="vocabulary-manager.html"
+            class="icon-btn"
+            data-i18n-label="words.title"
+            aria-label="My Words"
+            title="My Words"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </a>
           <div id="userChip" class="user-chip"></div>
         </div>
-        <h1 data-i18n="app.title">Flashcards</h1>
-        <div class="subtitle" data-i18n-html="study.subtitle">
-          Your personal collection ·
-          <a href="vocabulary-manager.html">Add words</a>
-        </div>
+      </header>
 
-        <!-- Shown while the collection is empty -->
-        <div
-          id="emptyCollectionNotice"
-          class="empty-collection-notice hidden"
-          data-i18n-html="study.empty"
+      <!-- Shown while the collection is empty -->
+      <div
+        id="emptyCollectionNotice"
+        class="notice hidden"
+        data-i18n-html="study.empty"
+      >
+        Your collection is empty.
+        <a href="vocabulary-manager.html">Add your first words</a> to start
+        studying.
+      </div>
+
+      <!-- PWA Install Button -->
+      <div id="pwa-install-container" class="pwa-install-container" style="display: none">
+        <button id="pwa-install-button" class="pwa-install-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7,10 12,15 17,10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span data-i18n="pwa.install">Install App</span>
+        </button>
+      </div>
+
+      <div class="mode-selector" role="group">
+        <button
+          class="mode-btn"
+          onclick="setMode('flashcard', event)"
+          data-i18n="mode.flashcards"
         >
-          Your collection is empty.
-          <a href="vocabulary-manager.html">Add your first words</a> to start
-          studying.
-        </div>
-
-        <!-- PWA Install Button -->
-        <div
-          id="pwa-install-container"
-          class="pwa-install-container"
-          style="display: none"
+          Flashcards
+        </button>
+        <button
+          class="mode-btn active"
+          onclick="setMode('quiz', event)"
+          data-i18n="mode.quiz"
         >
-          <button id="pwa-install-button" class="pwa-install-btn">
-            <svg
-              class="icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7,10 12,15 17,10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span data-i18n="pwa.install">Install App</span>
-          </button>
-        </div>
+          Quiz Mode
+        </button>
+      </div>
 
-        <div class="mode-selector">
-          <button
-            class="mode-btn"
-            onclick="setMode('flashcard', event)"
-            data-i18n="mode.flashcards"
-          >
-            Flashcards
-          </button>
-          <button
-            class="mode-btn active"
-            onclick="setMode('quiz', event)"
-            data-i18n="mode.quiz"
-          >
-            Quiz Mode
-          </button>
-        </div>
-        <div class="controls-buttons-row">
-          <!-- <div class="toggle-container">
-            <span class="toggle-label left" onclick="toggleShowAllCards()"
-              >Unknown Only</span
-            >
-            <button
-              class="toggle-switch"
-              id="showAllToggle"
-              onclick="toggleShowAllCards()"
-            ></button>
-            <span class="toggle-label right" onclick="toggleShowAllCards()"
-              >All Cards</span
-            >
-          </div> -->
-          <button onclick="resetProgress(this)" data-i18n="progress.reset">
-            Reset Progress
-          </button>
-        </div>
+      <div class="progress-panel">
         <div class="stats">
           <div class="stat">
-            <div class="stat-number">
-              <span id="totalCards">0</span>
-            </div>
-            <div data-i18n="stats.cards">Cards</div>
-            <div
-              class="stat-category"
-              id="categoryInfo"
-              data-i18n="stats.inCollection"
-            >
-              In your collection
-            </div>
+            <span class="stat-number" id="totalCards">0</span>
+            <span class="stat-label" data-i18n="stats.cards">Cards</span>
+          </div>
+          <div class="stat stat-known">
+            <span class="stat-number" id="knownCards">0</span>
+            <span class="stat-label" data-i18n="stats.known">Known</span>
           </div>
           <div class="stat">
-            <div class="stat-number" id="knownCards">0</div>
-            <div data-i18n="stats.known">Known</div>
-          </div>
-          <div class="stat">
-            <div class="stat-number" id="unknownCards">0</div>
-            <div data-i18n="stats.unknown">Unknown</div>
+            <span class="stat-number" id="unknownCards">0</span>
+            <span class="stat-label" data-i18n="stats.unknown">Unknown</span>
           </div>
         </div>
-
         <div class="progress-bar">
           <div class="progress-fill" id="progressFill"></div>
         </div>
@@ -229,6 +203,12 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="study-footer">
+        <button class="text-btn" onclick="resetProgress(this)" data-i18n="progress.reset">
+          Reset Progress
+        </button>
       </div>
     </div>
 

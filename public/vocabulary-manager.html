@@ -78,70 +78,71 @@
     </div>
 
     <div class="app-container">
-      <div class="header">
-        <div class="header-top">
+      <header class="topbar">
+        <a
+          href="index.html"
+          class="icon-btn"
+          data-i18n-label="words.back"
+          aria-label="Back to Study"
+          title="Back to Study"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <h1 class="topbar-title" data-i18n="words.title">My Words</h1>
+        <div class="topbar-actions">
           <div class="lang-dropdown" data-lang-switcher="select"></div>
           <div id="userChip" class="user-chip"></div>
         </div>
-        <h1>
-          <span data-i18n="words.title">My Words</span>
-          <span class="version-badge" id="vocab-manager-version">v...</span>
-        </h1>
+      </header>
 
-        <a href="index.html" class="back-to-main-link" data-i18n="words.back"
-          >← Back to Study</a
-        >
-      </div>
+      <!-- Add one word at a time -->
+      <section class="panel">
+        <h2 class="panel-title" data-i18n="words.addTitle">Add a Word</h2>
+        <form id="addWordForm" class="add-word-form" autocomplete="off">
+          <input
+            type="text"
+            id="newWord"
+            placeholder="Word"
+            data-i18n-placeholder="words.wordPlaceholder"
+            maxlength="200"
+            autocapitalize="none"
+            required
+          />
+          <input
+            type="text"
+            id="newTranslation"
+            placeholder="Translation"
+            data-i18n-placeholder="words.translationPlaceholder"
+            maxlength="500"
+            autocapitalize="none"
+            lang="ru"
+          />
+          <button type="submit" id="addWordBtn" class="primary-btn" data-i18n="words.add">
+            Add
+          </button>
+        </form>
+      </section>
 
-      <div class="vocab-manager-container">
-        <!-- Add one word at a time -->
-        <section class="expand-vocabulary-section add-word-section">
-          <h2 data-i18n="words.addTitle">Add a Word</h2>
-          <form id="addWordForm" class="add-word-form" autocomplete="off">
-            <input
-              type="text"
-              id="newWord"
-              placeholder="Word"
-              data-i18n-placeholder="words.wordPlaceholder"
-              maxlength="200"
-              required
-            />
-            <input
-              type="text"
-              id="newTranslation"
-              placeholder="Translation"
-              data-i18n-placeholder="words.translationPlaceholder"
-              maxlength="500"
-              lang="ru"
-            />
-            <button
-              type="submit"
-              id="addWordBtn"
-              class="primary-btn"
-              data-i18n="words.add"
-            >
-              Add
-            </button>
-          </form>
-          <div id="messageContainer"></div>
-        </section>
+      <!-- The signed-in user's collection -->
+      <section class="panel">
+        <h2 class="panel-title">
+          <span data-i18n="words.collection">My Collection</span>
+          <span id="wordCount" class="word-count"></span>
+        </h2>
+        <ul id="wordList" class="word-list"></ul>
+      </section>
 
-        <!-- The signed-in user's collection -->
-        <section class="current-vocabulary-section">
-          <h2>
-            <span data-i18n="words.collection">My Collection</span>
-            <span id="wordCount" class="word-count"></span>
-          </h2>
-          <ul id="wordList" class="word-list"></ul>
-        </section>
-      </div>
+      <div id="messageContainer" class="toast-container" aria-live="polite"></div>
     </div>
 
     <script src="src/ui/i18n.js"></script>
     <script type="module" src="src/core/cloud.js"></script>
     <script src="src/ui/auth-gate.js"></script>
     <script src="src/ui/confirm-button.js"></script>
-    <script src="src/ui/icons.js"></script>
     <script src="src/utils/pwa-installer.js"></script>
     <script src="src/utils/cache-manager.js"></script>
     <script src="src/utils/version-sync.js"></script>

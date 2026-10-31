@@ -308,6 +308,12 @@ class I18n {
     root.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
       el.placeholder = I18n.t(el.dataset.i18nPlaceholder);
     });
+    // Icon-only buttons: the label is their tooltip and accessible name
+    root.querySelectorAll("[data-i18n-label]").forEach((el) => {
+      const label = I18n.t(el.dataset.i18nLabel);
+      el.title = label;
+      el.setAttribute("aria-label", label);
+    });
     I18n.renderSwitchers(root);
   }
 
@@ -319,8 +325,11 @@ class I18n {
         const select = document.createElement("select");
         select.className = "lang-select";
         select.setAttribute("aria-label", I18n.t("auth.language"));
-        LANGUAGES.forEach(({ code, name }) => {
-          select.add(new Option(name, code, false, code === I18n.lang));
+        // Short codes keep the header compact; the full name is the option's tooltip
+        LANGUAGES.forEach(({ code, label, name }) => {
+          const option = new Option(label, code, false, code === I18n.lang);
+          option.title = name;
+          select.add(option);
         });
         select.addEventListener("change", () => I18n.setLanguage(select.value));
         container.appendChild(select);
