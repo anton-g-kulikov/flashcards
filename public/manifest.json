@@ -1,6 +1,6 @@
 {
-  "name": "Flashcards",
-  "short_name": "Flashcards",
+  "name": "YourCards",
+  "short_name": "YourCards",
   "description": "Your personal vocabulary flashcards, synced with your Google account",
   "start_url": "/",
   "display": "standalone",

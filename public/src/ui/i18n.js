@@ -7,7 +7,7 @@
 
 const TRANSLATIONS = {
   en: {
-    "app.title": "Flashcards",
+    "app.title": "YourCards",
     "auth.tagline":
       "Your personal vocabulary collection. Add your own words, then learn them with flashcards and quizzes on any device.",
     "auth.signIn": "Sign in with Google",
@@ -114,7 +114,7 @@ const TRANSLATIONS = {
   },
 
   ru: {
-    "app.title": "Карточки",
+    "app.title": "YourCards",
     "auth.tagline":
       "Ваша личная коллекция слов. Добавляйте свои слова и учите их с помощью карточек и тестов на любом устройстве.",
     "auth.signIn": "Войти через Google",
@@ -222,7 +222,7 @@ const TRANSLATIONS = {
   },
 
   es: {
-    "app.title": "Tarjetas",
+    "app.title": "YourCards",
     "auth.tagline":
       "Tu colección personal de vocabulario. Añade tus propias palabras y apréndelas con tarjetas y tests en cualquier dispositivo.",
     "auth.signIn": "Iniciar sesión con Google",

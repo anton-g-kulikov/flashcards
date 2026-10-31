@@ -1,5 +1,5 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.5.1";
+const CACHE_NAME = "flashcards-v1.6.0";
 const urlsToCache = [
   // Main pages
   "/",
