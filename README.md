@@ -62,42 +62,23 @@ Spanish → English, 100 words each, in [`public/collections/es-en/`](public/col
 | A2 | [a2-nouns.csv](public/collections/es-en/a2-nouns.csv) | [a2-verbs.csv](public/collections/es-en/a2-verbs.csv) | [a2-adjectives.csv](public/collections/es-en/a2-adjectives.csv) | [a2-adverbs.csv](public/collections/es-en/a2-adverbs.csv) |
 
 Nouns carry their article (`la casa`), verbs are infinitives (`comer` → `to eat`) and adjectives
-are masculine singular. No Spanish word appears in more than one collection.
+are masculine singular. No Spanish word appears in more than one of these eight collections.
 
 ## Contributing a collection
 
-Share a collection with everyone by adding it to the starter collections:
+Have a word list others could use? Send it as a pull request, and it can become a starter
+collection in the app.
 
-1. **Make the CSV.** Build the collection in the app and **Export** it, or write the file by hand
-   in the format above. Check the spelling, the translations and, for nouns, the articles.
-2. **Add the file** under `public/collections/<from>-<to>/`, using two-letter language codes
-   (`es-en`, `es-ru`, `en-ru` …) and a short lowercase name, e.g.
-   `public/collections/es-en/b1-food.csv`.
-3. **List it** in [`public/collections/index.json`](public/collections/index.json), which feeds
-   **Import → Starter collections**:
+1. **Make a CSV file** in the [format above](#collections-and-csv). The easiest way: build the
+   collection in the app, then export it with the download icon in its header. Give every word a
+   translation, and check the spelling (and, for nouns, the articles).
+2. **Fork this repository** and add your file to [`public/collections/`](public/collections/). On
+   github.com: open that folder in your fork, choose **Add file → Upload files**, and commit.
+3. **Open a pull request.** In the description, say which languages it covers, the level or
+   topic, and where the words come from. Only share lists you made yourself or are allowed to
+   share.
 
-   ```json
-   {
-     "file": "es-en/b1-food.csv",
-     "name": "Spanish B1 · Food",
-     "language": "es-en",
-     "level": "B1",
-     "words": 120
-   }
-   ```
-
-   `words` must match the number of words in the file.
-4. **Run the checks** (they parse every listed collection, compare the word counts and catch
-   duplicates):
-
-   ```bash
-   npm install
-   npm test
-   ```
-
-5. **Open a pull request** with the CSV and the `index.json` change. In the description, say
-   what the collection covers and where the words come from. Only add word lists you made or
-   are allowed to share.
+That's all: I'll review the words, put the file in place and add it to the app's list.
 
 ## How it works
 

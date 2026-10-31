@@ -66,18 +66,24 @@ describe("starter collections", () => {
   const index = JSON.parse(readFileSync(`${dir}/index.json`, "utf8"));
 
   it("lists every CSV in the folder, with the right word counts", () => {
-    const files = readdirSync(`${dir}/es-en`).filter((f) => f.endsWith(".csv")).map((f) => `es-en/${f}`);
+    const files = readdirSync(dir, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .flatMap((d) => readdirSync(`${dir}/${d.name}`).filter((f) => f.endsWith(".csv")).map((f) => `${d.name}/${f}`));
     assert.deepEqual(index.collections.map((c) => c.file).sort(), files.sort());
     for (const entry of index.collections) {
       const cards = toCards(readFileSync(`${dir}/${entry.file}`, "utf8"));
       assert.equal(cards.length, entry.words, entry.file);
       assert.ok(cards.every((c) => c.word && c.translation), `${entry.file} has an empty field`);
+      assert.ok(entry.name && entry.language && entry.level, `${entry.file} is missing name, language or level`);
+      assert.equal(entry.file.split("/")[0], entry.language, `${entry.file} is not in its language folder`);
     }
   });
 
-  it("never repeats a Spanish word across collections", () => {
+  // The A1/A2 series is designed to have no overlap; other collections (topics, contributions)
+  // may share words with it and with each other.
+  it("never repeats a Spanish word across the A1/A2 core series", () => {
     const seen = new Map();
-    for (const entry of index.collections) {
+    for (const entry of index.collections.filter((c) => /^es-en\/a[12]-/.test(c.file))) {
       for (const { word } of toCards(readFileSync(`${dir}/${entry.file}`, "utf8"))) {
         const key = word.toLowerCase();
         assert.ok(!seen.has(key), `"${word}" is in ${seen.get(key)} and ${entry.file}`);
