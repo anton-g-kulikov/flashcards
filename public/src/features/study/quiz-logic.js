@@ -1,6 +1,7 @@
 // The quiz's choices, kept apart from the page so the tests can import them: which word to ask
 // about and which translations to offer.
 import { shuffle } from "../../utils/shuffle-utils.js";
+import { RETRY_GAP } from "./progress.js";
 
 export const MAX_OPTIONS = 4;
 
@@ -18,10 +19,14 @@ export function quizPool(cards, progress, now = Date.now()) {
   return progress.studyQueue(cards, now).filter(hasTranslation);
 }
 
-// The next word to ask about: the first in the queue, but not the one just asked, while there
-// is another
-export function pickQuestion(pool, lastId) {
-  return pool.length > 1 && pool[0].id === lastId ? pool[1] : pool[0];
+// The next word to ask about: the first in the queue not asked in the last RETRY_GAP questions
+// (`recent`, most recent first). Known words leave the queue, so in practice this holds back a
+// word just missed. When every word left was asked that recently, the one asked longest ago.
+export function pickQuestion(pool, recent = []) {
+  const waiting = recent.slice(0, RETRY_GAP);
+  const fresh = pool.find((card) => !waiting.includes(card.id));
+  if (fresh) return fresh;
+  return pool.reduce((oldest, card) => (waiting.indexOf(card.id) > waiting.indexOf(oldest.id) ? card : oldest));
 }
 
 // The right card plus up to MAX_OPTIONS - 1 others, from any word with a translation, in random

@@ -45,12 +45,13 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | --- | --- |
 | Known word | up one box, due after that box's interval (1, 3, 7, 16, 35 days); box 5 stays 5 |
 | Word not known | box 1, due now |
+| Missed flashcard | back in the deck behind the next 3 cards, or last when fewer are left |
 | Needs study | new words and words due; not words scheduled later |
 | Study queue | due words first, oldest day first, same-day ones shuffled; then new words; nothing not due |
 | Stats | due (new included), learning, mastered, average box; next review time |
 | Saved progress | only the changed entries, the latest per word; reset and pruning forget entries; unsaved changes go back unless newer ones replaced them; malformed entries ignored |
 | Quiz pool | queued words with a translation |
-| Question | first in the queue, not the same word twice in a row while there's another |
+| Question | first in the queue not asked in the last 3 questions, so a missed word returns after 3 others; otherwise the word asked longest ago |
 | Options | the right card plus up to 3 others from any translated word, no two reading the same, right card in any position |
 | Shuffle | a permutation, any item can come first, 5,000 items quickly |
 

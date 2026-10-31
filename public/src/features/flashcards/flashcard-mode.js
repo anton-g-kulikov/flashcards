@@ -1,10 +1,11 @@
 // Flashcards: the word on the front, its translation on the back. The deck is the study queue
 // (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
-// "I don't know…" turns the card over, waits for a tap, and the word comes back at the end of
-// the deck.
+// "I don't know…" turns the card over, waits for a tap, and the word comes back after three
+// other cards, as a missed word does in the quiz.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
+import { retryLater } from "../study/progress.js";
 
 const FLIP_MS = 600; // the .flashcard transform transition in styles.css
 
@@ -121,10 +122,10 @@ export class FlashcardMode {
     this.flipTimer = setTimeout(() => this.next(), FLIP_MS);
   }
 
-  // A word still due (not known this time) goes to the end of the deck; a known one leaves it
+  // A word still due (not known this time) comes back after a few cards; a known one leaves
   next() {
     const card = this.deck.shift();
-    if (card && this.study.progress.needsStudy(card.id)) this.deck.push(card);
+    if (card && this.study.progress.needsStudy(card.id)) retryLater(this.deck, card);
     this.show();
   }
 }

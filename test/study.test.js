@@ -1,7 +1,14 @@
 // Study logic: spaced repetition (Leitner boxes) and the quiz's choices.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { DAY, INTERVAL_DAYS, MASTERED, Progress } from "../public/src/features/study/progress.js";
+import {
+  DAY,
+  INTERVAL_DAYS,
+  MASTERED,
+  Progress,
+  RETRY_GAP,
+  retryLater,
+} from "../public/src/features/study/progress.js";
 import {
   MAX_OPTIONS,
   distinctTranslations,
@@ -128,6 +135,16 @@ describe("saved progress", () => {
   });
 });
 
+describe("flashcards", () => {
+  it("put a missed card back behind the next three cards, or last when fewer are left", () => {
+    const ids = (deck) => deck.map((c) => c.id);
+    assert.equal(RETRY_GAP, 3);
+    assert.deepEqual(ids(retryLater([card("b"), card("c"), card("d"), card("e")], card("m"))), ["b", "c", "d", "m", "e"]);
+    assert.deepEqual(ids(retryLater([card("b")], card("m"))), ["b", "m"]);
+    assert.deepEqual(ids(retryLater([], card("m"))), ["m"]);
+  });
+});
+
 describe("quiz", () => {
   it("asks about queued words that have a translation", () => {
     const progress = new Progress({ srs: { later: { box: 2, due: NOW + DAY } } });
@@ -135,11 +152,32 @@ describe("quiz", () => {
     assert.deepEqual(pool.map((c) => c.id), ["a"]);
   });
 
-  it("asks the first word in the queue, but not the same word twice in a row", () => {
+  it("asks the first word in the queue not asked in the last three questions", () => {
+    const pool = [card("a"), card("b"), card("c"), card("d"), card("e")];
+    assert.equal(pickQuestion(pool).id, "a");
+    assert.equal(pickQuestion(pool, ["a"]).id, "b");
+    assert.equal(pickQuestion(pool, ["c", "b", "a"]).id, "d");
+    assert.equal(pickQuestion(pool, ["d", "c", "b", "a"]).id, "a", "a waited three questions");
+  });
+
+  it("brings a missed word back after three other questions", () => {
+    // "m" was missed: it stays due at the front of the queue, the others are answered and leave
+    let pool = ["m", "b", "c", "d", "e"].map((id) => card(id));
+    let recent = [];
+    const asked = [];
+    for (let turn = 0; turn < 5; turn++) {
+      const next = pickQuestion(pool, recent);
+      asked.push(next.id);
+      recent = [next.id, ...recent.filter((id) => id !== next.id)].slice(0, RETRY_GAP);
+      if (next.id !== "m" || turn > 0) pool = pool.filter((c) => c.id !== next.id);
+    }
+    assert.deepEqual(asked, ["m", "b", "c", "d", "m"]);
+  });
+
+  it("asks the word asked longest ago when every word left was asked recently", () => {
     const pool = [card("a"), card("b")];
-    assert.equal(pickQuestion(pool, null).id, "a");
-    assert.equal(pickQuestion(pool, "a").id, "b");
-    assert.equal(pickQuestion([card("a")], "a").id, "a");
+    assert.equal(pickQuestion(pool, ["a", "b"]).id, "b");
+    assert.equal(pickQuestion([card("a")], ["a"]).id, "a");
   });
 
   it("offers the right card and up to three others from any word, each reading differently", () => {

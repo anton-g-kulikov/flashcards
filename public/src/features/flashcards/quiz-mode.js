@@ -1,10 +1,12 @@
 // Quiz: "What does <word> mean?" with up to four translations to choose from. It asks about
 // the study queue (due words, then new ones); the options come from every word with a
 // translation. Right on the first try moves the word up a box; a wrong answer turns that card
-// over to show whose translation it is, drops the word to box 1, and it comes back later.
+// over to show whose translation it is, drops the word to box 1, and it comes back after a few
+// other questions.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, showMessageCard } from "../study/message-card.js";
+import { RETRY_GAP } from "../study/progress.js";
 import {
   distinctTranslations,
   hasTranslation,
@@ -23,7 +25,7 @@ export class QuizMode {
     this.questionEl = document.getElementById("quizQuestion");
     this.optionsEl = document.getElementById("quizOptions");
     this.current = null; // the card being asked about
-    this.lastId = null; // the card asked before, not asked twice in a row
+    this.recent = []; // ids of the cards asked last, most recent first (see pickQuestion)
     this.firstTry = true;
     this.answered = false;
     this.timers = [];
@@ -43,7 +45,7 @@ export class QuizMode {
 
   start() {
     this.stop();
-    this.lastId = null;
+    this.recent = [];
     this.ask();
   }
 
@@ -85,9 +87,9 @@ export class QuizMode {
       return;
     }
 
-    const correct = pickQuestion(pool, this.lastId);
+    const correct = pickQuestion(pool, this.recent);
     this.current = correct;
-    this.lastId = correct.id;
+    this.recent = [correct.id, ...this.recent.filter((id) => id !== correct.id)].slice(0, RETRY_GAP);
     this.firstTry = true;
     this.answered = false;
     this.renderQuestion();

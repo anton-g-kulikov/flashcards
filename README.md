@@ -62,7 +62,8 @@ The card shows the word; tap it (or press Enter or Space) to flip to the transla
 
 - **I know this!** moves the word up a box and on to the next.
 - **I don't know…** flips the card to show the translation; tap the card when you're ready to go
-  on. The word goes to the back of the pile and comes back in this session.
+  on. The word comes back after three other cards (or sooner, if fewer are left), the same as a
+  missed word in the quiz.
 
 ### Quiz
 
@@ -72,7 +73,9 @@ without a translation can't be quizzed; study them as flashcards.
 
 - **Right on the first try:** the word moves up a box.
 - **Wrong answer:** that card turns over to show which word the translation actually belongs to,
-  and you pick again. The word drops to box 1 and comes back later.
+  and you pick again. The word drops to box 1 and comes back after three other questions (or
+  sooner, if fewer words are left), so you have to remember it rather than recall it from a
+  moment ago.
 
 ### Starting over
 

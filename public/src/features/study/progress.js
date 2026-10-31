@@ -14,6 +14,16 @@ export const DAY = 24 * 60 * 60 * 1000;
 // Days until a word in each box is due again; box 0 is new, box 5 is mastered
 export const INTERVAL_DAYS = [0, 1, 3, 7, 16, 35];
 export const MASTERED = INTERVAL_DAYS.length - 1;
+// A missed word comes back after this many other words, in both modes: late enough that getting
+// it right means remembering it, not having seen it a moment ago
+export const RETRY_GAP = 3;
+
+// Flashcards: puts a missed card back into the deck behind the next RETRY_GAP cards (or last,
+// if fewer are left)
+export function retryLater(deck, card) {
+  deck.splice(Math.min(RETRY_GAP, deck.length), 0, card);
+  return deck;
+}
 
 function validEntry(entry) {
   return (
