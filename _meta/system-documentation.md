@@ -62,6 +62,8 @@ Firebase project: `flashcards-ak-app` (Firestore in `eur3`). Live at https://you
 (also https://flashcards-ak-app.web.app). The domain's DNS is on Cloudflare: an A record to
 `199.36.158.100` plus the Firebase TXT records, all "DNS only" (Cloudflare's proxy breaks
 Firebase's certificate). The API token for Cloudflare lives in the git-ignored `.env`.
+Cloudflare Email Routing forwards `help@yourflashcards.app` (the contact on the privacy page) to
+the maintainer's Gmail; other addresses at the domain bounce (the catch-all rule is off).
 
 ```bash
 npm run deploy
