@@ -66,19 +66,24 @@ are masculine singular. No Spanish word appears in more than one of these eight 
 
 ## Contributing a collection
 
-Have a word list others could use? Send it as a pull request, and it can become a starter
-collection in the app.
+Have a word list others could use? Send it in, and it can become a starter collection in the app.
 
-1. **Make a CSV file** in the [format above](#collections-and-csv). The easiest way: build the
-   collection in the app, then export it with the download icon in its header. Give every word a
-   translation, and check the spelling (and, for nouns, the articles).
-2. **Fork this repository** and add your file to [`public/collections/`](public/collections/). On
-   github.com: open that folder in your fork, choose **Add file → Upload files**, and commit.
-3. **Open a pull request.** In the description, say which languages it covers, the level or
-   topic, and where the words come from. Only share lists you made yourself or are allowed to
-   share.
+**First, make a CSV file** in the [format above](#collections-and-csv). The easiest way: build the
+collection in the app, then export it with the download icon in its header. Give every word a
+translation, and check the spelling (and, for nouns, the articles).
 
-That's all: I'll review the words, put the file in place and add it to the app's list.
+**Then send it**, whichever way suits you:
+
+- **Open an issue (easiest).** Use the
+  [New collection form](https://github.com/anton-g-kulikov/flashcards/issues/new?template=new-collection.yml):
+  say which languages it covers and the level or topic, attach the CSV, and say where the words
+  come from. All you need is a GitHub account.
+- **Or open a pull request.** Fork this repository, add your file to
+  [`public/collections/`](public/collections/) (on github.com: **Add file → Upload files**), and
+  open a pull request with the same details in the description.
+
+Only share lists you made yourself or are allowed to share. I'll review the words, put the file in
+place and add it to the app's list.
 
 ## How it works
 

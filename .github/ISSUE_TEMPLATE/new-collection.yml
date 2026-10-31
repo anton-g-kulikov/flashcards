@@ -1,0 +1,48 @@
+name: New collection
+description: Share a word list (CSV) to become a starter collection in the app.
+title: "New collection: "
+labels: ["collection"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing! Attach your collection as a CSV file with the columns `word,translation`
+        (see [the format](https://github.com/anton-g-kulikov/flashcards#collections-and-csv)).
+        The easiest way to get one: build the collection in the app and export it with the download
+        icon in its header.
+  - type: input
+    id: languages
+    attributes:
+      label: Languages
+      description: The language of the words, then of the translations.
+      placeholder: Spanish → English
+    validations:
+      required: true
+  - type: input
+    id: topic
+    attributes:
+      label: Level or topic
+      placeholder: B1 · Food
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: CSV file
+      description: Drag the .csv file into this box (or click here and paste it).
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where the words come from
+      placeholder: My own list from a course I took; translations checked with a dictionary.
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Permission
+      options:
+        - label: I made this list myself or am allowed to share it.
+          required: true
