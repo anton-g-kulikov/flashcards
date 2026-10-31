@@ -315,7 +315,11 @@ class QuizMode {
           ? translationText.trim()
           : option.word || "Unknown";
 
-      frontFace.innerHTML = `<div class="quiz-option-text">${displayText}</div>`;
+      // Card text is user data (typed or imported): always textContent, never HTML
+      const optionText = document.createElement("div");
+      optionText.className = "quiz-option-text";
+      optionText.textContent = displayText;
+      frontFace.appendChild(optionText);
 
       const backFace = document.createElement("div");
       backFace.className = "quiz-card-face quiz-card-back";
@@ -380,15 +384,7 @@ class QuizMode {
         // Use translation based on current language preference
         const translationText = selectedCard.translation;
 
-        backFace.innerHTML = `
-          <div class="quiz-card-translation">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            <span>${translationText}</span>
-          </div>
-          <div class="quiz-card-word mobile-hidden">${selectedCard.word}</div>
-        `;
+        QuizMode.renderAnswer(backFace, "M20 6L9 17l-5-5", translationText, selectedCard.word, true);
 
         // Even if correct answer is selected, if there were wrong attempts
         // add the correct word to unknown list
@@ -456,15 +452,7 @@ class QuizMode {
         // Use translation based on current language preference
         const translationText = selectedCard.translation;
 
-        backFace.innerHTML = `
-          <div class="quiz-card-translation">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-            <span>${translationText}</span>
-          </div>
-          <div class="quiz-card-word">${selectedCard.word}</div>
-        `;
+        QuizMode.renderAnswer(backFace, "M18 6L6 18M6 6l12 12", translationText, selectedCard.word, false);
 
         this.vocabApp.unknownCardsSet.add(correctId);
         this.vocabApp.unknownCardsSet.add(selectedId);
@@ -476,6 +464,23 @@ class QuizMode {
     }
 
     element.classList.add("flipped");
+  }
+
+  // The back of an answer card: a check or cross icon, the translation and the word. The icon is
+  // fixed markup; the translation and word are user data, so they go in as text only.
+  static renderAnswer(backFace, iconPath, translation, word, hideWordOnMobile) {
+    backFace.innerHTML = `
+      <div class="quiz-card-translation">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="${iconPath}"/>
+        </svg>
+        <span></span>
+      </div>
+      <div class="quiz-card-word"></div>`;
+    backFace.querySelector(".quiz-card-translation span").textContent = translation;
+    const wordEl = backFace.querySelector(".quiz-card-word");
+    wordEl.textContent = word;
+    if (hideWordOnMobile) wordEl.classList.add("mobile-hidden");
   }
 
   showQuizCompletionCard() {
