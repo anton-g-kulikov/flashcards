@@ -58,7 +58,10 @@ checks. (If `npm run dev` is already using port 8080, run
 
 ## Deploying
 
-Firebase project: `flashcards-ak-app` (Firestore in `eur3`).
+Firebase project: `flashcards-ak-app` (Firestore in `eur3`). Live at https://yourflashcards.app
+(also https://flashcards-ak-app.web.app). The domain's DNS is on Cloudflare: an A record to
+`199.36.158.100` plus the Firebase TXT records, all "DNS only" (Cloudflare's proxy breaks
+Firebase's certificate). The API token for Cloudflare lives in the git-ignored `.env`.
 
 ```bash
 npm run deploy

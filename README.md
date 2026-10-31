@@ -4,7 +4,7 @@ A personal flashcards PWA for learning vocabulary on your phone. Sign in with Go
 words into collections, and learn them with flashcards and quizzes. Your collections and progress
 sync across devices and keep working offline.
 
-**Try it here:** https://flashcards-ak-app.web.app
+**Try it here:** https://yourflashcards.app
 
 ## Using it
 
