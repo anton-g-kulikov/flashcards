@@ -290,6 +290,8 @@ class WordManager {
       this.showMessage(I18n.t("collections.importEmpty"), "error");
       return;
     }
+    // Saving waits for the server, so say something straight away
+    this.showMessage(I18n.t("collections.importing", { name, count: cards.length }), "info", 0);
     const id = await window.Cloud.createCollection(name);
     const added = await window.Cloud.importCards(id, cards);
     this.collections.push({ id, name, active: true });

@@ -22,3 +22,6 @@ ui-debug.log
 .claude/worktrees/
 .claude/agents/metacoding-workflow.md
 .claude/metacoding-workflow/
+
+# Browser network captures contain sign-in tokens
+*.har

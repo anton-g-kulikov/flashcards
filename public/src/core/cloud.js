@@ -48,8 +48,12 @@ const auth = getAuth(app);
 // Single-tab: with the multi-tab manager one tab does the networking for all of them, and a
 // frozen background tab could leave the others waiting forever. Another open tab now simply
 // works from memory instead.
+// Long polling: Safari stalled Firestore's default streaming connection for about a minute at a
+// time (an import's writes reached the server 61 s after the tap; reads hung the same way), and
+// auto-detection did not switch over in time. Plain long-poll requests work everywhere.
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() }),
+  experimentalForceLongPolling: true,
 });
 
 // Local development runs against the Emulator Suite (`npm run dev`).
