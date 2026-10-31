@@ -1241,12 +1241,6 @@ body.auth-pending .auth-gate .auth-loading {
   color: var(--color-text-light);
 }
 
-.chip-btn.chip-danger:hover {
-  color: var(--color-error);
-  border-color: var(--color-error);
-  background: var(--color-surface);
-}
-
 .inline-form,
 .import-panel {
   margin-top: var(--spacing-3);

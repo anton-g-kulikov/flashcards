@@ -8,6 +8,10 @@ export const DEFAULT_COLLECTION = "default";
 // utils/csv.js; it keeps a collection document well under Firestore's 1 MiB.
 export const MAX_CARDS = 5000;
 
+// Longest word and translation kept; longer ones are cut (and an import says how many)
+export const WORD_MAX = 200;
+export const TRANSLATION_MAX = 500;
+
 const text = (value, max) => String(value ?? "").trim().slice(0, max);
 
 export function collectionName(name) {
@@ -17,7 +21,7 @@ export function collectionName(name) {
 // A card as stored in its collection's `cards` list. Rules can't check list items, so this is
 // what keeps them to these fields and lengths.
 export function cardFields(card) {
-  return { word: text(card.word, 200), translation: text(card.translation, 500) };
+  return { word: text(card.word, WORD_MAX), translation: text(card.translation, TRANSLATION_MAX) };
 }
 
 // The `cards` list read from a collection document, cleaned up

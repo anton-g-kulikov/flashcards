@@ -3,6 +3,8 @@
 // Plain functions, also imported by the tests. Reading is forgiving: a BOM, CRLF line endings, a
 // missing header or extra columns are all fine.
 
+import { TRANSLATION_MAX, WORD_MAX } from "../core/card-data.js";
+
 export const MAX_ROWS = 5000;
 
 // Splits CSV text into rows of fields, honouring quoted fields with commas, quotes and newlines.
@@ -48,7 +50,8 @@ export function parse(text) {
 
 // Turns CSV text into cards. Uses the `word` and `translation` columns when there is a header,
 // otherwise the first two columns. Rows without a word and repeated words are skipped, and
-// rows past MAX_ROWS are left out; the counts say how many, so an import can tell the user.
+// rows past MAX_ROWS are left out; `shortened` counts words or translations too long to keep
+// whole (they are cut when saved). The counts let an import tell the user.
 export function readCards(text) {
   let rows = parse(text);
   let wordIndex = 0;
@@ -65,6 +68,7 @@ export function readCards(text) {
   const cards = [];
   let skipped = 0;
   let truncated = 0;
+  let shortened = 0;
   for (const row of rows) {
     const word = (row[wordIndex] || "").trim();
     const translation = translationIndex >= 0 ? (row[translationIndex] || "").trim() : "";
@@ -76,9 +80,10 @@ export function readCards(text) {
     } else {
       seen.add(key);
       cards.push({ word, translation });
+      if (word.length > WORD_MAX || translation.length > TRANSLATION_MAX) shortened++;
     }
   }
-  return { cards, skipped, truncated };
+  return { cards, skipped, truncated, shortened };
 }
 
 export function toCards(text) {

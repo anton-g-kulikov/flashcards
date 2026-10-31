@@ -50,6 +50,11 @@ describe("readCards", () => {
     assert.equal(truncated, 0);
   });
 
+  it("counts words and translations too long to keep whole", () => {
+    const text = `word,translation\n${"a".repeat(201)},x\nb,${"y".repeat(501)}\nc,z\n`;
+    assert.equal(readCards(text).shortened, 2);
+  });
+
   it("stops at MAX_ROWS words and counts the rest", () => {
     const rows = Array.from({ length: MAX_ROWS + 3 }, (_, i) => `word${i},t${i}`);
     const { cards, truncated } = readCards(rows.join("\n"));

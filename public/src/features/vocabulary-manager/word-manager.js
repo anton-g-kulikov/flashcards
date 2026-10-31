@@ -285,10 +285,10 @@ class WordManager {
     }
   }
 
-  // An import always becomes a new collection, so nothing already there is touched. `skipped` and
-  // `truncated` count the rows left out (see readCards), so the user knows the file wasn't taken
-  // in whole.
-  async importCards(name, { cards, skipped, truncated }) {
+  // An import always becomes a new collection, so nothing already there is touched. The counts
+  // from readCards (rows skipped, left out, or with text too long) tell the user when the file
+  // wasn't taken in whole.
+  async importCards(name, { cards, skipped, truncated, shortened }) {
     if (cards.length === 0) {
       this.showMessage(I18n.t("collections.importEmpty"), "error");
       return;
@@ -305,7 +305,8 @@ class WordManager {
     let report = I18n.t("collections.imported", { name, count: added.length });
     if (skipped) report += " " + I18n.t("collections.importSkipped", { count: skipped });
     if (truncated) report += " " + I18n.t("collections.importTruncated", { max: MAX_ROWS, count: truncated });
-    this.showMessage(report, "success", skipped || truncated ? 8000 : 3000);
+    if (shortened) report += " " + I18n.t("collections.importShortened", { count: shortened });
+    this.showMessage(report, "success", skipped || truncated || shortened ? 8000 : 3000);
   }
 
   // --- Words ---

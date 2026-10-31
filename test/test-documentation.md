@@ -25,6 +25,7 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Header in any column order; no header | uses `word`/`translation` columns, else the first two |
 | Empty and repeated words | skipped, and counted (`readCards`) so the import can report them |
 | More than 5,000 words | the first 5,000 imported, the rest counted as left out |
+| Word over 200 or translation over 500 characters | counted as shortened, so the import can say so |
 | Export then import | round-trips exactly |
 | Every file in `public/collections/` | listed in `index.json` with the right word count, no empty fields |
 | Spanish words across starter collections | never repeated |
