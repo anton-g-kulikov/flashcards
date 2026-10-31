@@ -67,3 +67,17 @@ describe("content security policy", () => {
     });
   }
 });
+
+describe("Firebase SDK preloads", () => {
+  it("name the same SDK files and version that cloud.js imports", () => {
+    const imports = [...readFileSync("public/src/core/cloud.js", "utf8").matchAll(/from "(https:\/\/www\.gstatic\.com\/[^"]+)"/g)]
+      .map(([, url]) => url)
+      .sort();
+    for (const page of ["index.html", "vocabulary-manager.html"]) {
+      const preloads = [...readFileSync(join("public", page), "utf8").matchAll(/rel="modulepreload" href="([^"]+)"/g)]
+        .map(([, url]) => url)
+        .sort();
+      assert.deepEqual(preloads, imports, page);
+    }
+  });
+});

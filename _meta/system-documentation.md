@@ -9,7 +9,7 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Piece | Where |
 | --- | --- |
 | Static app, no build step | `public/` (served as-is by Firebase Hosting). Every script is an ES module; each page loads one entry module (`src/study.js`, `src/my-cards.js`) and has no inline scripts or `on*` attributes |
-| Shared page set-up (service worker, analytics, footer version) | `public/src/core/page.js`; the version is `public/src/core/version.js` and must match `CACHE_NAME` in `sw.js` (tested in `test/app-shell.test.js`, which also checks that `sw.js` precaches every file) |
+| Shared page set-up (service worker, analytics, footer version; fonts and the Firebase SDK are preloaded from each page's `<head>`) | `public/src/core/page.js`; the version is `public/src/core/version.js` and must match `CACHE_NAME` in `sw.js` (tested in `test/app-shell.test.js`, which also checks that `sw.js` precaches every file) |
 | Firebase access (Google sign-in, Firestore) | `public/src/core/cloud.js`, importing the Firebase SDK from Google's CDN |
 | Sign-in screen, account chip, loading errors | `public/src/ui/auth-gate.js` |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
@@ -87,8 +87,18 @@ the maintainer's Gmail; other addresses at the domain bounce (the catch-all rule
 npm run deploy
 ```
 
-Deploys Hosting and the Firestore rules. When you change any file in `public/`, bump
-`CACHE_NAME` in `public/sw.js` so installed copies pick up the update.
+Deploys Hosting and the Firestore rules. The service worker serves the app's files from its
+cache (no network round trip; network first on localhost, so local edits show at once) and only
+fetches new ones when `CACHE_NAME` changes. So every deploy that changes an app file must raise
+`VERSION` in `public/src/core/version.js` and `CACHE_NAME` in `public/sw.js` together.
+`scripts/check-version.js` runs before each hosting deploy and stops it if files differ from the
+live ones under the same version. Installed apps pick a new version up the next time they open
+(the current session finishes on the version it started with, so a page never mixes files from
+two deploys).
+
+The in-app browser of the Claude desktop app can't fetch service-worker scripts from the local
+emulator (127.0.0.1); to try service-worker changes, deploy a preview channel:
+`firebase hosting:channel:deploy <name> --expires 1d`.
 
 Google sign-in is enabled under Authentication → Sign-in method in the
 [Firebase console](https://console.firebase.google.com/project/flashcards-ak-app/authentication/providers)

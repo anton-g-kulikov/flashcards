@@ -3,7 +3,8 @@
  * Written for a phone held in one hand; wider screens get the same single column, centred.
  * Breakpoints only ever add room (min-width), never take it away.
  */
-@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap");
+/* Fonts (DM Serif Display, Inter) are linked from each page's <head>, so they load alongside
+ * this file instead of after it. */
 
 :root {
   --color-bg: #f8f6f0;

@@ -1,7 +1,7 @@
 // Service Worker for the Flashcards App
 // Named after the app's version (src/core/version.js); test/app-shell.test.js checks they match
 // and that every file of the app is listed here.
-const CACHE_NAME = "flashcards-v1.10.0";
+const CACHE_NAME = "flashcards-v1.11.0";
 const urlsToCache = [
   // Pages
   "/",
@@ -51,57 +51,37 @@ const urlsToCache = [
   "/icons/ios/192.png?v=2",
 ];
 
-// Install event - cache resources
+// Install: copy the whole app into this version's cache, straight from the network (the HTTP
+// cache may still hold files from an older deploy). If any file fails, the install fails and the
+// previous version keeps running; the browser tries again later.
 self.addEventListener("install", (event) => {
-  console.log("Service Worker: Installing...");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => {
-        console.log("Service Worker: Caching files");
-        // Straight from the network: the HTTP cache may still hold files from an older deploy
-        return cache.addAll(
-          urlsToCache.map((url) => new Request(url, { cache: "reload" }))
-        );
-      })
-      .then(() => {
-        console.log("Service Worker: All files cached");
-        return self.skipWaiting();
-      })
-      .catch((error) => {
-        console.error("Service Worker: Cache failed", error);
-      })
+      .then((cache) => cache.addAll(urlsToCache.map((url) => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
+// Activate: drop older versions' caches and take over open pages.
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activating...");
   event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log("Service Worker: Deleting old cache", cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      }),
-      // Take control of all clients immediately
-      self.clients.claim(),
-    ])
+    caches
+      .keys()
+      .then((names) => Promise.all(names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch: network first, cache as fallback, for every same-origin GET.
-//
-// Serving scripts from the cache first meant that, for one load after a deploy, a page fetched
-// fresh from the network could run with an older cached script, and break. Going to the network
-// first keeps every file of a page from the same deploy; the cache only answers offline. The
-// server's no-cache headers make these requests cheap revalidations.
+// Local development (the emulators) always goes to the network, so edits show up on reload
+const DEVELOPMENT = ["localhost", "127.0.0.1"].includes(self.location.hostname);
+
+// Fetch: the app's own files come from this version's cache, with no network round trip, so the
+// app opens at once, also offline. Every file of a page comes from the same cache, so a page and
+// its scripts always belong to the same deploy. A deploy changes CACHE_NAME, which makes the
+// browser install the new version in the background; pages pick it up the next time they open.
+// Anything not in the cache (starter collections, other icons) goes to the network first and
+// is kept for offline use.
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   // Cross-origin requests (Firebase SDK, Google sign-in, Firestore, Analytics) are not ours
@@ -113,22 +93,24 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const navigation = request.mode === "navigate";
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response && response.status === 200 && response.type === "basic") {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = DEVELOPMENT ? null : await cache.match(request, { ignoreSearch: navigation });
+      if (cached) return cached;
+      try {
+        const response = await fetch(request);
+        if (response.status === 200 && response.type === "basic") {
+          cache.put(request, response.clone());
         }
         return response;
-      })
-      .catch(() =>
-        caches.match(request).then((cached) => {
-          if (cached) return cached;
-          // Offline navigation to a page we never cached: fall back to the study page
-          if (request.mode === "navigate") return caches.match("/index.html");
-          return Response.error();
-        })
-      )
+      } catch (error) {
+        // Offline
+        const fallback = await cache.match(request, { ignoreSearch: navigation });
+        if (fallback) return fallback;
+        if (navigation) return cache.match("/index.html");
+        return Response.error();
+      }
+    })
   );
 });

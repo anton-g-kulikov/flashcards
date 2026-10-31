@@ -63,11 +63,10 @@ const auth = getAuth(app);
 // then every request answered in milliseconds), which left the study page on "Loading quiz…"
 // and imports silent. The app itself still opens offline from the service worker; the words
 // need a connection.
-// Long polling: plain requests rather than a streaming connection, which works everywhere.
-const db = initializeFirestore(app, {
-  localCache: memoryLocalCache(),
-  experimentalForceLongPolling: true,
-});
+// The transport is left to the SDK: a streaming connection, or long polling where a proxy gets in
+// the way. (Long polling used to be forced while the Safari stall above was blamed on streaming;
+// the cache was the cause, and forced long polling only made every request slower.)
+const db = initializeFirestore(app, { localCache: memoryLocalCache() });
 
 // Local development runs against the Emulator Suite (`npm run dev`).
 const usesEmulators = ["localhost", "127.0.0.1"].includes(location.hostname);
