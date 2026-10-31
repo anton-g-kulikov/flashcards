@@ -105,6 +105,16 @@ function trackQuizInteraction(action, score = null) {
   sendGoogleAnalyticsEvent("Quiz", action, action, score);
 }
 
+// A named GA4 event (used by the install prompt)
+function trackEvent(name, params = {}) {
+  if (!window.gtag) return;
+  gtag("event", name, params);
+}
+
+function trackProgress(action) {
+  sendGoogleAnalyticsEvent("Progress", action);
+}
+
 // Make functions available globally
 window.Analytics = {
   trackSessionStart,
@@ -113,6 +123,8 @@ window.Analytics = {
   trackLanguageSwitch,
   trackCategorySelect,
   trackQuizInteraction,
+  trackEvent,
+  trackProgress,
 };
 
 // Add window unload handler to track final session stats

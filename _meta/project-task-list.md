@@ -40,9 +40,6 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 
 ## Backlog
 
-- Google Analytics: needs a GA4 property for `flashcards-ak-app` (Firebase console →
-  Integrations) before a tag can be added; dgt-vocab's property was removed on purpose.
-
 - Decide on a custom domain and add it to Firebase Auth's authorized domains.
 - Card-level spaced repetition (the study modes still use known/unknown plus last-seen ordering).
 - Account deletion (delete the user's cards and progress, then the Auth user).

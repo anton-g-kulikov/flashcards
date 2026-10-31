@@ -114,6 +114,7 @@ Share a collection with everyone by adding it to the starter collections:
 | Starter collections | `public/collections/` with `index.json` |
 | App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
 | Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |
+| Analytics | GA4 property `flashcards-ak-app` (measurement ID `G-E0J0MDFKE6`), tag in the `<head>` of both pages; skipped on localhost. Events go through `public/src/utils/analytics.js` |
 
 Data lives under each user's uid; the rules allow nobody else in:
 
