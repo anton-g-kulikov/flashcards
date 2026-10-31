@@ -30,6 +30,13 @@ users/{uid}/collections/{id}  { name, active, cards: [{ id, word, translation }]
 users/{uid}/meta/progress     { known: [cardId], history: { cardId: lastSeenMs }, updatedAt }
 ```
 
+Progress is saved as changes, not as a whole: `Progress` in
+`public/src/features/study/progress.js` records what changed, and `Cloud.saveProgressChanges`
+merges it in (`arrayUnion`/`arrayRemove` on `known`, single entries of `history`), at most every
+2 seconds and when the page is hidden. Two devices studying at once both keep their progress.
+Progress of deleted cards is pruned when the study page loads. `updatedAt` must be the server's
+clock (`serverTimestamp()`); the rules refuse any other value.
+
 A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
 1 MiB per document), so loading everything costs one read per collection, an import is a single
 atomic write, and word edits are transactions on that document (`public/src/core/cloud.js`).

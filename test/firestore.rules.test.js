@@ -1,5 +1,6 @@
 // Firestore security rules tests. Run with `npm test` (starts the Firestore emulator).
 import { readFileSync } from "node:fs";
+import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "node:test";
 import {
   assertFails,
@@ -7,7 +8,11 @@ import {
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import {
+  Timestamp,
+  arrayRemove,
+  arrayUnion,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   serverTimestamp,
@@ -132,6 +137,22 @@ describe("progress", () => {
       setDoc(ref, { known: ["c1"], history: { c1: 1730000000000 }, updatedAt: serverTimestamp() })
     );
     await assertSucceeds(getDoc(ref));
+  });
+
+  it("takes changes merged in: known words added or removed, single history entries", async () => {
+    const ref = doc(as("alice"), "users/alice/meta/progress");
+    const now = serverTimestamp();
+    await assertSucceeds(setDoc(ref, { known: arrayUnion("c1", "c2"), history: { c1: 1, c2: 2 }, updatedAt: now }, { merge: true }));
+    await assertSucceeds(setDoc(ref, { known: arrayRemove("c1"), history: { c1: deleteField() }, updatedAt: now }, { merge: true }));
+    const saved = (await getDoc(ref)).data();
+    assert.deepEqual(saved.known, ["c2"]);
+    assert.deepEqual(saved.history, { c2: 2 });
+  });
+
+  it("accepts only the server's clock as updatedAt", async () => {
+    const stale = Timestamp.fromMillis(Date.now() - 60_000);
+    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], updatedAt: stale }));
+    await assertFails(setDoc(doc(as("alice"), "users/alice/collections/k1"), { name: "A", updatedAt: stale }));
   });
 
   it("keeps other users away from someone's progress", async () => {

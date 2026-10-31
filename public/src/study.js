@@ -14,13 +14,11 @@ import { QuizMode } from "./features/flashcards/quiz-mode.js";
 const SAVE_DELAY_MS = 2000;
 
 class StudyPage {
-  constructor(cards, progress, allCardIds) {
+  constructor(cards, progress) {
     this.cards = cards;
     this.progress = progress;
-    this.allCardIds = allCardIds; // every card of the user, in any collection
     this.mode = "quiz";
     this.saveTimer = null;
-    this.unsaved = false;
 
     this.flashcards = new FlashcardMode(this);
     this.quiz = new QuizMode(this);
@@ -76,7 +74,6 @@ class StudyPage {
   // Called by the modes after every change to progress
   changed() {
     this.renderStats();
-    this.unsaved = true;
     clearTimeout(this.saveTimer);
     // Answers come in quick bursts: write at most once every couple of seconds
     this.saveTimer = setTimeout(() => this.save(), SAVE_DELAY_MS);
@@ -84,9 +81,11 @@ class StudyPage {
 
   save() {
     clearTimeout(this.saveTimer);
-    if (!this.unsaved) return;
-    this.unsaved = false;
-    Cloud.saveProgress(this.progress.toSaved(this.allCardIds)).catch((error) => {
+    if (!this.progress.hasChanges()) return;
+    const changes = this.progress.takeChanges();
+    Cloud.saveProgressChanges(changes).catch((error) => {
+      // Kept for the next save, e.g. once the connection is back
+      this.progress.restoreChanges(changes);
       console.error("Error saving progress:", error);
     });
   }
@@ -133,5 +132,9 @@ AuthGate.onSignedIn(async () => {
     .filter((card) => !inactive.has(card.collectionId))
     .map(({ id, word, translation }) => ({ id, word, translation }));
 
-  new StudyPage(cards, new Progress(saved), new Set(allCards.map((card) => card.id))).start();
+  const progress = new Progress(saved);
+  const page = new StudyPage(cards, progress);
+  // Progress of cards deleted since (in any collection) is dropped from the saved record
+  if (progress.prune(new Set(allCards.map((card) => card.id)))) page.save();
+  page.start();
 });

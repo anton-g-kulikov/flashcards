@@ -13,9 +13,12 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   connectFirestoreEmulator,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -252,8 +255,26 @@ export const Cloud = {
     return { known: data.known || [], history: data.history || {} };
   },
 
-  saveProgress({ known, history }) {
-    return setDoc(progressRef(), { known, history, updatedAt: serverTimestamp() });
+  // Saves what changed since the last save (Progress.takeChanges), merged into what is stored,
+  // so progress saved meanwhile from another device is kept. The card ids are map keys here, not
+  // field paths, so any id is safe.
+  saveProgressChanges({ knownAdd, knownRemove, history }) {
+    const ref = progressRef();
+    const updatedAt = serverTimestamp();
+    const batch = writeBatch(db);
+    const seen = Object.fromEntries(
+      Object.entries(history).map(([id, time]) => [id, time === null ? deleteField() : time])
+    );
+    batch.set(
+      ref,
+      { ...(knownAdd.length ? { known: arrayUnion(...knownAdd) } : {}), history: seen, updatedAt },
+      { merge: true }
+    );
+    // A second write: one write can't both add to and remove from the same list
+    if (knownRemove.length) {
+      batch.set(ref, { known: arrayRemove(...knownRemove), updatedAt }, { merge: true });
+    }
+    return batch.commit();
   },
 };
 

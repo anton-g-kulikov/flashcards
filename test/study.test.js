@@ -41,9 +41,50 @@ describe("Progress", () => {
     assert.deepEqual(progress.history, { b: 2 });
   });
 
-  it("saves only cards that still exist", () => {
-    const progress = new Progress({ known: ["a", "gone"], history: { a: 1, gone: 2, b: 3 } });
-    assert.deepEqual(progress.toSaved(new Set(["a", "b"])), { known: ["a"], history: { a: 1, b: 3 } });
+  it("records each change for saving, the latest one per card", () => {
+    const progress = new Progress({ known: ["b"], history: { b: 1 } });
+    progress.markKnown("a", 10);
+    progress.markUnknown("b", 20);
+    progress.markKnown("c", 30);
+    progress.markUnknown("c", 40);
+    progress.seen("d", 50);
+    assert.ok(progress.hasChanges());
+    assert.deepEqual(progress.takeChanges(), {
+      knownAdd: ["a"],
+      knownRemove: ["b", "c"],
+      history: { a: 10, b: 20, c: 40, d: 50 },
+    });
+    assert.ok(!progress.hasChanges());
+    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: [], history: {} });
+  });
+
+  it("records a reset as forgetting, only for what was there", () => {
+    const progress = new Progress({ known: ["a"], history: { a: 1, b: 2 } });
+    progress.reset(["a", "b", "c"]);
+    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: ["a"], history: { a: null, b: null } });
+  });
+
+  it("prunes cards that no longer exist", () => {
+    const progress = new Progress({ known: ["a", "gone"], history: { a: 1, gone: 2, old: 3 } });
+    assert.ok(progress.prune(new Set(["a"])));
+    assert.deepEqual([...progress.known], ["a"]);
+    assert.deepEqual(progress.history, { a: 1 });
+    assert.deepEqual(progress.takeChanges(), {
+      knownAdd: [],
+      knownRemove: ["gone"],
+      history: { gone: null, old: null },
+    });
+    assert.ok(!progress.prune(new Set(["a"])));
+  });
+
+  it("puts unsaved changes back, unless newer ones replaced them", () => {
+    const progress = new Progress();
+    progress.markKnown("a", 1);
+    progress.seen("b", 2);
+    const failed = progress.takeChanges();
+    progress.markUnknown("a", 3);
+    progress.restoreChanges(failed);
+    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: ["a"], history: { a: 3, b: 2 } });
   });
 
   it("doesn't share state with what it was loaded from", () => {

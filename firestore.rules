@@ -11,6 +11,11 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    // updatedAt is always the server's clock (serverTimestamp()), never one a client makes up
+    function stamped(d) {
+      return !('updatedAt' in d) || d.updatedAt == request.time;
+    }
+
     // A named group of cards, studied when active (the default). The cards live in the
     // collection document itself, as a list of { id, word, translation }, so loading every word
     // costs one read per collection rather than one per card, and an import is a single write.
@@ -25,15 +30,16 @@ service cloud.firestore {
         && (!('active' in d) || d.active is bool)
         && (!('cards' in d) || (d.cards is list && d.cards.size() <= 5000))
         && (!('createdAt' in d) || d.createdAt is timestamp)
-        && (!('updatedAt' in d) || d.updatedAt is timestamp);
+        && stamped(d);
     }
 
-    // Learning progress: which cards are known, and when each was last seen.
+    // Learning progress: which cards are known, and when each was last seen. The app saves only
+    // what changed (arrayUnion/arrayRemove and single history entries), merged into this.
     function isProgress(d) {
       return d.keys().hasOnly(['known', 'history', 'updatedAt'])
         && (!('known' in d) || (d.known is list && d.known.size() <= 20000))
         && (!('history' in d) || (d.history is map && d.history.size() <= 20000))
-        && (!('updatedAt' in d) || d.updatedAt is timestamp);
+        && stamped(d);
     }
 
     // Cards used to be one document each. cloud.js moves any it finds into their collection
