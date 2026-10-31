@@ -21,8 +21,7 @@ import {
   getDoc,
   getDocs,
   initializeFirestore,
-  persistentLocalCache,
-  persistentSingleTabManager,
+  memoryLocalCache,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -44,15 +43,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-// Offline cache on, so studying keeps working without a connection, as it did before accounts.
-// Single-tab: with the multi-tab manager one tab does the networking for all of them, and a
-// frozen background tab could leave the others waiting forever. Another open tab now simply
-// works from memory instead.
-// Long polling: Safari stalled Firestore's default streaming connection for about a minute at a
-// time (an import's writes reached the server 61 s after the tap; reads hung the same way), and
-// auto-detection did not switch over in time. Plain long-poll requests work everywhere.
+// Memory cache, not Firestore's IndexedDB cache: in Safari, opening that cache held up every
+// read and write for over a minute (a HAR showed no Firestore request until 77 s after load,
+// then every request answered in milliseconds), which left the study page on "Loading quiz…"
+// and imports silent. The app itself still opens offline from the service worker; the words
+// need a connection.
+// Long polling: plain requests rather than a streaming connection, which works everywhere.
 const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() }),
+  localCache: memoryLocalCache(),
   experimentalForceLongPolling: true,
 });
 
