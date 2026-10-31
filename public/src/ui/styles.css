@@ -1305,6 +1305,51 @@ body.auth-pending .auth-gate .auth-loading {
   white-space: nowrap;
 }
 
+/* === Privacy page and legal links === */
+.prose {
+  padding: var(--spacing-5);
+  line-height: 1.6;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  margin: var(--spacing-5) 0 var(--spacing-2);
+}
+
+.prose p,
+.prose ul {
+  margin-bottom: var(--spacing-3);
+}
+
+.prose ul {
+  padding-left: var(--spacing-5);
+}
+
+.prose li {
+  margin-bottom: var(--spacing-2);
+}
+
+.prose code {
+  font-size: 0.875em;
+  background: var(--color-card-2);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-1);
+}
+
+.prose-meta {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.auth-legal {
+  margin-top: var(--spacing-3);
+  font-size: 0.8125rem;
+}
+
+.auth-legal a {
+  color: var(--color-muted);
+}
+
 /* === Wider screens: more room, same single column === */
 @media (min-width: 600px) {
   .app-container {

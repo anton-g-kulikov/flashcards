@@ -1,10 +1,11 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.6.4";
+const CACHE_NAME = "flashcards-v1.7.0";
 const urlsToCache = [
   // Main pages
   "/",
   "/index.html",
   "/vocabulary-manager.html",
+  "/privacy.html",
 
   // Core application files
   "/src/core/cloud.js",
