@@ -1,4 +1,4 @@
-# Flashcards
+# YourCards
 
 A personal flashcards PWA for learning vocabulary on your phone. Sign in with Google, organise
 words into collections, and learn them with flashcards and quizzes. Your collections and progress
@@ -8,15 +8,62 @@ sync across devices and keep working offline.
 
 ## Using it
 
-- **Study** (`index.html`): studies every word in the collections that are switched on. Quiz mode
-  asks what a word means and offers up to four translations; Flashcard mode shows the word and
-  flips to the translation. Correct answers and "I know this" mark a word known; Reset Progress
-  starts these words over. Only words with a translation appear in quizzes.
+- **Study** (`index.html`): learn the words of every collection that's switched on, with
+  flashcards or a multiple-choice quiz. See [How studying works](#how-studying-works).
 - **My Words** (`vocabulary-manager.html`): one collapsible card per collection. Its header
   switches it on or off for study and has rename, export and delete; open it to add words one at
   a time (the translation is optional and can be added later) and edit or delete them. **New**
   and **Import** at the top create collections.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.
+
+## How studying works
+
+### The words you study
+
+The study page uses every word in the collections switched on in **My Words**. Each word is
+either **known** or **not yet known**, and both modes only ever show the words you don't know
+yet. The app also remembers when you last saw each word. Both are saved to your account, so
+your progress follows you to every device.
+
+### Flashcards
+
+The card shows the word; tap it to flip to the translation.
+
+- **I know this!** marks the word known and moves on. It won't come back.
+- **I don't know…** flips the card to show the translation; tap the card when you're ready to go
+  on. The word stays unknown and comes back later.
+- When every word is known, you get a "All cards learned!" card.
+
+### Quiz
+
+The quiz asks "What does *word* mean?" and offers up to four translations, taken from other
+words you don't know yet. It needs at least two such words that have a translation; words
+without one are left out.
+
+- **Right on the first try:** the word is marked known and leaves the quiz.
+- **Wrong answer:** that card turns over to show which word the translation actually belongs to,
+  and you pick again. Once you find the right one, the word stays unknown and comes back later.
+- **One word left:** the app switches to Flashcards for it. When all are known, the quiz is
+  complete.
+
+### Which word comes next
+
+The order is shuffled every time, so you can't learn the list by its order. The shuffle leans
+towards words you haven't seen for a while: a word you've never seen or haven't seen for about
+four days gets the most weight, one you saw in the last hour the least. About a third of the
+time the order ignores that and is purely random.
+
+### Starting over
+
+**Reset Progress** (below the cards) marks the words you're studying as unknown again. Other
+collections keep their progress. Switching a collection off keeps its progress too; switch it
+back on to continue where you left off.
+
+### Is this spaced repetition?
+
+No. There are no review intervals and nothing is scheduled to come back: once a word is known,
+it stays out of the rotation until you reset. The "least recently seen" weighting above only
+changes the order of the words you don't know yet.
 
 ## Collections and CSV
 
