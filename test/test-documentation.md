@@ -6,15 +6,13 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 
 | Case | Expectation |
 | --- | --- |
-| Old one-per-document card: owner reads or deletes it | allowed (for the move into collections) |
-| Old one-per-document card: anyone creates or changes one | denied |
-| Old card read or deleted by another user or a signed-out visitor | denied |
+| A card document outside a collection (`users/{uid}/cards/*`), even the owner's | denied |
 | Collection with up to 5,000 cards in its `cards` list | allowed; 5,001, or `cards` not a list, denied |
 | Owner saves and reads own progress | allowed |
 | Another user reads or writes someone's progress | denied |
 | Progress with an unexpected field | denied |
-| Spaced-repetition entries merged in one card at a time, old fields deleted (`deleteField`) | allowed, and merged correctly |
-| A whole-record rewrite without `srs` once `srs` exists (an old version's save) | denied |
+| Spaced-repetition entries merged in one card at a time, forgotten with `deleteField` | allowed, and merged correctly |
+| Progress with the old `known` or `history` fields | denied |
 | More than 20,000 `srs` entries | denied |
 | `updatedAt` other than the server's clock, on progress or a collection | denied |
 | User document, or any other `meta/*` document | denied |
@@ -35,15 +33,11 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 Collection documents and a card's `collectionId` / a collection's `active` flag are covered in
 `firestore.rules.test.js`.
 
-## Automated: stored cards and the move out of one-per-document cards (`card-data.test.js`)
+## Automated: stored card shape (`card-data.test.js`)
 
 | Case | Expectation |
 | --- | --- |
 | Card fields | only word and translation, trimmed and cut to length; list items without id or word dropped |
-| Old cards naming an existing collection | appended after its cards, ids kept |
-| Old cards without a collection, or whose collection is gone | into a new default collection |
-| Cards already moved | skipped, so an interrupted move can rerun |
-| More than 5,000 cards for one collection | the rest in "<name> (2)", "<name> (3)"... |
 
 ## Automated: study logic (`study.test.js`, `shuffle.test.js`)
 
@@ -55,7 +49,6 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Study queue | due words first, oldest day first, same-day ones shuffled; then new words; nothing not due |
 | Stats | due (new included), learning, mastered, average box; next review time |
 | Saved progress | only the changed entries, the latest per word; reset and pruning forget entries; unsaved changes go back unless newer ones replaced them; malformed entries ignored |
-| Progress from before spaced repetition | known words to box 2, due now; old fields dropped with the first save |
 | Quiz pool | queued words with a translation |
 | Question | first in the queue, not the same word twice in a row while there's another |
 | Options | the right card plus up to 3 others from any translated word, no two reading the same, right card in any position |
@@ -90,22 +83,19 @@ With `npm run dev`, at http://127.0.0.1:5050:
    quiz; flashcards flip to the translation ("No translation yet" when missing). Keyboard: Tab
    reaches the mode buttons, quiz options and the flashcard; Enter or Space answers or flips.
    With one quiz word left, the page switches to Flashcards with that word first.
-5. Answer a quiz question correctly, reload: the known count is kept. Reset Progress needs a
-   second tap ("Tap again to reset these words"); after it, the known count is 0, also after a
+5. Answer a quiz question correctly, reload: the Learning count is kept. Reset Progress needs a
+   second tap ("Tap again to reset these words"); after it, every word is due again, also after a
    reload. Delete in My Cards likewise needs a second tap ("Sure?"). These replace `confirm()`,
    which embedded browsers can suppress (a suppressed dialog returns false and cancels).
 6. Sign out and in as a different account: the collection is empty.
-7. Old layout: with rules bypassed (REST with `Authorization: Bearer owner`), create
-   `users/{uid}/cards/*` documents, some naming a collection and some not. Opening My Cards moves
-   them into their collections (orphans into the default one) and the old documents are gone.
-8. Two tabs of the same account: answer different words in each, wait 2 seconds, reload: the
+7. Two tabs of the same account: answer different words in each, wait 2 seconds, reload: the
    Learning count includes both.
-9. Spaced repetition: with three new words, miss one in the quiz (it comes back after another
+8. Spaced repetition: with three new words, miss one in the quiz (it comes back after another
    word), answer the rest; the "All caught up" card says the next review is tomorrow. Reset
    Progress makes all three due again. At phone width, the stats row fits in all three languages.
-10. Appearance: pick Dark at the foot of Study; My Cards and the privacy page open dark, with no
+9. Appearance: pick Dark at the foot of Study; My Cards and the privacy page open dark, with no
    light flash. Light holds while the device is dark; "Match the device" follows the device again.
-11. Cookie note: under the footer of Study, at the foot of My Cards, and on the sign-in screen. "Turn off analytics" deletes
+10. Cookie note: under the footer of Study, at the foot of My Cards, and on the sign-in screen. "Turn off analytics" deletes
    the `_ga` cookies and switches the note to "Analytics is off on this device"; after a reload no
    googletagmanager script loads (check on a deployed site, it never loads on localhost). "Turn it
    back on" restores it.

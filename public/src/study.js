@@ -156,9 +156,7 @@ AuthGate.onSignedIn(async () => {
 
   const progress = new Progress(saved);
   const page = new StudyPage(cards, progress);
-  // Progress of cards deleted since (in any collection) is dropped from the saved record, and
-  // progress from before spaced repetition is saved in its converted form
-  progress.prune(new Set(allCards.map((card) => card.id)));
-  page.save();
+  // Progress of cards deleted since (in any collection) is dropped from the saved record
+  if (progress.prune(new Set(allCards.map((card) => card.id)))) page.save();
   page.start();
 });

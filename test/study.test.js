@@ -93,7 +93,6 @@ describe("saved progress", () => {
     assert.ok(progress.hasChanges());
     assert.deepEqual(progress.takeChanges(), {
       srs: { a: { box: 1, due: NOW + DAY }, b: { box: 2, due: NOW + 3 * DAY } },
-      dropLegacy: false,
     });
     assert.ok(!progress.hasChanges());
   });
@@ -102,7 +101,7 @@ describe("saved progress", () => {
     const progress = new Progress({ srs: { a: { box: 3, due: NOW } } });
     progress.reset(["a", "b"]);
     assert.equal(progress.box("a"), 0);
-    assert.deepEqual(progress.takeChanges(), { srs: { a: null }, dropLegacy: false });
+    assert.deepEqual(progress.takeChanges(), { srs: { a: null } });
   });
 
   it("prunes words that no longer exist", () => {
@@ -126,16 +125,6 @@ describe("saved progress", () => {
   it("ignores malformed stored entries", () => {
     const progress = new Progress({ srs: { a: { box: 9, due: 1 }, b: { box: 2 }, c: "x", d: { box: 2, due: NOW } } });
     assert.deepEqual(Object.keys(progress.srs), ["d"]);
-  });
-
-  it("converts progress saved before spaced repetition: known words to box 2, due now", () => {
-    const progress = new Progress({ known: ["a", "b"], history: { a: 1, c: 2 } }, NOW);
-    assert.deepEqual(progress.srs, { a: { box: 2, due: NOW }, b: { box: 2, due: NOW } });
-    assert.deepEqual(progress.takeChanges(), {
-      srs: { a: { box: 2, due: NOW }, b: { box: 2, due: NOW } },
-      dropLegacy: true,
-    });
-    assert.ok(!new Progress({ known: ["a"], srs: {} }).hasChanges(), "already converted");
   });
 });
 

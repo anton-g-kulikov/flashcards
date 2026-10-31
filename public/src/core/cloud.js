@@ -26,14 +26,12 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-  writeBatch,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import {
   DEFAULT_COLLECTION,
   MAX_CARDS,
   cardFields,
   collectionName,
-  planMigration,
   storedCards,
 } from "./card-data.js";
 
@@ -81,50 +79,8 @@ function uid() {
 const collectionsRef = () => collection(db, "users", uid(), "collections");
 const collectionRef = (id) => doc(collectionsRef(), id);
 const progressRef = () => doc(db, "users", uid(), "meta", "progress");
-// Where cards lived, one document each, before collections held them (see migrate)
-const legacyCardsRef = () => collection(db, "users", uid(), "cards");
-
 // A new random id, made locally like Firestore's own document ids
 const newId = () => doc(collectionsRef()).id;
-
-// A Firestore batch holds at most 500 writes.
-const BATCH_LIMIT = 450;
-
-async function commitInChunks(writes) {
-  for (let start = 0; start < writes.length; start += BATCH_LIMIT) {
-    const batch = writeBatch(db);
-    writes.slice(start, start + BATCH_LIMIT).forEach((write) => write(batch));
-    await batch.commit();
-  }
-}
-
-// Moves cards from the old one-document-per-card layout into their collections, then deletes
-// the old documents. Safe to interrupt: what was already moved is skipped next time.
-async function migrate(collections, legacyDocs, defaultName) {
-  const legacy = legacyDocs.map((card) => ({ id: card.id, ...card.data() }));
-  const writes = planMigration(collections, legacy, defaultName, newId);
-  const now = serverTimestamp();
-  await commitInChunks([
-    ...writes.map((write) => (batch) =>
-      write.isNew
-        ? batch.set(collectionRef(write.id), {
-            name: write.name,
-            active: true,
-            cards: write.cards,
-            createdAt: now,
-            updatedAt: now,
-          })
-        : batch.update(collectionRef(write.id), { cards: write.cards, updatedAt: now })
-    ),
-    ...legacy.map((card) => (batch) => batch.delete(doc(legacyCardsRef(), card.id))),
-  ]);
-
-  const byId = new Map(collections.map((c) => [c.id, c]));
-  for (const write of writes) {
-    byId.set(write.id, { id: write.id, name: write.name, active: true, ...byId.get(write.id), cards: write.cards });
-  }
-  return [...byId.values()];
-}
 
 // Changes one collection's cards in a transaction, so edits from two devices don't overwrite
 // each other. `edit` gets the current list and returns the new one.
@@ -165,15 +121,13 @@ export const Cloud = {
   // its collection, sorted by word. One read per collection. A first visit gets the default
   // collection, named in the interface language, so there is always somewhere to put words.
   async loadAll(defaultName) {
-    // The old card documents are looked up too (an empty query costs one read), and moved
-    const [snapshot, legacy] = await Promise.all([getDocs(collectionsRef()), getDocs(legacyCardsRef())]);
-    let collections = snapshot.docs.map((c) => ({
+    const snapshot = await getDocs(collectionsRef());
+    const collections = snapshot.docs.map((c) => ({
       id: c.id,
       name: collectionName(c.data().name),
       active: c.data().active !== false,
       cards: storedCards(c.data().cards),
     }));
-    if (!legacy.empty) collections = await migrate(collections, legacy.docs, defaultName);
 
     if (collections.length === 0) {
       const now = serverTimestamp();
@@ -246,7 +200,7 @@ export const Cloud = {
     return editCards(collectionId, (cards) => cards.filter((c) => c.id !== id));
   },
 
-  // { srs } (spaced repetition), or { known, history } saved by versions before it
+  // { srs: { cardId: { box, due } } }
   async loadProgress() {
     const snapshot = await getDoc(progressRef());
     return snapshot.exists() ? snapshot.data() : {};
@@ -254,19 +208,14 @@ export const Cloud = {
 
   // Saves what changed since the last save (Progress.takeChanges): single srs entries merged into
   // what is stored, so progress saved meanwhile from another device is kept. The card ids are
-  // map keys here, not field paths, so any id is safe. `dropLegacy` removes the fields of
-  // progress saved before spaced repetition, once it has been converted.
-  saveProgressChanges({ srs, dropLegacy }) {
+  // map keys here, not field paths, so any id is safe.
+  saveProgressChanges({ srs }) {
     const data = {
       srs: Object.fromEntries(
         Object.entries(srs).map(([id, entry]) => [id, entry === null ? deleteField() : entry])
       ),
       updatedAt: serverTimestamp(),
     };
-    if (dropLegacy) {
-      data.known = deleteField();
-      data.history = deleteField();
-    }
     return setDoc(progressRef(), data, { merge: true });
   },
 };

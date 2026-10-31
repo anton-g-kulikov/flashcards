@@ -37,22 +37,19 @@ miss goes back to box 1 due now; `due` is in ms. It is saved as changes, not as 
 `Progress` records each changed entry, and `Cloud.saveProgressChanges` merges them in (`set` with
 `merge`, `deleteField()` to forget one), at most every 2 seconds and when the page is hidden. Two
 devices studying at once both keep their progress. Progress of deleted cards is pruned when the
-study page loads. Progress saved before spaced repetition (`known: [cardId]`, `history`) is
-converted on load (known words to box 2, due now) and the old fields are deleted. The rules
-refuse a write that would drop `srs` (an old version's whole-record save) and any `updatedAt`
-other than the server's clock.
+study page loads. The rules refuse any other field, and any `updatedAt` other than the server's
+clock.
+
+Until 1.9.0 each card was a document of its own (`users/{uid}/cards`), and until 1.11.0
+progress was `{ known, history }`. The app migrated both on load; on 1 November 2026 the last
+remaining data was migrated server-side, and the migration code and the rules for the old layout
+were removed.
 
 A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
 1 MiB per document), so loading everything costs one read per collection, an import is a single
 atomic write, and word edits are transactions on that document (`public/src/core/cloud.js`).
 Firestore rules can't check list items, so `public/src/core/card-data.js` trims every card to
 its fields and lengths.
-
-Until 1.9.0 each card was a document of its own in `users/{uid}/cards`. On load, `Cloud.loadAll`
-moves any it still finds into their collection (keeping their ids, so progress still applies;
-cards whose collection is gone go to the default one) and deletes them; the rules still let the
-owner read and delete them for that, but not create any. The move is planned by
-`planMigration` in `card-data.js` and tested in `test/card-data.test.js`.
 
 ## Development
 

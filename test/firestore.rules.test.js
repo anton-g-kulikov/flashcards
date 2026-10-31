@@ -20,14 +20,6 @@ import {
 
 let env;
 
-const card = () => ({
-  word: "abrir",
-  translation: "открыть",
-  collectionId: "k1",
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp(),
-});
-
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: "demo-flashcards",
@@ -45,32 +37,11 @@ beforeEach(async () => {
 
 const as = (uid) => env.authenticatedContext(uid).firestore();
 
-describe("cards stored one per document (before collections held them)", () => {
-  it("can be read and deleted by their owner, for the move into collections", async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
-    });
-    const ref = doc(as("alice"), "users/alice/cards/c1");
-    await assertSucceeds(getDoc(ref));
-    await assertSucceeds(deleteDoc(ref));
-  });
-
-  it("can't be created or changed any more", async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
-    });
+describe("cards outside collections", () => {
+  it("can't be read or written, even by their owner (cards live in their collection)", async () => {
     const db = as("alice");
-    await assertFails(setDoc(doc(db, "users/alice/cards/c2"), card()));
-    await assertFails(updateDoc(doc(db, "users/alice/cards/c1"), { translation: "x" }));
-  });
-
-  it("are kept away from other users and signed-out visitors", async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
-    });
-    await assertFails(getDoc(doc(as("bob"), "users/alice/cards/c1")));
-    await assertFails(deleteDoc(doc(as("bob"), "users/alice/cards/c1")));
-    await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), "users/alice/cards/c1")));
+    await assertFails(getDoc(doc(db, "users/alice/cards/c1")));
+    await assertFails(setDoc(doc(db, "users/alice/cards/c1"), { word: "abrir" }));
   });
 });
 
@@ -132,7 +103,7 @@ describe("progress", () => {
     const db = as("alice");
     const ref = doc(db, "users/alice/meta/progress");
     await assertSucceeds(
-      setDoc(ref, { known: ["c1"], history: { c1: 1730000000000 }, updatedAt: serverTimestamp() })
+      setDoc(ref, { srs: { c1: { box: 1, due: 1730000000000 } }, updatedAt: serverTimestamp() })
     );
     await assertSucceeds(getDoc(ref));
   });
@@ -140,21 +111,17 @@ describe("progress", () => {
   it("takes spaced-repetition entries merged in, one card at a time", async () => {
     const ref = doc(as("alice"), "users/alice/meta/progress");
     const now = serverTimestamp();
-    await assertSucceeds(setDoc(ref, { known: ["c1"], history: { c1: 1 }, updatedAt: now }));
-    await assertSucceeds(
-      setDoc(ref, { srs: { c1: { box: 2, due: 5 } }, known: deleteField(), history: deleteField(), updatedAt: now }, { merge: true })
-    );
+    await assertSucceeds(setDoc(ref, { srs: { c1: { box: 2, due: 5 } }, updatedAt: now }, { merge: true }));
     await assertSucceeds(setDoc(ref, { srs: { c2: { box: 1, due: 6 } }, updatedAt: now }, { merge: true }));
     await assertSucceeds(setDoc(ref, { srs: { c1: deleteField() }, updatedAt: now }, { merge: true }));
     const saved = (await getDoc(ref)).data();
     assert.deepEqual(saved.srs, { c2: { box: 1, due: 6 } });
-    assert.ok(!("known" in saved) && !("history" in saved));
   });
 
-  it("refuses a whole-record rewrite without srs once srs exists (an old version's save)", async () => {
+  it("refuses the fields of progress from before spaced repetition", async () => {
     const ref = doc(as("alice"), "users/alice/meta/progress");
-    await assertSucceeds(setDoc(ref, { srs: { c1: { box: 2, due: 5 } }, updatedAt: serverTimestamp() }));
-    await assertFails(setDoc(ref, { known: ["c1"], history: {}, updatedAt: serverTimestamp() }));
+    await assertFails(setDoc(ref, { known: ["c1"], updatedAt: serverTimestamp() }));
+    await assertFails(setDoc(ref, { srs: {}, history: {}, updatedAt: serverTimestamp() }));
   });
 
   it("caps srs at 20,000 cards", async () => {
@@ -164,23 +131,18 @@ describe("progress", () => {
 
   it("accepts only the server's clock as updatedAt", async () => {
     const stale = Timestamp.fromMillis(Date.now() - 60_000);
-    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], updatedAt: stale }));
+    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { srs: {}, updatedAt: stale }));
     await assertFails(setDoc(doc(as("alice"), "users/alice/collections/k1"), { name: "A", updatedAt: stale }));
   });
 
   it("keeps other users away from someone's progress", async () => {
     await assertFails(getDoc(doc(as("bob"), "users/alice/meta/progress")));
-    await assertFails(setDoc(doc(as("bob"), "users/alice/meta/progress"), { known: [] }));
-  });
-
-  it("caps the history at 20,000 cards, like the known list", async () => {
-    const big = Object.fromEntries(Array.from({ length: 20001 }, (_, i) => [`c${i}`, 1]));
-    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], history: big }));
+    await assertFails(setDoc(doc(as("bob"), "users/alice/meta/progress"), { srs: {} }));
   });
 
   it("rejects progress with unexpected fields", async () => {
     await assertFails(
-      setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], score: 10 })
+      setDoc(doc(as("alice"), "users/alice/meta/progress"), { srs: {}, score: 10 })
     );
   });
 });

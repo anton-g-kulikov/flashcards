@@ -26,20 +26,12 @@ function validEntry(entry) {
 }
 
 export class Progress {
-  // `saved` is the stored record. Progress saved before spaced repetition ({ known, history })
-  // is converted: known words go to box 2, due now, so each gets one review; the old fields are
-  // dropped with the first save.
-  constructor({ known = [], history = {}, srs } = {}, now = Date.now()) {
+  // `saved` is the stored record, { srs }
+  constructor({ srs = {} } = {}) {
     this.srs = {};
     this.pending = new Map(); // card id → { box, due }, or null to forget it
-    this.dropLegacy = false;
-    if (srs) {
-      for (const [id, entry] of Object.entries(srs)) {
-        if (validEntry(entry)) this.srs[id] = { box: entry.box, due: entry.due };
-      }
-    } else if (known.length > 0 || Object.keys(history).length > 0) {
-      known.forEach((id) => this.set(id, { box: 2, due: now }));
-      this.dropLegacy = true;
+    for (const [id, entry] of Object.entries(srs)) {
+      if (validEntry(entry)) this.srs[id] = { box: entry.box, due: entry.due };
     }
   }
 
@@ -126,22 +118,20 @@ export class Progress {
   }
 
   hasChanges() {
-    return this.pending.size > 0 || this.dropLegacy;
+    return this.pending.size > 0;
   }
 
-  // The changes since the last call, for saving: { srs: { id: entry or null }, dropLegacy }
+  // The changes since the last call, for saving: { srs: { id: entry or null } }
   takeChanges() {
-    const changes = { srs: Object.fromEntries(this.pending), dropLegacy: this.dropLegacy };
+    const changes = { srs: Object.fromEntries(this.pending) };
     this.pending.clear();
-    this.dropLegacy = false;
     return changes;
   }
 
   // Puts back changes that could not be saved, unless newer ones replaced them meanwhile
-  restoreChanges({ srs, dropLegacy }) {
+  restoreChanges({ srs }) {
     for (const [id, entry] of Object.entries(srs)) {
       if (!this.pending.has(id)) this.pending.set(id, entry);
     }
-    if (dropLegacy) this.dropLegacy = true;
   }
 }
