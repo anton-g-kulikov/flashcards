@@ -21,11 +21,20 @@ import {
   getDocs,
   initializeFirestore,
   memoryLocalCache,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
   writeBatch,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import {
+  DEFAULT_COLLECTION,
+  MAX_CARDS,
+  cardFields,
+  collectionName,
+  planMigration,
+  storedCards,
+} from "./card-data.js";
 
 // Public by design: it identifies the project and grants nothing on its own. What protects a
 // collection is firestore.rules, enforced server-side against the user's uid.
@@ -69,32 +78,17 @@ function uid() {
   return auth.currentUser.uid;
 }
 
-const cardsRef = () => collection(db, "users", uid(), "cards");
 const collectionsRef = () => collection(db, "users", uid(), "collections");
+const collectionRef = (id) => doc(collectionsRef(), id);
 const progressRef = () => doc(db, "users", uid(), "meta", "progress");
+// Where cards lived, one document each, before collections held them (see migrate)
+const legacyCardsRef = () => collection(db, "users", uid(), "cards");
 
-const text = (value, max) => String(value || "").trim().slice(0, max);
-
-// Cards saved before collections existed have no collectionId; they belong to this one.
-const DEFAULT_COLLECTION = "default";
+// A new random id, made locally like Firestore's own document ids
+const newId = () => doc(collectionsRef()).id;
 
 // A Firestore batch holds at most 500 writes.
 const BATCH_LIMIT = 450;
-
-// The stored shape of a card: a word, its optional translation and its collection.
-// Must match isCard() in firestore.rules.
-function cardFields(card) {
-  return {
-    word: text(card.word, 200),
-    translation: text(card.translation, 500),
-    collectionId: text(card.collectionId, 100) || DEFAULT_COLLECTION,
-  };
-}
-
-// Must match isCollection() in firestore.rules.
-function collectionFields(name) {
-  return { name: text(name, 100) };
-}
 
 async function commitInChunks(writes) {
   for (let start = 0; start < writes.length; start += BATCH_LIMIT) {
@@ -102,6 +96,54 @@ async function commitInChunks(writes) {
     writes.slice(start, start + BATCH_LIMIT).forEach((write) => write(batch));
     await batch.commit();
   }
+}
+
+// Moves cards from the old one-document-per-card layout into their collections, then deletes
+// the old documents. Safe to interrupt: what was already moved is skipped next time.
+async function migrate(collections, legacyDocs, defaultName) {
+  const legacy = legacyDocs.map((card) => ({ id: card.id, ...card.data() }));
+  const writes = planMigration(collections, legacy, defaultName, newId);
+  const now = serverTimestamp();
+  await commitInChunks([
+    ...writes.map((write) => (batch) =>
+      write.isNew
+        ? batch.set(collectionRef(write.id), {
+            name: write.name,
+            active: true,
+            cards: write.cards,
+            createdAt: now,
+            updatedAt: now,
+          })
+        : batch.update(collectionRef(write.id), { cards: write.cards, updatedAt: now })
+    ),
+    ...legacy.map((card) => (batch) => batch.delete(doc(legacyCardsRef(), card.id))),
+  ]);
+
+  const byId = new Map(collections.map((c) => [c.id, c]));
+  for (const write of writes) {
+    byId.set(write.id, { id: write.id, name: write.name, active: true, ...byId.get(write.id), cards: write.cards });
+  }
+  return [...byId.values()];
+}
+
+// Changes one collection's cards in a transaction, so edits from two devices don't overwrite
+// each other. `edit` gets the current list and returns the new one.
+function editCards(collectionId, edit) {
+  return runTransaction(db, async (transaction) => {
+    const ref = collectionRef(collectionId);
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists()) throw new Error("This collection no longer exists");
+    transaction.update(ref, {
+      cards: edit(storedCards(snapshot.data().cards)),
+      updatedAt: serverTimestamp(),
+    });
+  });
+}
+
+function collectionFull() {
+  const error = new Error(`A collection holds up to ${MAX_CARDS} words`);
+  error.code = "collection-full";
+  return error;
 }
 
 export const Cloud = {
@@ -119,91 +161,89 @@ export const Cloud = {
     return signOut(auth);
   },
 
-  // The user's collections, sorted by name. A first visit gets the default collection, named
-  // in the interface language, so there is always somewhere to put words.
-  async loadCollections(defaultName) {
-    const snapshot = await getDocs(collectionsRef());
-    const collections = snapshot.docs.map((c) => ({
+  // Everything the user has: their collections, sorted by name, and every card with the id of
+  // its collection, sorted by word. One read per collection. A first visit gets the default
+  // collection, named in the interface language, so there is always somewhere to put words.
+  async loadAll(defaultName) {
+    // The old card documents are looked up too (an empty query costs one read), and moved
+    const [snapshot, legacy] = await Promise.all([getDocs(collectionsRef()), getDocs(legacyCardsRef())]);
+    let collections = snapshot.docs.map((c) => ({
       id: c.id,
-      ...collectionFields(c.data().name),
+      name: collectionName(c.data().name),
       active: c.data().active !== false,
+      cards: storedCards(c.data().cards),
     }));
+    if (!legacy.empty) collections = await migrate(collections, legacy.docs, defaultName);
+
     if (collections.length === 0) {
       const now = serverTimestamp();
-      await setDoc(doc(collectionsRef(), DEFAULT_COLLECTION), {
-        ...collectionFields(defaultName),
+      const name = collectionName(defaultName);
+      await setDoc(collectionRef(DEFAULT_COLLECTION), {
+        name,
         active: true,
+        cards: [],
         createdAt: now,
         updatedAt: now,
       });
-      collections.push({ id: DEFAULT_COLLECTION, ...collectionFields(defaultName), active: true });
+      collections.push({ id: DEFAULT_COLLECTION, name, active: true, cards: [] });
     }
-    return collections.sort((a, b) => a.name.localeCompare(b.name));
+
+    collections.sort((a, b) => a.name.localeCompare(b.name));
+    const cards = collections
+      .flatMap((c) => c.cards.map((card) => ({ ...card, collectionId: c.id })))
+      .sort((a, b) => a.word.localeCompare(b.word, "es"));
+    return { collections: collections.map(({ cards, ...rest }) => rest), cards };
   },
 
-  async createCollection(name) {
-    const ref = doc(collectionsRef());
+  // A new collection, empty or with the given cards (an import) in a single write, so an import
+  // either arrives whole or not at all. Returns its id and the cards with their new ids.
+  async createCollection(name, cards = []) {
+    if (cards.length > MAX_CARDS) throw collectionFull();
+    const id = newId();
+    const stored = cards.map((card) => ({ id: newId(), ...cardFields(card) }));
     const now = serverTimestamp();
-    await setDoc(ref, { ...collectionFields(name), active: true, createdAt: now, updatedAt: now });
-    return ref.id;
+    await setDoc(collectionRef(id), {
+      name: collectionName(name),
+      active: true,
+      cards: stored,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return { id, cards: stored };
   },
 
   // Active collections are the ones the study page uses.
   setCollectionActive(id, active) {
-    return updateDoc(doc(collectionsRef(), id), { active: !!active, updatedAt: serverTimestamp() });
+    return updateDoc(collectionRef(id), { active: !!active, updatedAt: serverTimestamp() });
   },
 
   renameCollection(id, name) {
-    return updateDoc(doc(collectionsRef(), id), {
-      ...collectionFields(name),
-      updatedAt: serverTimestamp(),
-    });
+    return updateDoc(collectionRef(id), { name: collectionName(name), updatedAt: serverTimestamp() });
   },
 
-  // Deletes a collection and the given cards (the ones in it).
-  deleteCollection(id, cardIds) {
-    return commitInChunks([
-      ...cardIds.map((cardId) => (batch) => batch.delete(doc(cardsRef(), cardId))),
-      (batch) => batch.delete(doc(collectionsRef(), id)),
-    ]);
+  // Deletes a collection and its cards
+  deleteCollection(id) {
+    return deleteDoc(collectionRef(id));
   },
 
-  // Adds many cards to a collection at once; returns them with their new ids.
-  async importCards(collectionId, cards) {
-    const now = serverTimestamp();
-    const added = cards.map((card) => ({
-      id: doc(cardsRef()).id,
-      ...cardFields({ ...card, collectionId }),
-    }));
-    await commitInChunks(
-      added.map(({ id, ...fields }) => (batch) =>
-        batch.set(doc(cardsRef(), id), { ...fields, createdAt: now, updatedAt: now })
-      )
-    );
-    return added;
-  },
-
-  async loadCards() {
-    const snapshot = await getDocs(cardsRef());
-    return snapshot.docs
-      .map((card) => ({ id: card.id, ...cardFields(card.data()) }))
-      .sort((a, b) => a.word.localeCompare(b.word, "es"));
-  },
-
-  // Adds a card and returns its id.
+  // Adds a card ({ word, translation, collectionId }) and returns its id.
   async addCard(card) {
-    const ref = doc(cardsRef());
-    const now = serverTimestamp();
-    await setDoc(ref, { ...cardFields(card), createdAt: now, updatedAt: now });
-    return ref.id;
+    const id = newId();
+    await editCards(card.collectionId, (cards) => {
+      if (cards.length >= MAX_CARDS) throw collectionFull();
+      return [...cards, { id, ...cardFields(card) }];
+    });
+    return id;
   },
 
   updateCard(id, card) {
-    return updateDoc(doc(cardsRef(), id), { ...cardFields(card), updatedAt: serverTimestamp() });
+    return editCards(card.collectionId, (cards) =>
+      cards.map((c) => (c.id === id ? { id, ...cardFields(card) } : c))
+    );
   },
 
-  deleteCard(id) {
-    return deleteDoc(doc(cardsRef(), id));
+  deleteCard(id, collectionId) {
+    return editCards(collectionId, (cards) => cards.filter((c) => c.id !== id));
   },
 
   async loadProgress() {

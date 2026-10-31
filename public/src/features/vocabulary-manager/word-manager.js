@@ -3,6 +3,7 @@
 // words one at a time and lets you fix a translation or delete a word. Collections can also be
 // created and imported from CSV (a file or a starter collection).
 import { Cloud } from "../../core/cloud.js";
+import { MAX_CARDS } from "../../core/card-data.js";
 import { I18n } from "../../ui/i18n.js";
 import { AuthGate } from "../../ui/auth-gate.js";
 import { confirmOnSecondTap } from "../../ui/confirm-button.js";
@@ -64,10 +65,7 @@ class WordManager {
   }
 
   async load() {
-    const [collections, cards] = await Promise.all([
-      Cloud.loadCollections(I18n.t("collections.default")),
-      Cloud.loadCards(),
-    ]);
+    const { collections, cards } = await Cloud.loadAll(I18n.t("collections.default"));
     this.collections = collections;
     this.cards = cards;
     // A first visit with a single collection opens it, so there is somewhere to type
@@ -146,7 +144,7 @@ class WordManager {
     const name = this.nameInput.value.trim();
     if (!name) return;
     try {
-      const id = await Cloud.createCollection(name);
+      const { id } = await Cloud.createCollection(name);
       this.collections.push({ id, name, active: true });
       this.sortCollections();
       this.closeNameForm();
@@ -194,9 +192,8 @@ class WordManager {
   async deleteCollection(collection, button) {
     if (!confirmOnSecondTap(button, I18n.t("collections.deleteConfirm"))) return;
 
-    const cardIds = this.cardsIn(collection.id).map((card) => card.id);
     try {
-      await Cloud.deleteCollection(collection.id, cardIds);
+      await Cloud.deleteCollection(collection.id);
     } catch (error) {
       this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
       return;
@@ -208,7 +205,7 @@ class WordManager {
     this.saveOpenState();
     if (this.collections.length === 0) {
       // There is always somewhere to put words: this recreates the default collection
-      this.collections = await Cloud.loadCollections(I18n.t("collections.default"));
+      ({ collections: this.collections } = await Cloud.loadAll(I18n.t("collections.default")));
     }
     this.render();
     this.showMessage(I18n.t("collections.deleted", { name: collection.name }), "success");
@@ -298,10 +295,9 @@ class WordManager {
     }
     // Saving waits for the server, so say something straight away
     this.showMessage(I18n.t("collections.importing", { name, count: cards.length }), "info", 0);
-    const id = await Cloud.createCollection(name);
-    const added = await Cloud.importCards(id, cards);
+    const { id, cards: added } = await Cloud.createCollection(name, cards);
     this.collections.push({ id, name, active: true });
-    this.cards.push(...added);
+    this.cards.push(...added.map((card) => ({ ...card, collectionId: id })));
     this.sortCards();
     this.sortCollections();
     this.importPanel.classList.add("hidden");
@@ -337,7 +333,8 @@ class WordManager {
       this.sortCards();
     } catch (error) {
       submit.disabled = false;
-      this.showMessage(I18n.t("words.addFailed", { word, error: error.message }), "error");
+      const reason = error.code === "collection-full" ? I18n.t("words.collectionFull", { max: MAX_CARDS }) : error.message;
+      this.showMessage(I18n.t("words.addFailed", { word, error: reason }), "error");
       return;
     }
 
@@ -367,7 +364,7 @@ class WordManager {
     if (!confirmOnSecondTap(button, I18n.t("words.deleteConfirm"))) return;
 
     try {
-      await Cloud.deleteCard(card.id);
+      await Cloud.deleteCard(card.id, card.collectionId);
     } catch (error) {
       this.showMessage(
         I18n.t("words.deleteFailed", { word: card.word, error: error.message }),

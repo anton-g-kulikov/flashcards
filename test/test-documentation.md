@@ -6,11 +6,10 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 
 | Case | Expectation |
 | --- | --- |
-| Owner creates, reads, updates, deletes own card | allowed |
-| Card with only a `word` | allowed |
-| Another user reads, writes or deletes someone's card | denied |
-| Signed-out visitor reads or writes a card | denied |
-| Card with an unknown field, no word, empty or >200-char word, non-string translation | denied |
+| Old one-per-document card: owner reads or deletes it | allowed (for the move into collections) |
+| Old one-per-document card: anyone creates or changes one | denied |
+| Old card read or deleted by another user or a signed-out visitor | denied |
+| Collection with up to 5,000 cards in its `cards` list | allowed; 5,001, or `cards` not a list, denied |
 | Owner saves and reads own progress | allowed |
 | Another user reads or writes someone's progress | denied |
 | Progress with an unexpected field | denied |
@@ -30,6 +29,16 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 
 Collection documents and a card's `collectionId` / a collection's `active` flag are covered in
 `firestore.rules.test.js`.
+
+## Automated: stored cards and the move out of one-per-document cards (`card-data.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| Card fields | only word and translation, trimmed and cut to length; list items without id or word dropped |
+| Old cards naming an existing collection | appended after its cards, ids kept |
+| Old cards without a collection, or whose collection is gone | into a new default collection |
+| Cards already moved | skipped, so an interrupted move can rerun |
+| More than 5,000 cards for one collection | the rest in "<name> (2)", "<name> (3)"... |
 
 ## Automated: study logic (`study.test.js`, `shuffle.test.js`)
 
@@ -71,3 +80,6 @@ With `npm run dev`, at http://127.0.0.1:5050:
    reload. Delete in My Cards likewise needs a second tap ("Sure?"). These replace `confirm()`,
    which embedded browsers can suppress (a suppressed dialog returns false and cancels).
 6. Sign out and in as a different account: the collection is empty.
+7. Old layout: with rules bypassed (REST with `Authorization: Bearer owner`), create
+   `users/{uid}/cards/*` documents, some naming a collection and some not. Opening My Cards moves
+   them into their collections (orphans into the default one) and the old documents are gone.

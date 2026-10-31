@@ -121,9 +121,8 @@ class StudyPage {
 initInstallPrompt();
 
 AuthGate.onSignedIn(async () => {
-  const [collections, allCards, saved] = await Promise.all([
-    Cloud.loadCollections(I18n.t("collections.default")),
-    Cloud.loadCards(),
+  const [{ collections, cards: allCards }, saved] = await Promise.all([
+    Cloud.loadAll(I18n.t("collections.default")),
     Cloud.loadProgress(),
   ]);
 

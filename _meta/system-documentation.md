@@ -15,7 +15,7 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
 | Study page (modes, stats, saving progress) | `public/src/study.js`, the modes in `public/src/features/flashcards/` |
 | Study logic without the DOM (progress, quiz choices, card order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
-| Collections and words | `public/src/features/vocabulary-manager/word-manager.js` |
+| Collections and words | `public/src/features/vocabulary-manager/word-manager.js` (page), `public/src/core/cloud.js` and `card-data.js` (storage) |
 | CSV reading and writing | `public/src/utils/csv.js`, tested in `test/csv.test.js` |
 | Starter collections | `public/collections/` with `index.json` |
 | App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
@@ -26,13 +26,21 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 Data lives under each user's uid; the rules allow nobody else in:
 
 ```text
-users/{uid}/collections/{id}  { name, active, createdAt, updatedAt }
-users/{uid}/cards/{cardId}    { word, translation, collectionId, createdAt, updatedAt }
+users/{uid}/collections/{id}  { name, active, cards: [{ id, word, translation }], createdAt, updatedAt }
 users/{uid}/meta/progress     { known: [cardId], history: { cardId: lastSeenMs }, updatedAt }
 ```
 
-Cards saved before collections existed have no `collectionId` and belong to the `default`
-collection.
+A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
+1 MiB per document), so loading everything costs one read per collection, an import is a single
+atomic write, and word edits are transactions on that document (`public/src/core/cloud.js`).
+Firestore rules can't check list items, so `public/src/core/card-data.js` trims every card to
+its fields and lengths.
+
+Until 1.9.0 each card was a document of its own in `users/{uid}/cards`. On load, `Cloud.loadAll`
+moves any it still finds into their collection (keeping their ids, so progress still applies;
+cards whose collection is gone go to the default one) and deletes them; the rules still let the
+owner read and delete them for that, but not create any. The move is planned by
+`planMigration` in `card-data.js` and tested in `test/card-data.test.js`.
 
 ## Development
 

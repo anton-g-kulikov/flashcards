@@ -17,12 +17,12 @@ import {
 
 let env;
 
-const card = (overrides = {}) => ({
+const card = () => ({
   word: "abrir",
   translation: "открыть",
+  collectionId: "k1",
   createdAt: serverTimestamp(),
   updatedAt: serverTimestamp(),
-  ...overrides,
 });
 
 before(async () => {
@@ -42,44 +42,32 @@ beforeEach(async () => {
 
 const as = (uid) => env.authenticatedContext(uid).firestore();
 
-describe("cards", () => {
-  it("lets a user create, read, update and delete their own cards", async () => {
-    const db = as("alice");
-    const ref = doc(db, "users/alice/cards/c1");
-    await assertSucceeds(setDoc(ref, card()));
+describe("cards stored one per document (before collections held them)", () => {
+  it("can be read and deleted by their owner, for the move into collections", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
+    });
+    const ref = doc(as("alice"), "users/alice/cards/c1");
     await assertSucceeds(getDoc(ref));
-    await assertSucceeds(updateDoc(ref, { translation: "открывать", updatedAt: serverTimestamp() }));
     await assertSucceeds(deleteDoc(ref));
   });
 
-  it("accepts a card with only a word", async () => {
-    await assertSucceeds(setDoc(doc(as("alice"), "users/alice/cards/c1"), { word: "hola" }));
-  });
-
-  it("keeps other users out of a collection", async () => {
+  it("can't be created or changed any more", async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), { word: "abrir" });
+      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
     });
-    const bob = as("bob");
-    await assertFails(getDoc(doc(bob, "users/alice/cards/c1")));
-    await assertFails(setDoc(doc(bob, "users/alice/cards/c2"), card()));
-    await assertFails(deleteDoc(doc(bob, "users/alice/cards/c1")));
-  });
-
-  it("keeps signed-out visitors out", async () => {
-    const anon = env.unauthenticatedContext().firestore();
-    await assertFails(getDoc(doc(anon, "users/alice/cards/c1")));
-    await assertFails(setDoc(doc(anon, "users/alice/cards/c1"), card()));
-  });
-
-  it("rejects cards with unknown fields, no word, or oversized values", async () => {
     const db = as("alice");
-    await assertFails(setDoc(doc(db, "users/alice/cards/c1"), card({ owner: "bob" })));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c2"), { translation: "открыть" }));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c3"), card({ word: "" })));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c4"), card({ word: "x".repeat(201) })));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c5"), card({ translation: 42 })));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c6"), card({ category: "verb" })));
+    await assertFails(setDoc(doc(db, "users/alice/cards/c2"), card()));
+    await assertFails(updateDoc(doc(db, "users/alice/cards/c1"), { translation: "x" }));
+  });
+
+  it("are kept away from other users and signed-out visitors", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "users/alice/cards/c1"), card());
+    });
+    await assertFails(getDoc(doc(as("bob"), "users/alice/cards/c1")));
+    await assertFails(deleteDoc(doc(as("bob"), "users/alice/cards/c1")));
+    await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), "users/alice/cards/c1")));
   });
 });
 
@@ -125,10 +113,14 @@ describe("collections", () => {
     await assertFails(updateDoc(ref, { active: "no" }));
   });
 
-  it("lets a card name its collection, but only with a string id", async () => {
+  it("holds its cards as a list of up to 5,000", async () => {
     const db = as("alice");
-    await assertSucceeds(setDoc(doc(db, "users/alice/cards/c1"), card({ collectionId: "k1" })));
-    await assertFails(setDoc(doc(db, "users/alice/cards/c2"), card({ collectionId: 7 })));
+    const cards = (n) => Array.from({ length: n }, (_, i) => ({ id: `c${i}`, word: `w${i}`, translation: "" }));
+    const ref = doc(db, "users/alice/collections/k1");
+    await assertSucceeds(setDoc(ref, collection({ cards: cards(5000) })));
+    await assertSucceeds(updateDoc(ref, { cards: cards(3), updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { cards: cards(5001) }));
+    await assertFails(setDoc(doc(db, "users/alice/collections/k2"), collection({ cards: { c1: "x" } })));
   });
 });
 

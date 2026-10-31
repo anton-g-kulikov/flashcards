@@ -11,26 +11,19 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // A word, its optional translation and the collection it belongs to. The field list matches
-    // cardFields() in public/src/core/cloud.js; a new card field has to be added here in the
-    // same change. Cards without a collectionId belong to the "default" collection.
-    function isCard(d) {
-      return d.keys().hasOnly(['word', 'translation', 'collectionId', 'createdAt', 'updatedAt'])
-        && d.keys().hasAll(['word'])
-        && d.word is string && d.word.size() > 0 && d.word.size() <= 200
-        && (!('translation' in d) || (d.translation is string && d.translation.size() <= 500))
-        && (!('collectionId' in d) || (d.collectionId is string && d.collectionId.size() <= 100))
-        && (!('createdAt' in d) || d.createdAt is timestamp)
-        && (!('updatedAt' in d) || d.updatedAt is timestamp);
-    }
-
-    // A named group of cards; studied when active (the default). Matches collectionFields() in
+    // A named group of cards, studied when active (the default). The cards live in the
+    // collection document itself, as a list of { id, word, translation }, so loading every word
+    // costs one read per collection rather than one per card, and an import is a single write.
+    // Rules can't look inside list items: cloud.js trims each card to its fields and length
+    // limits (cardFields), and only the owner can write here anyway. 5,000 cards keep a
+    // collection well under Firestore's 1 MiB document limit. Matches collectionFields() in
     // public/src/core/cloud.js.
     function isCollection(d) {
-      return d.keys().hasOnly(['name', 'active', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['name', 'active', 'cards', 'createdAt', 'updatedAt'])
         && d.keys().hasAll(['name'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && (!('active' in d) || d.active is bool)
+        && (!('cards' in d) || (d.cards is list && d.cards.size() <= 5000))
         && (!('createdAt' in d) || d.createdAt is timestamp)
         && (!('updatedAt' in d) || d.updatedAt is timestamp);
     }
@@ -43,9 +36,10 @@ service cloud.firestore {
         && (!('updatedAt' in d) || d.updatedAt is timestamp);
     }
 
+    // Cards used to be one document each. cloud.js moves any it finds into their collection
+    // and deletes them; nothing new is written here.
     match /users/{userId}/cards/{cardId} {
       allow read, delete: if isOwner(userId);
-      allow create, update: if isOwner(userId) && isCard(request.resource.data);
     }
 
     match /users/{userId}/collections/{collectionId} {
