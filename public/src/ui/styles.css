@@ -186,6 +186,26 @@ button:disabled {
   height: 18px;
 }
 
+/* The top bar's one primary action: filled, so it reads as "add" rather than a utility icon */
+.icon-btn.add-btn {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.35);
+}
+
+.icon-btn.add-btn:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: white;
+}
+
+.icon-btn.add-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.5;
+}
+
 .icon {
   width: 18px;
   height: 18px;
@@ -258,12 +278,13 @@ button.armed:hover {
   flex-shrink: 0;
 }
 
+/* Neutral, so the accent "+" stays the only coloured button in the top bar */
 .user-chip .user-initial {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-accent);
-  color: white;
+  background: var(--color-card-1);
+  color: var(--color-text-light);
   font-weight: 600;
 }
 
