@@ -10,6 +10,8 @@ body:
         (see [the format](https://github.com/anton-g-kulikov/flashcards#collections-and-csv)).
         The easiest way to get one: build the collection in the app and export it with the download
         icon in its header.
+
+        Please finish the title with a short name, e.g. **New collection: Spanish B1 · Food**.
   - type: input
     id: languages
     attributes:
