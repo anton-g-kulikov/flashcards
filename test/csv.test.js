@@ -2,16 +2,12 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import vm from "node:vm";
-
-const context = { globalThis: {} };
-vm.runInNewContext(readFileSync("public/src/utils/csv.js", "utf8"), context);
-const { parse, toCards, fromCards, fileName } = context.globalThis.CsvUtils;
+import { MAX_ROWS, fileName, fromCards, parse, readCards, toCards } from "../public/src/utils/csv.js";
 
 describe("parse", () => {
   it("handles quotes, embedded commas, doubled quotes, CRLF and a BOM", () => {
     const text = '﻿word,translation\r\n"hola, amigo","hi, friend"\r\n"él dijo ""sí""",he said yes\r\n';
-    assert.deepEqual(JSON.parse(JSON.stringify(parse(text))), [
+    assert.deepEqual(parse(text), [
       ["word", "translation"],
       ["hola, amigo", "hi, friend"],
       ['él dijo "sí"', "he said yes"],
@@ -28,12 +24,12 @@ describe("parse", () => {
 describe("toCards", () => {
   it("reads the word and translation columns by header, in any order", () => {
     const cards = toCards("translation,word,notes\nhouse,la casa,x\n");
-    assert.deepEqual(JSON.parse(JSON.stringify(cards)), [{ word: "la casa", translation: "house" }]);
+    assert.deepEqual(cards, [{ word: "la casa", translation: "house" }]);
   });
 
   it("falls back to the first two columns without a header", () => {
     const cards = toCards("perro,собака\ngato\n");
-    assert.deepEqual(JSON.parse(JSON.stringify(cards)), [
+    assert.deepEqual(cards, [
       { word: "perro", translation: "собака" },
       { word: "gato", translation: "" },
     ]);
@@ -46,13 +42,29 @@ describe("toCards", () => {
   });
 });
 
+describe("readCards", () => {
+  it("counts the rows it skips: no word, or a word already seen", () => {
+    const { cards, skipped, truncated } = readCards("word,translation\nhola,hi\n,orphan\nHola,again\nadiós,bye\n");
+    assert.deepEqual(cards.map((c) => c.word), ["hola", "adiós"]);
+    assert.equal(skipped, 2);
+    assert.equal(truncated, 0);
+  });
+
+  it("stops at MAX_ROWS words and counts the rest", () => {
+    const rows = Array.from({ length: MAX_ROWS + 3 }, (_, i) => `word${i},t${i}`);
+    const { cards, truncated } = readCards(rows.join("\n"));
+    assert.equal(cards.length, MAX_ROWS);
+    assert.equal(truncated, 3);
+  });
+});
+
 describe("fromCards", () => {
   it("round-trips through toCards", () => {
     const cards = [
       { word: "hola, amigo", translation: 'hi "friend"' },
       { word: "casa", translation: "" },
     ];
-    assert.deepEqual(JSON.parse(JSON.stringify(toCards(fromCards(cards)))), cards);
+    assert.deepEqual(toCards(fromCards(cards)), cards);
   });
 
   it("makes a safe file name", () => {

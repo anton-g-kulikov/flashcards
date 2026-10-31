@@ -1,7 +1,6 @@
 // Firebase access for the whole app: Google sign-in and the signed-in user's collection.
 //
-// Loaded as an ES module straight from Google's CDN so the app keeps its no-build setup. Classic
-// scripts reach it through window.Cloud and the "cloud-auth-changed" event.
+// The Firebase SDK comes straight from Google's CDN as ES modules, so the app needs no build step.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {
   GoogleAuthProvider,
@@ -105,10 +104,7 @@ async function commitInChunks(writes) {
   }
 }
 
-window.Cloud = {
-  user: null,
-  authResolved: false,
-
+export const Cloud = {
   async signIn() {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
@@ -221,20 +217,21 @@ window.Cloud = {
   },
 };
 
-// Emulator only: sign in as a test Google account without the popup, for automated checks.
-// The Auth emulator accepts an unsigned token; production Auth would reject it.
+// Calls back with the signed-in user, or null, now and whenever that changes.
+export function onAuthChanged(callback) {
+  return onAuthStateChanged(auth, callback);
+}
+
+// Emulator only: sign in as a test Google account without the popup, for automated checks
+// (window.Cloud.signInForTesting() from the browser console). The Auth emulator accepts an
+// unsigned token; production Auth would reject it.
 if (usesEmulators) {
-  window.Cloud.signInForTesting = (id = "test-user", name = "Test User") =>
+  Cloud.signInForTesting = (id = "test-user", name = "Test User") =>
     signInWithCredential(
       auth,
       GoogleAuthProvider.credential(
         JSON.stringify({ sub: id, email: `${id}@example.com`, name, email_verified: true })
       )
     );
+  window.Cloud = Cloud;
 }
-
-onAuthStateChanged(auth, (user) => {
-  window.Cloud.user = user;
-  window.Cloud.authResolved = true;
-  document.dispatchEvent(new CustomEvent("cloud-auth-changed", { detail: { user } }));
-});

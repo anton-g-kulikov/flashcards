@@ -1,161 +1,61 @@
-// Analytics helper functions
+// Google Analytics (GA4 property "flashcards-ak-app", linked to the Firebase project): which
+// features get used. Names, emails, account ids and words are never sent. Not loaded on
+// localhost, so development stays out of the stats.
+const MEASUREMENT_ID = "G-E0J0MDFKE6";
+const enabled = !["localhost", "127.0.0.1"].includes(location.hostname);
 
-// Session tracking state
-const sessionState = {
-  startTime: Date.now(),
-  modeStartTime: Date.now(),
-  currentMode: "flashcard",
-  cardsReviewed: 0,
-  lastReviewTime: Date.now(),
-};
-
-// Helper function to safely send events to Google Analytics
-function sendGoogleAnalyticsEvent(
-  eventCategory,
-  eventAction,
-  eventLabel = null,
-  eventValue = null
-) {
-  if (!window.gtag) return;
-
-  const eventParams = {
-    event_category: eventCategory,
-    event_label: eventLabel,
+if (enabled) {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () {
+    window.dataLayer.push(arguments);
   };
-  if (eventValue !== null) {
-    eventParams.value = eventValue;
-  }
-  gtag("event", eventAction, eventParams);
+  const tag = document.createElement("script");
+  tag.async = true;
+  tag.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
+  document.head.appendChild(tag);
+  window.gtag("js", new Date());
+  window.gtag("config", MEASUREMENT_ID);
 }
 
-// Session events
-function trackSessionStart() {
-  const totalCards = window.vocabApp?.allCards?.length || 0;
-  const knownCards = window.vocabApp?.knownCardsSet?.size || 0;
-
-  // Reset session state
-  sessionState.startTime = Date.now();
-  sessionState.modeStartTime = Date.now();
-  sessionState.cardsReviewed = 0;
-  sessionState.lastReviewTime = Date.now();
-
-  sendGoogleAnalyticsEvent("Session", "Start", "Initial Load", totalCards);
-  sendGoogleAnalyticsEvent("User Stats", "Known Cards", null, knownCards);
+function send(name, params = {}) {
+  if (enabled) window.gtag("event", name, params);
 }
 
-function trackModeSwitch(mode) {
-  // Track time spent in previous mode
-  const timeInPreviousMode = Math.round(
-    (Date.now() - sessionState.modeStartTime) / 1000
-  );
-  sendGoogleAnalyticsEvent(
-    "Usage Time",
-    sessionState.currentMode,
-    "Time in seconds",
-    timeInPreviousMode
-  );
-
-  // Update session state
-  sessionState.currentMode = mode;
-  sessionState.modeStartTime = Date.now();
-
-  sendGoogleAnalyticsEvent("Navigation", "Mode Switch", mode);
+// Time spent in each study mode, sent when the mode changes or the page is left
+const mode = { name: null, since: 0 };
+function endMode() {
+  if (!mode.name) return;
+  send("study_time", { mode: mode.name, seconds: Math.round((Date.now() - mode.since) / 1000) });
+  mode.since = Date.now();
 }
+window.addEventListener("pagehide", endMode);
 
-// Card interaction events
-function trackCardInteraction(action, category = "all", knownCount = null) {
-  // Track individual card review
-  sessionState.cardsReviewed++;
-
-  // If it's been more than 5 minutes since last review, send a count update
-  const timeSinceLastReview = Date.now() - sessionState.lastReviewTime;
-  if (timeSinceLastReview > 5 * 60 * 1000) {
-    // 5 minutes
-    sendGoogleAnalyticsEvent(
-      "Session Progress",
-      "Cards Reviewed",
-      category,
-      sessionState.cardsReviewed
-    );
-    sessionState.lastReviewTime = Date.now();
-  }
-
-  sendGoogleAnalyticsEvent("Cards", action, category, knownCount);
-}
-
-// Language switching events
-function trackLanguageSwitch(newLanguage) {
-  sendGoogleAnalyticsEvent("Language", "Switch Language", newLanguage);
-}
-
-// Category selection events
-function trackCategorySelect(category) {
-  sendGoogleAnalyticsEvent("Categories", "Select Category", category);
-}
-
-// Quiz events
-function trackQuizInteraction(action, score = null) {
-  const params = {
-    event_category: "Quiz",
-    event_label: action,
-  };
-  if (score !== null) {
-    params.value = score;
-  }
-  sendGoogleAnalyticsEvent("Quiz", action, action, score);
-}
-
-// A named GA4 event (used by the install prompt)
-function trackEvent(name, params = {}) {
-  if (!window.gtag) return;
-  gtag("event", name, params);
-}
-
-function trackProgress(action) {
-  sendGoogleAnalyticsEvent("Progress", action);
-}
-
-// Make functions available globally
-window.Analytics = {
-  trackSessionStart,
-  trackModeSwitch,
-  trackCardInteraction,
-  trackLanguageSwitch,
-  trackCategorySelect,
-  trackQuizInteraction,
-  trackEvent,
-  trackProgress,
-};
-
-// Add window unload handler to track final session stats
-window.addEventListener("beforeunload", () => {
-  // Track final time in current mode
-  const timeInCurrentMode = Math.round(
-    (Date.now() - sessionState.modeStartTime) / 1000
-  );
-  sendGoogleAnalyticsEvent(
-    "Usage Time",
-    sessionState.currentMode,
-    "Time in seconds",
-    timeInCurrentMode
-  );
-
-  // Track total session time
-  const totalSessionTime = Math.round(
-    (Date.now() - sessionState.startTime) / 1000
-  );
-  sendGoogleAnalyticsEvent(
-    "Usage Time",
-    "Total Session",
-    "Time in seconds",
-    totalSessionTime
-  );
-
-  // Track total cards reviewed
-  sendGoogleAnalyticsEvent(
-    "Session Progress",
-    "Total Cards Reviewed",
-    null,
-    sessionState.cardsReviewed
-  );
+document.addEventListener("i18n-changed", (event) => {
+  send("language_switch", { language: event.detail.lang });
 });
+
+export const Analytics = {
+  studyStart(modeName, cards, known) {
+    send("study_start", { mode: modeName, cards, known });
+  },
+  // A mode shown by the app itself: timed, but not counted as a switch
+  modeStarted(name) {
+    endMode();
+    mode.name = name;
+    mode.since = Date.now();
+  },
+  modeSwitch(name) {
+    Analytics.modeStarted(name);
+    send("mode_switch", { mode: name });
+  },
+  cardMarked(known) {
+    send("card_marked", { answer: known ? "known" : "unknown" });
+  },
+  quizAnswer(correct) {
+    send("quiz_answer", { result: correct ? "correct" : "wrong" });
+  },
+  progressReset() {
+    send("progress_reset");
+  },
+  event: send,
+};

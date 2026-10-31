@@ -1,26 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Cards - YourFlashCards</title>
-
-    <!-- Google Analytics: GA4 property "flashcards-ak-app", linked to the Firebase project.
-         Not loaded on localhost, so development stays out of the stats. -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      if (!["localhost", "127.0.0.1"].includes(location.hostname)) {
-        const tag = document.createElement("script");
-        tag.async = true;
-        tag.src = "https://www.googletagmanager.com/gtag/js?id=G-E0J0MDFKE6";
-        document.head.appendChild(tag);
-        gtag("js", new Date());
-        gtag("config", "G-E0J0MDFKE6");
-      }
-    </script>
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json" />
@@ -41,34 +24,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/ios/16.png?v=2" />
 
     <link rel="stylesheet" href="src/ui/styles.css" />
-    <!-- Add this script to detect page type before loading any other scripts -->
-    <script>
-      window.isVocabManagerPage = true;
-      // Ensure body class is set for vocabulary manager page
-      document.addEventListener("DOMContentLoaded", function () {
-        document.body.classList.add("vocab-manager-page");
-      });
-    </script>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-      // Registers the service worker for offline use. It never reloads the page: pages are
-      // always fetched from the network first, and a new worker clears the old cache when it
-      // activates, so the next navigation picks up an update by itself. (Reloading on
-      // "controllerchange" used to refresh every first visit, and again after each deploy.)
-      if (
-        "serviceWorker" in navigator &&
-        (location.protocol === "http:" || location.protocol === "https:")
-      ) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/sw.js").catch(function (err) {
-            console.log("ServiceWorker registration failed: ", err);
-          });
-        });
-      }
-    </script>
+    <script type="module" src="src/my-cards.js"></script>
   </head>
-  <body class="vocab-manager-page">
+  <body class="vocab-manager-page auth-pending">
     <!-- Sign-in screen, shown until a Google account is signed in -->
     <div id="authGate" class="auth-gate">
       <div class="auth-loading">
@@ -166,15 +124,5 @@
 
       <div id="messageContainer" class="toast-container" aria-live="polite"></div>
     </div>
-
-    <script src="src/ui/i18n.js"></script>
-    <script type="module" src="src/core/cloud.js"></script>
-    <script src="src/ui/auth-gate.js"></script>
-    <script src="src/ui/confirm-button.js"></script>
-    <script src="src/utils/csv.js"></script>
-    <script src="src/utils/pwa-installer.js"></script>
-    <script src="src/utils/cache-manager.js"></script>
-    <script src="src/utils/version-sync.js"></script>
-    <script src="src/features/vocabulary-manager/word-manager.js"></script>
   </body>
 </html>

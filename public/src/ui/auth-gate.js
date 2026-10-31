@@ -1,10 +1,12 @@
 // Auth Gate - Shows the sign-in screen until a Google account is signed in, then the app.
+import { Cloud, onAuthChanged } from "../core/cloud.js";
+import { I18n } from "./i18n.js";
 //
 // Pages register their start-up with AuthGate.onSignedIn(callback); it runs once, with the user,
 // as soon as Firebase reports a signed-in account. Signing out reloads the page so no state from
 // one account survives into the next.
 
-class AuthGate {
+export class AuthGate {
   static callbacks = [];
   static signedInUser = null;
 
@@ -18,13 +20,7 @@ class AuthGate {
 
   static init() {
     document.body.classList.add("auth-pending");
-
-    document.addEventListener("cloud-auth-changed", (event) => {
-      AuthGate.handleUser(event.detail.user);
-    });
-    if (window.Cloud && window.Cloud.authResolved) {
-      AuthGate.handleUser(window.Cloud.user);
-    }
+    onAuthChanged((user) => AuthGate.handleUser(user));
 
     document.addEventListener("i18n-changed", () => {
       if (AuthGate.signedInUser) AuthGate.renderUserChip(AuthGate.signedInUser);
@@ -95,7 +91,7 @@ class AuthGate {
     const errorEl = document.getElementById("authError");
     if (errorEl) errorEl.textContent = "";
     try {
-      await window.Cloud.signIn();
+      await Cloud.signIn();
     } catch (error) {
       // Closing the popup is a change of mind, not an error worth showing.
       if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
@@ -141,10 +137,9 @@ class AuthGate {
         <polyline points="16 17 21 12 16 7"/>
         <line x1="21" y1="12" x2="9" y2="12"/>
       </svg>`;
-    signOutBtn.addEventListener("click", () => window.Cloud.signOut());
+    signOutBtn.addEventListener("click", () => Cloud.signOut());
     chip.appendChild(signOutBtn);
   }
 }
 
-window.AuthGate = AuthGate;
-document.addEventListener("DOMContentLoaded", () => AuthGate.init());
+AuthGate.init();

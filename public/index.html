@@ -1,26 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YourFlashCards</title>
-
-    <!-- Google Analytics: GA4 property "flashcards-ak-app", linked to the Firebase project.
-         Not loaded on localhost, so development stays out of the stats. -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      if (!["localhost", "127.0.0.1"].includes(location.hostname)) {
-        const tag = document.createElement("script");
-        tag.async = true;
-        tag.src = "https://www.googletagmanager.com/gtag/js?id=G-E0J0MDFKE6";
-        document.head.appendChild(tag);
-        gtag("js", new Date());
-        gtag("config", "G-E0J0MDFKE6");
-      }
-    </script>
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json" />
@@ -45,30 +28,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/ios/16.png?v=2" />
 
     <link rel="stylesheet" href="src/ui/styles.css" />
-    <script>
-      // Initialize page type detection
-      window.isVocabManagerPage = false;
-    </script>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-      // Registers the service worker for offline use. It never reloads the page: pages are
-      // always fetched from the network first, and a new worker clears the old cache when it
-      // activates, so the next navigation picks up an update by itself. (Reloading on
-      // "controllerchange" used to refresh every first visit, and again after each deploy.)
-      if (
-        "serviceWorker" in navigator &&
-        (location.protocol === "http:" || location.protocol === "https:")
-      ) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/sw.js").catch(function (err) {
-            console.log("ServiceWorker registration failed: ", err);
-          });
-        });
-      }
-    </script>
+    <script type="module" src="src/study.js"></script>
   </head>
-  <body>
+  <body class="auth-pending">
     <!-- Sign-in screen, shown until a Google account is signed in -->
     <div id="authGate" class="auth-gate">
       <div class="auth-loading">
@@ -135,7 +97,7 @@
       </div>
 
       <!-- PWA Install Button -->
-      <div id="pwa-install-container" class="pwa-install-container" style="display: none">
+      <div id="pwa-install-container" class="pwa-install-container hidden">
         <button id="pwa-install-button" class="pwa-install-btn">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -147,20 +109,10 @@
       </div>
 
       <div class="mode-selector" role="group">
-        <button
-          class="mode-btn"
-          onclick="setMode('flashcard', event)"
-          data-i18n="mode.flashcards"
-        >
-          Flashcards
-        </button>
-        <button
-          class="mode-btn active"
-          onclick="setMode('quiz', event)"
-          data-i18n="mode.quiz"
-        >
-          Quiz Mode
-        </button>
+        <button type="button" class="mode-btn" data-mode="flashcard" aria-pressed="false"
+          data-i18n="mode.flashcards">Flashcards</button>
+        <button type="button" class="mode-btn active" data-mode="quiz" aria-pressed="true"
+          data-i18n="mode.quiz">Quiz Mode</button>
       </div>
 
       <div class="progress-panel">
@@ -184,37 +136,34 @@
       </div>
 
       <!-- Flashcard Mode -->
-      <div id="flashcardMode" class="hidden" style="display: none">
+      <div id="flashcardMode" class="hidden">
         <div class="flashcard-container">
-          <div class="flashcard" id="flashcard">
-            <!-- Content will be populated dynamically by flashcard-mode.js -->
-          </div>
+          <!-- Filled by flashcard-mode.js; tap, Enter or Space turns it over -->
+          <div class="flashcard" id="flashcard" role="button" tabindex="0"></div>
         </div>
 
-        <div class="card-actions">
-          <button
-            class="action-btn dont-know-btn"
-            onclick="markCard(false)"
-            data-i18n="card.dontKnow"
-          >
-            I Don't Know...
+        <div class="card-actions" id="cardActions">
+          <button type="button" id="dontKnowBtn" class="action-btn dont-know-btn" data-i18n="card.dontKnow">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 2.5-2.5 3-2.5 5" />
+              <circle cx="12" cy="17" r="0.1" />
+            </svg>
+            <span>I Don't Know...</span>
           </button>
-          <button
-            class="action-btn know-btn"
-            onclick="markCard(true)"
-            data-i18n="card.know"
-          >
-            I Know This!
+          <button type="button" id="knowBtn" class="action-btn know-btn" data-i18n="card.know">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>I Know This!</span>
           </button>
         </div>
       </div>
 
       <!-- Quiz Mode -->
-      <div id="quizMode" style="display: block">
+      <div id="quizMode">
         <div class="quiz-mode">
-          <div class="quiz-question" id="quizQuestion">
-            <!-- Empty initially, will be populated by quiz -->
-          </div>
+          <div class="quiz-question" id="quizQuestion" aria-live="polite"></div>
           <div class="quiz-options" id="quizOptions">
             <!-- Options will be populated dynamically -->
             <div class="quiz-loading-spinner">
@@ -230,104 +179,15 @@
       </div>
 
       <div class="study-footer">
-        <button class="text-btn" onclick="resetProgress(this)" data-i18n="progress.reset">
-          Reset Progress
+        <button type="button" id="resetProgressBtn" class="text-btn" data-i18n="progress.reset">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span>Reset Progress</span>
         </button>
       </div>
     </div>
-
-    <script src="src/ui/i18n.js"></script>
-    <script type="module" src="src/core/cloud.js"></script>
-    <script src="src/ui/auth-gate.js"></script>
-    <script src="src/ui/icons.js"></script>
-    <script src="src/utils/analytics.js"></script>
-    <script src="src/utils/pwa-installer.js"></script>
-    <script src="src/ui/confirm-button.js"></script>
-    <script src="src/utils/reset-progress.js"></script>
-    <script src="src/utils/cache-manager.js"></script>
-    <script src="src/utils/version-sync.js"></script>
-    <script src="src/utils/shuffle-utils.js"></script>
-    <script src="src/core/core.js"></script>
-    <script src="src/features/flashcards/flashcard-mode.js"></script>
-    <script src="src/features/flashcards/quiz-mode.js"></script>
-    <script src="src/features/stats/stats-manager.js"></script>
-    <script src="src/ui/ui-helpers.js"></script>
-    <script src="src/utils/script.js"></script>
-    <script>
-      // Global setMode function for mode switching
-      window.setMode = function (mode, event) {
-        console.log(`Switching to mode: ${mode}`);
-
-        // Count switches the user makes (a click), not ones the app makes itself
-        if (event && window.Analytics) {
-          window.Analytics.trackModeSwitch(mode);
-        }
-
-        // Update button states
-        document
-          .querySelectorAll(".mode-btn")
-          .forEach((btn) => btn.classList.remove("active"));
-        if (event && event.target) {
-          event.target.classList.add("active");
-        }
-
-        // Show/hide mode containers
-        const flashcardMode = document.getElementById("flashcardMode");
-        const quizMode = document.getElementById("quizMode");
-
-        if (mode === "flashcard") {
-          flashcardMode.classList.remove("hidden");
-          flashcardMode.style.display = "block";
-          quizMode.classList.add("hidden");
-          quizMode.style.display = "none";
-
-          // Update app mode and show current card
-          if (window.vocabApp) {
-            window.vocabApp.currentMode = "flashcard";
-            window.vocabApp.updateCurrentCards();
-            if (window.vocabApp.flashcardMode) {
-              window.vocabApp.flashcardMode.showCurrentCard();
-            }
-          } else {
-            // If vocabApp isn't ready yet, set up a temporary message
-            const flashcard = document.getElementById("flashcard");
-            if (flashcard) {
-              flashcard.innerHTML = `
-                <div class="card-face card-front">
-                  <div class="spanish-word">${I18n.t("card.loading")}</div>
-                  <div class="category-badge">${I18n.t("card.wait")}</div>
-                </div>
-              `;
-            }
-          }
-        } else if (mode === "quiz") {
-          flashcardMode.classList.add("hidden");
-          flashcardMode.style.display = "none";
-          quizMode.classList.remove("hidden");
-          quizMode.style.display = "block";
-
-          // Update app mode - but don't automatically start quiz on page load
-          if (window.vocabApp) {
-            window.vocabApp.currentMode = "quiz";
-
-            // Only start quiz if this is a user-initiated mode switch (has event)
-            // or if there's no current question showing
-            if (
-              event ||
-              !document
-                .getElementById("quizQuestion")
-                .textContent.includes("What does")
-            ) {
-              if (window.vocabApp.quizMode) {
-                window.vocabApp.quizMode.startQuiz();
-              }
-            }
-          }
-        }
-      };
-
-      // Reset function is now handled by reset-progress.js utility
-    </script>
 
     <footer class="site-footer">
       <div class="footer-content">

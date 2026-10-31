@@ -1,39 +1,42 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.7.4";
+// Named after the app's version (src/core/version.js); test/app-shell.test.js checks they match
+// and that every file of the app is listed here.
+const CACHE_NAME = "flashcards-v1.8.0";
 const urlsToCache = [
-  // Main pages
+  // Pages
   "/",
   "/index.html",
   "/vocabulary-manager.html",
   "/privacy.html",
 
-  // Core application files
-  "/src/core/cloud.js",
-  "/src/core/core.js",
+  // Page entry points
+  "/src/study.js",
+  "/src/my-cards.js",
 
-  // UI files
+  // Core
+  "/src/core/cloud.js",
+  "/src/core/page.js",
+  "/src/core/version.js",
+
+  // UI
   "/src/ui/styles.css",
   "/src/ui/i18n.js",
   "/src/ui/auth-gate.js",
   "/src/ui/confirm-button.js",
-  "/src/ui/icons.js",
-  "/src/ui/ui-helpers.js",
 
   // Features
   "/src/features/flashcards/flashcard-mode.js",
   "/src/features/flashcards/quiz-mode.js",
-  "/src/features/stats/stats-manager.js",
+  "/src/features/study/message-card.js",
+  "/src/features/study/progress.js",
+  "/src/features/study/quiz-logic.js",
   "/src/features/vocabulary-manager/word-manager.js",
 
   // Utilities
   "/src/utils/analytics.js",
-  "/src/utils/pwa-installer.js",
-  "/src/utils/reset-progress.js",
-  "/src/utils/cache-manager.js",
-  "/src/utils/version-sync.js",
-  "/src/utils/shuffle-utils.js",
   "/src/utils/csv.js",
-  "/src/utils/script.js",
+  "/src/utils/pwa-installer.js",
+  "/src/utils/shuffle-utils.js",
 
   // PWA files
   "/manifest.json",
@@ -88,23 +91,10 @@ self.addEventListener("activate", (event) => {
       }),
       // Take control of all clients immediately
       self.clients.claim(),
-    ]).then(() => {
-      console.log("Service Worker: Activated and claiming clients");
-
-      // Notify all clients about the update
-      return self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({
-            type: "CACHE_UPDATED",
-            cacheName: CACHE_NAME,
-          });
-        });
-      });
-    })
+    ])
   );
 });
 
-// Fetch event - serve from cache with network fallback
 // Fetch: network first, cache as fallback, for every same-origin GET.
 //
 // Serving scripts from the cache first meant that, for one load after a deploy, a page fetched
@@ -140,66 +130,4 @@ self.addEventListener("fetch", (event) => {
         })
       )
   );
-});
-
-// Background sync for offline functionality
-self.addEventListener("sync", (event) => {
-  if (event.tag === "background-sync") {
-    event.waitUntil(doBackgroundSync());
-  }
-});
-
-// Message handler for communication with the app
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  } else if (event.data && event.data.type === "CLEAR_CACHE") {
-    event.waitUntil(
-      caches.delete(CACHE_NAME).then(() => {
-        console.log("Service Worker: Cache cleared on request");
-        return self.clients.matchAll().then((clients) => {
-          clients.forEach((client) => {
-            client.postMessage({
-              type: "CACHE_CLEARED",
-            });
-          });
-        });
-      })
-    );
-  }
-});
-
-function doBackgroundSync() {
-  // Here you can implement background sync logic
-  // For example, sync user progress when back online
-  return new Promise((resolve) => {
-    console.log("Service Worker: Background sync triggered");
-    resolve();
-  });
-}
-
-// Push notifications (optional - can be implemented later)
-self.addEventListener("push", (event) => {
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: "/icons/ios/192.png?v=2",
-      badge: "/icons/android/android-launchericon-72-72.png?v=2",
-      vibrate: [100, 50, 100],
-      data: {
-        dateOfArrival: Date.now(),
-        primaryKey: 1,
-      },
-    };
-
-    event.waitUntil(self.registration.showNotification(data.title, options));
-  }
-});
-
-// Handle notification clicks
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  event.waitUntil(clients.openWindow("/"));
 });

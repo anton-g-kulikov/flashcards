@@ -505,15 +505,23 @@ button.armed:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.no-cards-message h3 {
-  color: white;
-  font-size: 1.375rem;
-  margin-bottom: var(--spacing-2);
+/* Message cards ("All cards learned!", "A quiz needs at least 2 words"...) */
+.card-front.tone-warning {
+  background: var(--color-warning);
 }
 
-.no-cards-message p,
-.no-cards-message a {
-  color: white;
+.card-front.tone-success {
+  background: var(--color-success);
+}
+
+.card-front.tone-accent {
+  background: var(--color-accent);
+}
+
+.flashcard:focus-visible,
+.quiz-card:focus-visible .quiz-card-face {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .card-actions {
@@ -523,7 +531,6 @@ button.armed:hover {
   margin-top: var(--spacing-4);
 }
 
-/* flashcard-mode.js toggles this row with an inline display:flex, so size the buttons for both */
 .action-btn {
   flex: 1 1 0;
   width: 100%;
@@ -593,12 +600,24 @@ button.armed:hover {
   cursor: pointer;
 }
 
+/* A button that turns over to show the answer */
 .quiz-card {
   position: relative;
+  display: block;
   width: 100%;
   height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quiz-card[aria-disabled="true"] {
+  cursor: default;
 }
 
 .quiz-card.flipped {

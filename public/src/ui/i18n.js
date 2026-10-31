@@ -19,23 +19,18 @@ const TRANSLATIONS = {
     "auth.loadFailed": "Could not load your words.",
     "auth.loadSlow": "Loading your words is taking longer than usual.",
     "auth.retry": "Try again",
-    "study.subtitle": 'Your personal collection · <a href="vocabulary-manager.html">Add words</a>',
     "study.empty":
       'Nothing to study yet. <a href="vocabulary-manager.html">Add words, import a collection or switch one on</a> in My Cards.',
     "mode.flashcards": "Flashcards",
     "mode.quiz": "Quiz Mode",
     "progress.reset": "Reset Progress",
     "progress.resetConfirm": "Tap again to reset these words",
-    "progress.resetFailed": "There was an error resetting progress. Please try again.",
     "stats.cards": "Cards",
-    "stats.inCollection": "In your collection",
     "stats.known": "Known",
     "stats.unknown": "Unknown",
     "card.dontKnow": "I Don't Know...",
     "card.know": "I Know This!",
     "card.noTranslation": "No translation yet",
-    "card.loading": "Loading cards...",
-    "card.wait": "Please wait",
     "flash.complete.badge": "🎉 Congratulations!",
     "flash.complete.title": "All cards learned!",
     "flash.complete.next": "What would you like to do next?",
@@ -68,14 +63,10 @@ const TRANSLATIONS = {
     "pwa.install": "Install App",
     "words.title": "My Cards",
     "words.back": "Back to Study",
-    "words.addTitle": "Add a Word",
     "words.wordPlaceholder": "Word",
     "words.translationPlaceholder": "Translation",
     "words.add": "Add",
-    "words.collection": "My Collection",
-    "words.wordColumn": "Word",
     "words.translationColumn": "Translation",
-    "words.addTranslation": "Add a translation",
     "words.delete": "Delete",
     "words.deleteConfirm": "Sure?",
     "words.empty": "No words yet. Add your first word above.",
@@ -87,8 +78,6 @@ const TRANSLATIONS = {
     "words.deleted": "Deleted “{word}”",
     "words.deleteFailed": "Could not delete “{word}”: {error}",
     "collections.default": "My words",
-    "collections.all": "All words",
-    "collections.label": "Collection",
     "collections.title": "Collections",
     "collections.activeHint": "Study uses the collections that are switched on.",
     "collections.activeLabel": "Study “{name}”",
@@ -113,6 +102,8 @@ const TRANSLATIONS = {
     "collections.importing": "Importing “{name}” ({count} words)…",
     "collections.importFailed": "Could not import: {error}",
     "collections.importEmpty": "No words found in that file",
+    "collections.importSkipped": "Skipped {count} rows with no word or a repeated word.",
+    "collections.importTruncated": "Only the first {max} words fit; {count} more were left out.",
     "collections.exportEmpty": "This collection is empty — nothing to export",
   },
 
@@ -129,23 +120,18 @@ const TRANSLATIONS = {
     "auth.loadFailed": "Не удалось загрузить слова.",
     "auth.loadSlow": "Слова загружаются дольше обычного.",
     "auth.retry": "Попробовать снова",
-    "study.subtitle": 'Ваша личная коллекция · <a href="vocabulary-manager.html">Добавить слова</a>',
     "study.empty":
       'Пока нечего учить. <a href="vocabulary-manager.html">Добавьте слова, импортируйте или включите коллекцию</a> в разделе «Мои карточки».',
     "mode.flashcards": "Карточки",
     "mode.quiz": "Тест",
     "progress.reset": "Сбросить прогресс",
     "progress.resetConfirm": "Нажмите ещё раз, чтобы сбросить эти слова",
-    "progress.resetFailed": "Не удалось сбросить прогресс. Попробуйте ещё раз.",
     "stats.cards": "Карточки",
-    "stats.inCollection": "В вашей коллекции",
     "stats.known": "Знаю",
     "stats.unknown": "Не знаю",
     "card.dontKnow": "Не знаю...",
     "card.know": "Знаю!",
     "card.noTranslation": "Перевода пока нет",
-    "card.loading": "Загрузка карточек...",
-    "card.wait": "Подождите",
     "flash.complete.badge": "🎉 Поздравляем!",
     "flash.complete.title": "Все карточки выучены!",
     "flash.complete.next": "Что дальше?",
@@ -179,14 +165,10 @@ const TRANSLATIONS = {
     "pwa.install": "Установить приложение",
     "words.title": "Мои карточки",
     "words.back": "К занятиям",
-    "words.addTitle": "Добавить слово",
     "words.wordPlaceholder": "Слово",
     "words.translationPlaceholder": "Перевод",
     "words.add": "Добавить",
-    "words.collection": "Моя коллекция",
-    "words.wordColumn": "Слово",
     "words.translationColumn": "Перевод",
-    "words.addTranslation": "Добавьте перевод",
     "words.delete": "Удалить",
     "words.deleteConfirm": "Точно?",
     "words.empty": "Слов пока нет. Добавьте первое слово выше.",
@@ -198,8 +180,6 @@ const TRANSLATIONS = {
     "words.deleted": "Удалено: «{word}»",
     "words.deleteFailed": "Не удалось удалить «{word}»: {error}",
     "collections.default": "Мои слова",
-    "collections.all": "Все слова",
-    "collections.label": "Коллекция",
     "collections.title": "Коллекции",
     "collections.activeHint": "Для занятий используются включённые коллекции.",
     "collections.activeLabel": "Учить «{name}»",
@@ -224,6 +204,8 @@ const TRANSLATIONS = {
     "collections.importing": "Импортируем «{name}» (слов: {count})…",
     "collections.importFailed": "Не удалось импортировать: {error}",
     "collections.importEmpty": "В файле не найдено слов",
+    "collections.importSkipped": "Пропущено строк без слова или с повтором: {count}.",
+    "collections.importTruncated": "Поместились только первые {max} слов; ещё {count} не вошли.",
     "collections.exportEmpty": "Коллекция пуста — нечего экспортировать",
   },
 
@@ -240,23 +222,18 @@ const TRANSLATIONS = {
     "auth.loadFailed": "No se pudieron cargar tus palabras.",
     "auth.loadSlow": "Tus palabras están tardando más de lo normal en cargar.",
     "auth.retry": "Reintentar",
-    "study.subtitle": 'Tu colección personal · <a href="vocabulary-manager.html">Añadir palabras</a>',
     "study.empty":
       'Aún no hay nada que estudiar. <a href="vocabulary-manager.html">Añade palabras, importa o activa una colección</a> en Mis tarjetas.',
     "mode.flashcards": "Tarjetas",
     "mode.quiz": "Test",
     "progress.reset": "Reiniciar progreso",
     "progress.resetConfirm": "Pulsa otra vez para reiniciar estas palabras",
-    "progress.resetFailed": "No se pudo reiniciar el progreso. Inténtalo de nuevo.",
     "stats.cards": "Tarjetas",
-    "stats.inCollection": "En tu colección",
     "stats.known": "Sabidas",
     "stats.unknown": "Por aprender",
     "card.dontKnow": "No la sé...",
     "card.know": "¡La sé!",
     "card.noTranslation": "Aún sin traducción",
-    "card.loading": "Cargando tarjetas...",
-    "card.wait": "Espera un momento",
     "flash.complete.badge": "🎉 ¡Enhorabuena!",
     "flash.complete.title": "¡Has aprendido todas las tarjetas!",
     "flash.complete.next": "¿Qué quieres hacer ahora?",
@@ -290,14 +267,10 @@ const TRANSLATIONS = {
     "pwa.install": "Instalar la app",
     "words.title": "Mis tarjetas",
     "words.back": "Volver a estudiar",
-    "words.addTitle": "Añadir una palabra",
     "words.wordPlaceholder": "Palabra",
     "words.translationPlaceholder": "Traducción",
     "words.add": "Añadir",
-    "words.collection": "Mi colección",
-    "words.wordColumn": "Palabra",
     "words.translationColumn": "Traducción",
-    "words.addTranslation": "Añade una traducción",
     "words.delete": "Eliminar",
     "words.deleteConfirm": "¿Seguro?",
     "words.empty": "Aún no hay palabras. Añade la primera arriba.",
@@ -309,8 +282,6 @@ const TRANSLATIONS = {
     "words.deleted": "Eliminada: «{word}»",
     "words.deleteFailed": "No se pudo eliminar «{word}»: {error}",
     "collections.default": "Mis palabras",
-    "collections.all": "Todas las palabras",
-    "collections.label": "Colección",
     "collections.title": "Colecciones",
     "collections.activeHint": "Para estudiar se usan las colecciones activadas.",
     "collections.activeLabel": "Estudiar «{name}»",
@@ -335,6 +306,8 @@ const TRANSLATIONS = {
     "collections.importing": "Importando «{name}» ({count} palabras)…",
     "collections.importFailed": "No se pudo importar: {error}",
     "collections.importEmpty": "No se encontraron palabras en el archivo",
+    "collections.importSkipped": "Se omitieron {count} filas sin palabra o con una palabra repetida.",
+    "collections.importTruncated": "Solo caben las primeras {max} palabras; quedaron fuera {count} más.",
     "collections.exportEmpty": "La colección está vacía: no hay nada que exportar",
   },
 };
@@ -346,7 +319,7 @@ const LANGUAGES = [
 ];
 const STORAGE_KEY = "flashcards-ui-language";
 
-class I18n {
+export class I18n {
   static lang = I18n.initialLanguage();
 
   static initialLanguage() {
@@ -394,7 +367,7 @@ class I18n {
     document.title = I18n.t(document.body?.classList.contains("vocab-manager-page") ? "words.title" : "app.titleLong");
 
     root.querySelectorAll("[data-i18n]").forEach((el) => {
-      // Buttons that icons.js decorated keep their icon; the label sits in the inner span
+      // Buttons with an icon keep it; their label sits in the inner span
       const target = el.querySelector(":scope > span") || el;
       target.textContent = I18n.t(el.dataset.i18n);
     });
@@ -447,6 +420,5 @@ class I18n {
   }
 }
 
-window.I18n = I18n;
+// Modules run once the page is parsed, so the static text can be translated straight away
 I18n.apply();
-document.addEventListener("DOMContentLoaded", () => I18n.apply());

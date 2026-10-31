@@ -2,6 +2,11 @@
 // switches the collection on or off for study, renames, exports or deletes it; its body adds
 // words one at a time and lets you fix a translation or delete a word. Collections can also be
 // created and imported from CSV (a file or a starter collection).
+import { Cloud } from "../../core/cloud.js";
+import { I18n } from "../../ui/i18n.js";
+import { AuthGate } from "../../ui/auth-gate.js";
+import { confirmOnSecondTap } from "../../ui/confirm-button.js";
+import { MAX_ROWS, fileName, fromCards, readCards } from "../../utils/csv.js";
 
 const ICONS = {
   chevron: '<polyline points="9 6 15 12 9 18"/>',
@@ -60,8 +65,8 @@ class WordManager {
 
   async load() {
     const [collections, cards] = await Promise.all([
-      window.Cloud.loadCollections(I18n.t("collections.default")),
-      window.Cloud.loadCards(),
+      Cloud.loadCollections(I18n.t("collections.default")),
+      Cloud.loadCards(),
     ]);
     this.collections = collections;
     this.cards = cards;
@@ -141,7 +146,7 @@ class WordManager {
     const name = this.nameInput.value.trim();
     if (!name) return;
     try {
-      const id = await window.Cloud.createCollection(name);
+      const id = await Cloud.createCollection(name);
       this.collections.push({ id, name, active: true });
       this.sortCollections();
       this.closeNameForm();
@@ -159,7 +164,7 @@ class WordManager {
       return;
     }
     try {
-      await window.Cloud.renameCollection(collection.id, name);
+      await Cloud.renameCollection(collection.id, name);
       collection.name = name;
       this.renaming = null;
       this.sortCollections();
@@ -178,7 +183,7 @@ class WordManager {
   async setActive(collection, active, checkbox) {
     collection.active = active;
     try {
-      await window.Cloud.setCollectionActive(collection.id, active);
+      await Cloud.setCollectionActive(collection.id, active);
     } catch (error) {
       collection.active = !active;
       checkbox.checked = !active;
@@ -187,11 +192,11 @@ class WordManager {
   }
 
   async deleteCollection(collection, button) {
-    if (!window.confirmOnSecondTap(button, I18n.t("collections.deleteConfirm"))) return;
+    if (!confirmOnSecondTap(button, I18n.t("collections.deleteConfirm"))) return;
 
     const cardIds = this.cardsIn(collection.id).map((card) => card.id);
     try {
-      await window.Cloud.deleteCollection(collection.id, cardIds);
+      await Cloud.deleteCollection(collection.id, cardIds);
     } catch (error) {
       this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
       return;
@@ -203,7 +208,7 @@ class WordManager {
     this.saveOpenState();
     if (this.collections.length === 0) {
       // There is always somewhere to put words: this recreates the default collection
-      this.collections = await window.Cloud.loadCollections(I18n.t("collections.default"));
+      this.collections = await Cloud.loadCollections(I18n.t("collections.default"));
     }
     this.render();
     this.showMessage(I18n.t("collections.deleted", { name: collection.name }), "success");
@@ -215,10 +220,10 @@ class WordManager {
       this.showMessage(I18n.t("collections.exportEmpty"), "info");
       return;
     }
-    const blob = new Blob([window.CsvUtils.fromCards(cards)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([fromCards(cards)], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = window.CsvUtils.fileName(collection.name);
+    link.download = fileName(collection.name);
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -264,7 +269,7 @@ class WordManager {
     try {
       const response = await fetch(`collections/${entry.file}`);
       if (!response.ok) throw new Error(response.statusText);
-      await this.importCards(entry.name, window.CsvUtils.toCards(await response.text()));
+      await this.importCards(entry.name, readCards(await response.text()));
     } catch (error) {
       this.showMessage(I18n.t("collections.importFailed", { error: error.message }), "error");
     } finally {
@@ -277,30 +282,34 @@ class WordManager {
     this.fileInput.value = "";
     if (!file) return;
     try {
-      const cards = window.CsvUtils.toCards(await file.text());
-      await this.importCards(file.name.replace(/\.csv$/i, ""), cards);
+      await this.importCards(file.name.replace(/\.csv$/i, ""), readCards(await file.text()));
     } catch (error) {
       this.showMessage(I18n.t("collections.importFailed", { error: error.message }), "error");
     }
   }
 
-  // An import always becomes a new collection, so nothing already there is touched
-  async importCards(name, cards) {
+  // An import always becomes a new collection, so nothing already there is touched. `skipped` and
+  // `truncated` count the rows left out (see readCards), so the user knows the file wasn't taken
+  // in whole.
+  async importCards(name, { cards, skipped, truncated }) {
     if (cards.length === 0) {
       this.showMessage(I18n.t("collections.importEmpty"), "error");
       return;
     }
     // Saving waits for the server, so say something straight away
     this.showMessage(I18n.t("collections.importing", { name, count: cards.length }), "info", 0);
-    const id = await window.Cloud.createCollection(name);
-    const added = await window.Cloud.importCards(id, cards);
+    const id = await Cloud.createCollection(name);
+    const added = await Cloud.importCards(id, cards);
     this.collections.push({ id, name, active: true });
     this.cards.push(...added);
     this.sortCards();
     this.sortCollections();
     this.importPanel.classList.add("hidden");
     this.reveal(id);
-    this.showMessage(I18n.t("collections.imported", { name, count: added.length }), "success");
+    let report = I18n.t("collections.imported", { name, count: added.length });
+    if (skipped) report += " " + I18n.t("collections.importSkipped", { count: skipped });
+    if (truncated) report += " " + I18n.t("collections.importTruncated", { max: MAX_ROWS, count: truncated });
+    this.showMessage(report, "success", skipped || truncated ? 8000 : 3000);
   }
 
   // --- Words ---
@@ -323,7 +332,7 @@ class WordManager {
     submit.disabled = true;
     try {
       const card = { word, translation, collectionId: collection.id };
-      const id = await window.Cloud.addCard(card);
+      const id = await Cloud.addCard(card);
       this.cards.push({ id, ...card });
       this.sortCards();
     } catch (error) {
@@ -342,7 +351,7 @@ class WordManager {
     if (translation === card.translation) return;
 
     try {
-      await window.Cloud.updateCard(card.id, { ...card, translation });
+      await Cloud.updateCard(card.id, { ...card, translation });
       card.translation = translation;
       this.showMessage(I18n.t("words.saved", { word: card.word }), "success");
     } catch (error) {
@@ -355,10 +364,10 @@ class WordManager {
   }
 
   async deleteWord(card, button) {
-    if (!window.confirmOnSecondTap(button, I18n.t("words.deleteConfirm"))) return;
+    if (!confirmOnSecondTap(button, I18n.t("words.deleteConfirm"))) return;
 
     try {
-      await window.Cloud.deleteCard(card.id);
+      await Cloud.deleteCard(card.id);
     } catch (error) {
       this.showMessage(
         I18n.t("words.deleteFailed", { word: card.word, error: error.message }),
@@ -566,7 +575,4 @@ class WordManager {
   }
 }
 
-AuthGate.onSignedIn((user) => {
-  window.wordManager = new WordManager(user);
-  return window.wordManager.load();
-});
+AuthGate.onSignedIn((user) => new WordManager(user).load());

@@ -3,7 +3,7 @@
 // which silently cancels the action.
 //
 // Returns true when this click confirms the action; otherwise arms the button for 3 seconds.
-function confirmOnSecondTap(button, prompt = "Tap again to confirm") {
+export function confirmOnSecondTap(button, prompt = "Tap again to confirm") {
   if (button.dataset.armed === "true") {
     disarmButton(button);
     return true;
@@ -23,5 +23,3 @@ function disarmButton(button) {
   button.innerHTML = button.dataset.originalHtml;
   button.classList.remove("armed");
 }
-
-window.confirmOnSecondTap = confirmOnSecondTap;
