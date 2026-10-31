@@ -147,6 +147,11 @@ describe("progress", () => {
     await assertFails(setDoc(doc(as("bob"), "users/alice/meta/progress"), { known: [] }));
   });
 
+  it("caps the history at 20,000 cards, like the known list", async () => {
+    const big = Object.fromEntries(Array.from({ length: 20001 }, (_, i) => [`c${i}`, 1]));
+    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], history: big }));
+  });
+
   it("rejects progress with unexpected fields", async () => {
     await assertFails(
       setDoc(doc(as("alice"), "users/alice/meta/progress"), { known: [], score: 10 })

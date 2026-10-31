@@ -258,6 +258,11 @@
       window.setMode = function (mode, event) {
         console.log(`Switching to mode: ${mode}`);
 
+        // Count switches the user makes (a click), not ones the app makes itself
+        if (event && window.Analytics) {
+          window.Analytics.trackModeSwitch(mode);
+        }
+
         // Update button states
         document
           .querySelectorAll(".mode-btn")

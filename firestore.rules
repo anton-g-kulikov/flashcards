@@ -39,7 +39,7 @@ service cloud.firestore {
     function isProgress(d) {
       return d.keys().hasOnly(['known', 'history', 'updatedAt'])
         && (!('known' in d) || (d.known is list && d.known.size() <= 20000))
-        && (!('history' in d) || d.history is map)
+        && (!('history' in d) || (d.history is map && d.history.size() <= 20000))
         && (!('updatedAt' in d) || d.updatedAt is timestamp);
     }
 

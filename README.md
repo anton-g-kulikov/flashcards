@@ -2,7 +2,8 @@
 
 A personal flashcards PWA for learning vocabulary on your phone. Sign in with Google, organise
 words into collections, and learn them with flashcards and quizzes. Your collections and progress
-sync across devices and keep working offline.
+sync across devices, and the app opens even without a connection (your words load once you're
+back online).
 
 **Try it here:** https://yourflashcards.app
 
