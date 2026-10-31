@@ -6,7 +6,8 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 
 | Case | Expectation |
 | --- | --- |
-| A card document outside a collection (`users/{uid}/cards/*`), even the owner's | denied |
+| The old card path (`users/{uid}/cards`): owner reads it (empty; older cached versions query it on load) | allowed |
+| The old card path: anyone writes or deletes, or another user reads | denied |
 | Collection with up to 5,000 cards in its `cards` list | allowed; 5,001, or `cards` not a list, denied |
 | Owner saves and reads own progress | allowed |
 | Another user reads or writes someone's progress | denied |

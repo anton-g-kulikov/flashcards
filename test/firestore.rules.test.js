@@ -9,10 +9,12 @@ import {
 } from "@firebase/rules-unit-testing";
 import {
   Timestamp,
+  collection,
   deleteDoc,
   deleteField,
   doc,
   getDoc,
+  getDocs,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -37,11 +39,16 @@ beforeEach(async () => {
 
 const as = (uid) => env.authenticatedContext(uid).firestore();
 
-describe("cards outside collections", () => {
-  it("can't be read or written, even by their owner (cards live in their collection)", async () => {
+describe("cards outside collections (the layout before 1.9.0)", () => {
+  it("can be read by their owner, so an older cached version still loads, but not written", async () => {
     const db = as("alice");
-    await assertFails(getDoc(doc(db, "users/alice/cards/c1")));
+    await assertSucceeds(getDocs(collection(db, "users/alice/cards")));
     await assertFails(setDoc(doc(db, "users/alice/cards/c1"), { word: "abrir" }));
+    await assertFails(deleteDoc(doc(db, "users/alice/cards/c1")));
+  });
+
+  it("stay closed to other users", async () => {
+    await assertFails(getDocs(collection(as("bob"), "users/alice/cards")));
   });
 });
 

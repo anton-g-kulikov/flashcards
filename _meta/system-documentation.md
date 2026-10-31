@@ -43,7 +43,8 @@ clock.
 Until 1.9.0 each card was a document of its own (`users/{uid}/cards`), and until 1.11.0
 progress was `{ known, history }`. The app migrated both on load; on 1 November 2026 the last
 remaining data was migrated server-side, and the migration code and the rules for the old layout
-were removed.
+were removed, except that the owner may still read the (empty) old card path, which versions up
+to 1.12.1 query on load.
 
 A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
 1 MiB per document), so loading everything costs one read per collection, an import is a single
@@ -97,6 +98,12 @@ fetches new ones when `CACHE_NAME` changes. So every deploy that changes an app 
 live ones under the same version. Installed apps pick a new version up the next time they open
 (the current session finishes on the version it started with, so a page never mixes files from
 two deploys).
+
+Because of that, **Firestore rules must keep accepting what the previous app version does**:
+rules deploy at once, while an installed app runs its old version for one more session. 1.13.0
+broke this by denying the old card path that 1.12.1 still read on load ("Missing or insufficient
+permissions" on the first open after the deploy); 1.13.1 lets the owner read that empty path
+again. Tighten rules one release after the app stops needing what they remove.
 
 The in-app browser of the Claude desktop app can't fetch service-worker scripts from the local
 emulator (127.0.0.1); to try service-worker changes, deploy a preview channel:
