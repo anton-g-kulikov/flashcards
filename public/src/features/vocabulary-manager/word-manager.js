@@ -7,7 +7,7 @@ class WordManager {
     this.wordInput = document.getElementById("newWord");
     this.translationInput = document.getElementById("newTranslation");
     this.addButton = document.getElementById("addWordBtn");
-    this.tableBody = document.getElementById("vocabTableBody");
+    this.list = document.getElementById("wordList");
 
     document.addEventListener("i18n-changed", () => this.render());
 
@@ -90,42 +90,51 @@ class WordManager {
 
   render() {
     document.getElementById("wordCount").textContent = `(${this.cards.length})`;
-    this.tableBody.innerHTML = "";
+    this.list.innerHTML = "";
 
     if (this.cards.length === 0) {
-      this.tableBody.innerHTML = `<tr><td colspan="3" class="empty-table-message">${I18n.t(
-        "words.empty"
-      )}</td></tr>`;
+      const empty = document.createElement("li");
+      empty.className = "word-list-empty";
+      empty.textContent = I18n.t("words.empty");
+      this.list.appendChild(empty);
       return;
     }
 
     this.cards.forEach((card) => {
-      const row = document.createElement("tr");
+      const item = document.createElement("li");
+      item.className = "word-item";
 
-      const wordCell = document.createElement("td");
-      wordCell.textContent = card.word;
+      const word = document.createElement("span");
+      word.className = "word-item-word";
+      word.textContent = card.word;
 
-      const translationCell = document.createElement("td");
       const input = document.createElement("input");
       input.type = "text";
-      input.className = "translation-input";
+      input.className = "word-item-translation";
       input.lang = "ru";
       input.maxLength = 500;
-      input.placeholder = I18n.t("words.addTranslation");
+      input.placeholder = I18n.t("words.translationPlaceholder");
+      input.setAttribute("aria-label", I18n.t("words.translationColumn"));
       input.value = card.translation;
       input.addEventListener("change", () => this.updateTranslation(card, input));
-      translationCell.appendChild(input);
 
-      const actionsCell = document.createElement("td");
-      actionsCell.className = "row-actions";
       const deleteButton = document.createElement("button");
-      deleteButton.className = "delete-btn";
-      deleteButton.textContent = I18n.t("words.delete");
+      deleteButton.type = "button";
+      deleteButton.className = "word-item-delete";
+      deleteButton.title = I18n.t("words.delete");
+      deleteButton.setAttribute("aria-label", `${I18n.t("words.delete")}: ${card.word}`);
+      deleteButton.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>`;
       deleteButton.addEventListener("click", () => this.deleteWord(card, deleteButton));
-      actionsCell.appendChild(deleteButton);
 
-      row.append(wordCell, translationCell, actionsCell);
-      this.tableBody.appendChild(row);
+      item.append(word, input, deleteButton);
+      this.list.appendChild(item);
     });
   }
 

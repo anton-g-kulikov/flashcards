@@ -2456,3 +2456,107 @@ button.armed:hover {
   width: 17px;
   height: 17px;
 }
+
+/* === My Words: the collection list === */
+.word-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.word-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.word-item:last-child {
+  border-bottom: none;
+}
+
+.word-item-word {
+  flex: 0 1 40%;
+  min-width: 0;
+  font-family: "DM Serif Display", serif;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  overflow-wrap: anywhere;
+}
+
+/* Reads as text until hovered or edited */
+.word-item-translation {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: inherit;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2) var(--spacing-3);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.word-item-translation::placeholder {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.word-item-translation:hover {
+  border-color: var(--color-border);
+}
+
+.word-item-translation:focus {
+  outline: none;
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+}
+
+.word-item-delete {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  box-shadow: none;
+  color: var(--color-muted);
+}
+
+.word-item-delete svg {
+  width: 18px;
+  height: 18px;
+}
+
+.word-item-delete:hover {
+  background: var(--color-card-3);
+  color: var(--color-error);
+}
+
+/* Armed for confirmation: the icon gives way to a short label */
+.word-item-delete.armed,
+.word-item-delete.armed:hover {
+  width: auto;
+  padding: 0 var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.word-list-empty {
+  padding: var(--spacing-4) 0;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .word-item-word {
+    font-size: 1.125rem;
+  }
+}

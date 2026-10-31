@@ -35,86 +35,19 @@
 
     <!-- PWA Service Worker Registration -->
     <script>
-      // Only register service worker if served over HTTP/HTTPS
+      // Registers the service worker for offline use. It never reloads the page: pages are
+      // always fetched from the network first, and a new worker clears the old cache when it
+      // activates, so the next navigation picks up an update by itself. (Reloading on
+      // "controllerchange" used to refresh every first visit, and again after each deploy.)
       if (
         "serviceWorker" in navigator &&
         (location.protocol === "http:" || location.protocol === "https:")
       ) {
         window.addEventListener("load", function () {
-          navigator.serviceWorker
-            .register("/sw.js")
-            .then(function (registration) {
-              console.log(
-                "ServiceWorker registration successful with scope: ",
-                registration.scope
-              );
-
-              // Check for updates only on initial load
-              registration.update().catch((err) => {
-                console.log("Service worker update check failed:", err);
-              });
-
-              // Handle updates
-              registration.addEventListener("updatefound", function () {
-                const newWorker = registration.installing;
-                console.log("New service worker found, installing...");
-
-                newWorker.addEventListener("statechange", function () {
-                  if (newWorker.state === "installed") {
-                    if (navigator.serviceWorker.controller) {
-                      // New update available
-                      console.log(
-                        "New content is available; prompting for refresh."
-                      );
-
-                      // Show update notification
-                      if (
-                        confirm(
-                          "A new version is available! Would you like to refresh to get the latest features and vocabulary?"
-                        )
-                      ) {
-                        // Tell the new service worker to skip waiting
-                        newWorker.postMessage({ type: "SKIP_WAITING" });
-
-                        // Reload the page
-                        window.location.reload();
-                      }
-                    } else {
-                      // Content is cached for the first time
-                      console.log("Content is cached for offline use.");
-                    }
-                  }
-                });
-              });
-
-              // Listen for controlling changes
-              navigator.serviceWorker.addEventListener(
-                "controllerchange",
-                () => {
-                  console.log(
-                    "Service worker controller changed, reloading..."
-                  );
-                  window.location.reload();
-                }
-              );
-
-              // Listen for messages from service worker
-              navigator.serviceWorker.addEventListener("message", (event) => {
-                if (event.data && event.data.type === "CACHE_UPDATED") {
-                  console.log("Cache updated to:", event.data.cacheName);
-                } else if (event.data && event.data.type === "CACHE_CLEARED") {
-                  console.log("Cache cleared successfully");
-                }
-              });
-            })
-            .catch(function (err) {
-              console.log("ServiceWorker registration failed: ", err);
-            });
+          navigator.serviceWorker.register("/sw.js").catch(function (err) {
+            console.log("ServiceWorker registration failed: ", err);
+          });
         });
-      } else if (location.protocol === "file:") {
-        console.info(
-          "PWA features disabled: Please serve this app over HTTP/HTTPS for full PWA functionality. Run 'python3 -m http.server 8082' and visit http://localhost:8082"
-        );
       }
     </script>
   </head>
