@@ -32,11 +32,9 @@ import {
 // collection is firestore.rules, enforced server-side against the user's uid.
 const firebaseConfig = {
   apiKey: "AIzaSyAWbQFwCgHbAnrxchnv-2pbF4X09zAFIs4",
-  // On Firebase Hosting the sign-in handler is served from the app's own domain, which keeps the
-  // redirect fallback same-origin (browsers block third-party storage on firebaseapp.com).
-  authDomain: location.hostname.endsWith(".web.app")
-    ? location.host
-    : "flashcards-ak-app.firebaseapp.com",
+  // Google only accepts sign-in returns at the firebaseapp.com handler registered for this
+  // project's OAuth client; any other domain fails with redirect_uri_mismatch.
+  authDomain: "flashcards-ak-app.firebaseapp.com",
   projectId: "flashcards-ak-app",
   storageBucket: "flashcards-ak-app.firebasestorage.app",
   messagingSenderId: "523757398504",
