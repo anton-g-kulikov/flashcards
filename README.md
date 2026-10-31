@@ -14,6 +14,8 @@ their mechanics are the same; the shared DGT vocabulary became a per-user collec
   known; Reset Progress starts over. Only words with a translation appear in quizzes.
 - **My Words** (`vocabulary-manager.html`): add a word and, optionally, its translation. The list
   below lets you add or fix a translation later, or delete a word.
+- **Interface language**: EN / RU / ES switcher in the header and on the sign-in screen. The first
+  visit follows the browser's language; the choice is remembered on the device.
 
 ## How it works
 
@@ -22,6 +24,8 @@ their mechanics are the same; the shared DGT vocabulary became a per-user collec
 | Static app, no build step | `public/` (served as-is by Firebase Hosting) |
 | Firebase access (Google sign-in, Firestore) | `public/src/core/cloud.js` — ES module loaded from Google's CDN |
 | Sign-in screen and account chip | `public/src/ui/auth-gate.js` |
+| Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js` — `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
+| App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it |
 | Study app (modes, stats, progress) | `public/src/core/core.js`, `public/src/features/flashcards/` |
 | Adding and editing words | `public/src/features/vocabulary-manager/word-manager.js` |
 | Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |

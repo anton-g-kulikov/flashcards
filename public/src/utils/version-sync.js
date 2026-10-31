@@ -51,7 +51,7 @@ class VersionSync {
         // Update footer version display
         const footerVersion = document.getElementById("footer-version");
         if (footerVersion) {
-          footerVersion.textContent = `Version: ${version}`;
+          footerVersion.textContent = I18n.t("footer.version", { version });
         }
 
         // Update any version badges

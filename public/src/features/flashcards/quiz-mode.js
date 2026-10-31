@@ -50,11 +50,11 @@ class QuizMode {
           <div class="flashcard-container" style="max-width: 500px; margin: 0 auto;">
             <div class="flashcard">
               <div class="card-face card-front" style="background: var(--color-warning); color: white;">
-                <div class="spanish-word">A quiz needs at least 2 unknown words with a translation.</div>
+                <div class="spanish-word">${I18n.t("quiz.needTwo.title")}</div>
               </div>
               <div class="card-face card-back">
-                <div class="translation">You have ${unknownCards.length} right now.</div>
-                <div class="example">Add words or translations in My Words, or reset your progress to review known words.</div>
+                <div class="translation">${I18n.t("quiz.needTwo.count", { count: unknownCards.length })}</div>
+                <div class="example">${I18n.t("quiz.needTwo.hint")}</div>
               </div>
             </div>
           </div>
@@ -225,12 +225,12 @@ class QuizMode {
           <div class="flashcard-container" style="max-width: 500px; margin: 0 auto;">
             <div class="flashcard">
               <div class="card-face card-front" style="background: var(--color-warning); color: white;">
-                <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">⚠️ Insufficient unique cards for quiz</div>
-                <div class="spanish-word">Not enough unique cards available</div>
+                <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">${I18n.t("quiz.notUnique.badge")}</div>
+                <div class="spanish-word">${I18n.t("quiz.notUnique.title")}</div>
               </div>
               <div class="card-face card-back">
-                <div class="translation">Switch to flashcard mode or add more vocabulary.</div>
-                <div class="example">Add more words with different translations in My Words.</div>
+                <div class="translation">${I18n.t("quiz.notUnique.next")}</div>
+                <div class="example">${I18n.t("quiz.notUnique.hint")}</div>
               </div>
             </div>
           </div>
@@ -257,8 +257,9 @@ class QuizMode {
       // Clear existing content
       quizQuestion.innerHTML = "";
 
-      // Create question text with Spanish word properly styled
-      const questionText = document.createTextNode('What does "');
+      // Create question text with the word properly styled
+      const [questionStart, questionEnd] = I18n.t("quiz.question").split("{word}");
+      const questionText = document.createTextNode(questionStart);
       quizQuestion.appendChild(questionText);
 
       // Create span for the Spanish word with appropriate class
@@ -272,7 +273,7 @@ class QuizMode {
       quizQuestion.appendChild(spanishWordSpan);
 
       // Add the rest of the question
-      const endText = document.createTextNode('" mean?');
+      const endText = document.createTextNode(questionEnd);
       quizQuestion.appendChild(endText);
 
       // Debug log to help troubleshoot
@@ -492,12 +493,12 @@ class QuizMode {
         <div class="flashcard-container" style="max-width: 500px; margin: 0 auto;">
           <div class="flashcard completion-card">
             <div class="card-face card-front" style="background: var(--color-success); color: white;">
-              <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">🎉 Quiz Complete!</div>
-              <div class="spanish-word">¡Felicidades!</div>
+              <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">${I18n.t("quiz.complete.badge")}</div>
+              <div class="spanish-word">${I18n.t("quiz.complete.title")}</div>
             </div>
             <div class="card-face card-back">
-              <div class="translation">You know all your words!</div>
-              <div class="example">Add new words in My Words, or reset your progress to review them again.</div>
+              <div class="translation">${I18n.t("quiz.complete.next")}</div>
+              <div class="example">${I18n.t("quiz.complete.hint")}</div>
             </div>
           </div>
         </div>
@@ -532,12 +533,12 @@ class QuizMode {
         <div class="flashcard-container" style="max-width: 500px; margin: 0 auto;">
           <div class="flashcard transition-card">
             <div class="card-face card-front" style="background: var(--color-accent); color: white;">
-              <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">🎉 Almost done!</div>
-              <div class="spanish-word">One card remaining</div>
+              <div class="category-badge" style="background: rgba(255,255,255,0.2); color: white;">${I18n.t("quiz.last.badge")}</div>
+              <div class="spanish-word">${I18n.t("quiz.last.title")}</div>
             </div>
             <div class="card-face card-back">
-              <div class="translation">Switching to flashcard mode...</div>
-              <div class="example">Perfect for reviewing the last word: "${lastCard.word}"</div>
+              <div class="translation">${I18n.t("quiz.last.next")}</div>
+              <div class="example">${I18n.t("quiz.last.hint", { word: I18n.escape(lastCard.word) })}</div>
             </div>
           </div>
         </div>

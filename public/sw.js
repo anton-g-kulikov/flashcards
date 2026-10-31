@@ -1,5 +1,5 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.0.1";
+const CACHE_NAME = "flashcards-v1.1.0";
 const urlsToCache = [
   // Main pages
   "/",
@@ -12,6 +12,7 @@ const urlsToCache = [
 
   // UI files
   "/src/ui/styles.css",
+  "/src/ui/i18n.js",
   "/src/ui/auth-gate.js",
   "/src/ui/confirm-button.js",
   "/src/ui/icons.js",

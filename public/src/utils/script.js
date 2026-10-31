@@ -18,7 +18,23 @@ AuthGate.onSignedIn(async function () {
   const emptyNotice = document.getElementById("emptyCollectionNotice");
   if (emptyNotice) emptyNotice.classList.toggle("hidden", cards.length > 0);
   const wordCount = document.getElementById("footer-word-count");
-  if (wordCount) wordCount.textContent = `Vocabulary: ${cards.length} words`;
+  const showWordCount = () => {
+    if (wordCount) {
+      wordCount.textContent = I18n.t("footer.words", { count: cards.length });
+    }
+  };
+  showWordCount();
+
+  // Switching the interface language redraws the footer and the current card or question
+  document.addEventListener("i18n-changed", () => {
+    showWordCount();
+    if (window.VersionSync) window.VersionSync.syncVersions();
+    if (window.vocabApp.currentMode === "flashcard") {
+      window.vocabApp.flashcardMode.showCurrentCard();
+    } else {
+      window.vocabApp.quizMode.startQuiz();
+    }
+  });
 
   // Save pending progress when the page is hidden or closed
   document.addEventListener("visibilitychange", () => {

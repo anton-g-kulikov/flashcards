@@ -2331,3 +2331,54 @@ button.armed:hover {
   border-color: var(--color-error);
   color: white;
 }
+
+/* === Interface language switcher === */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.header-top .user-chip {
+  margin-bottom: 0;
+}
+
+.lang-switcher {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.auth-card .lang-switcher {
+  margin-bottom: var(--spacing-5);
+}
+
+.lang-switcher .lang-option {
+  background: transparent;
+  color: var(--color-text-light);
+  border: none;
+  border-radius: 0;
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  box-shadow: none;
+  min-width: 0;
+}
+
+.lang-switcher .lang-option + .lang-option {
+  border-left: 1px solid var(--color-border);
+}
+
+.lang-switcher .lang-option:hover {
+  background: var(--color-card-2);
+  color: var(--color-text);
+}
+
+.lang-switcher .lang-option.active {
+  background: var(--color-accent);
+  color: white;
+}

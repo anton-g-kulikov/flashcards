@@ -98,7 +98,7 @@ class FlashcardMode {
     // Add translation based on current language
     const translation = document.createElement("div");
     translation.className = "translation";
-    translation.textContent = card.translation || "No translation yet";
+    translation.textContent = card.translation || I18n.t("card.noTranslation");
     backFace.appendChild(translation);
 
     // Add example if available
@@ -292,14 +292,12 @@ class FlashcardMode {
     // Use the same flashcard structure as regular cards
     flashcard.innerHTML = `
       <div class="card-face card-front">
-        <div class="category-badge">🎉 Congratulations!</div>
-        <div class="spanish-word">All cards learned!</div>
+        <div class="category-badge">${I18n.t("flash.complete.badge")}</div>
+        <div class="spanish-word">${I18n.t("flash.complete.title")}</div>
       </div>
       <div class="card-face card-back">
-        <div class="translation">What would you like to do next?</div>
-        <div class="example">
-          Add new words in My Words, or reset your progress to review everything you've learned.
-        </div>
+        <div class="translation">${I18n.t("flash.complete.next")}</div>
+        <div class="example">${I18n.t("flash.complete.hint")}</div>
       </div>
     `;
 
@@ -350,8 +348,8 @@ class FlashcardMode {
     flashcard.innerHTML = `
       <div class="card-face card-front" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="no-cards-message">
-          <h3>No cards to study yet</h3>
-          <p>Add your first words in <a href="vocabulary-manager.html">My Words</a>.</p>
+          <h3>${I18n.t("flash.none.title")}</h3>
+          <p>${I18n.t("flash.none.hint")}</p>
         </div>
       </div>
     `;
@@ -389,7 +387,7 @@ class FlashcardMode {
   updateTranslation(card) {
     const translation = document.querySelector(".translation");
     if (translation && card) {
-      translation.textContent = card.translation || "No translation yet";
+      translation.textContent = card.translation || I18n.t("card.noTranslation");
     }
   }
 }

@@ -57,7 +57,7 @@ function replaceButtonsWithIcons() {
 
   // Reset button - use a refresh icon
   document
-    .querySelectorAll('button[onclick="resetProgress()"]')
+    .querySelectorAll('button[onclick="resetProgress(this)"]')
     .forEach((btn) => {
       if (!btn.querySelector(".icon")) {
         const text = btn.textContent.trim();

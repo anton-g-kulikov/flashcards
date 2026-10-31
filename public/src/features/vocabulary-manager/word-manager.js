@@ -9,6 +9,8 @@ class WordManager {
     this.addButton = document.getElementById("addWordBtn");
     this.tableBody = document.getElementById("vocabTableBody");
 
+    document.addEventListener("i18n-changed", () => this.render());
+
     this.form.addEventListener("submit", (event) => {
       event.preventDefault();
       this.addWord();
@@ -30,7 +32,7 @@ class WordManager {
       (card) => card.word.toLowerCase() === word.toLowerCase()
     );
     if (existing) {
-      this.showMessage(`"${existing.word}" is already in your collection`, "info");
+      this.showMessage(I18n.t("words.exists", { word: existing.word }), "info");
       return;
     }
 
@@ -40,7 +42,7 @@ class WordManager {
       this.cards.push({ id, word, translation });
       this.cards.sort((a, b) => a.word.localeCompare(b.word, "es"));
     } catch (error) {
-      this.showMessage(`Could not add "${word}": ${error.message}`, "error");
+      this.showMessage(I18n.t("words.addFailed", { word, error: error.message }), "error");
       return;
     } finally {
       this.addButton.disabled = false;
@@ -49,7 +51,7 @@ class WordManager {
     this.form.reset();
     this.wordInput.focus();
     this.render();
-    this.showMessage(`Added "${word}"`, "success");
+    this.showMessage(I18n.t("words.added", { word }), "success");
   }
 
   async updateTranslation(card, input) {
@@ -59,25 +61,31 @@ class WordManager {
     try {
       await window.Cloud.updateCard(card.id, { word: card.word, translation });
       card.translation = translation;
-      this.showMessage(`Saved the translation of "${card.word}"`, "success");
+      this.showMessage(I18n.t("words.saved", { word: card.word }), "success");
     } catch (error) {
       input.value = card.translation;
-      this.showMessage(`Could not save "${card.word}": ${error.message}`, "error");
+      this.showMessage(
+        I18n.t("words.saveFailed", { word: card.word, error: error.message }),
+        "error"
+      );
     }
   }
 
   async deleteWord(card, button) {
-    if (!window.confirmOnSecondTap(button, "Sure?")) return;
+    if (!window.confirmOnSecondTap(button, I18n.t("words.deleteConfirm"))) return;
 
     try {
       await window.Cloud.deleteCard(card.id);
     } catch (error) {
-      this.showMessage(`Could not delete "${card.word}": ${error.message}`, "error");
+      this.showMessage(
+        I18n.t("words.deleteFailed", { word: card.word, error: error.message }),
+        "error"
+      );
       return;
     }
     this.cards = this.cards.filter((c) => c.id !== card.id);
     this.render();
-    this.showMessage(`Deleted "${card.word}"`, "success");
+    this.showMessage(I18n.t("words.deleted", { word: card.word }), "success");
   }
 
   render() {
@@ -85,8 +93,9 @@ class WordManager {
     this.tableBody.innerHTML = "";
 
     if (this.cards.length === 0) {
-      this.tableBody.innerHTML =
-        '<tr><td colspan="3" class="empty-table-message">No words yet. Add your first word above.</td></tr>';
+      this.tableBody.innerHTML = `<tr><td colspan="3" class="empty-table-message">${I18n.t(
+        "words.empty"
+      )}</td></tr>`;
       return;
     }
 
@@ -102,7 +111,7 @@ class WordManager {
       input.className = "translation-input";
       input.lang = "ru";
       input.maxLength = 500;
-      input.placeholder = "Add a translation";
+      input.placeholder = I18n.t("words.addTranslation");
       input.value = card.translation;
       input.addEventListener("change", () => this.updateTranslation(card, input));
       translationCell.appendChild(input);
@@ -111,7 +120,7 @@ class WordManager {
       actionsCell.className = "row-actions";
       const deleteButton = document.createElement("button");
       deleteButton.className = "delete-btn";
-      deleteButton.textContent = "Delete";
+      deleteButton.textContent = I18n.t("words.delete");
       deleteButton.addEventListener("click", () => this.deleteWord(card, deleteButton));
       actionsCell.appendChild(deleteButton);
 

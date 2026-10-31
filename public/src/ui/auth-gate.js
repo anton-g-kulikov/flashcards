@@ -26,6 +26,10 @@ class AuthGate {
       AuthGate.handleUser(window.Cloud.user);
     }
 
+    document.addEventListener("i18n-changed", () => {
+      if (AuthGate.signedInUser) AuthGate.renderUserChip(AuthGate.signedInUser);
+    });
+
     const signInBtn = document.getElementById("googleSignInBtn");
     if (signInBtn) {
       signInBtn.addEventListener("click", () => AuthGate.signIn());
@@ -56,7 +60,7 @@ class AuthGate {
     callbacks.forEach((callback) => {
       Promise.resolve(callback(user)).catch((error) => {
         console.error("Error starting the app:", error);
-        alert("Could not load your collection. Please check your connection and reload.");
+        alert(I18n.t("auth.loadFailed"));
       });
     });
   }
@@ -72,7 +76,7 @@ class AuthGate {
         return;
       }
       console.error("Sign-in failed:", error);
-      if (errorEl) errorEl.textContent = `Sign-in failed: ${error.message}`;
+      if (errorEl) errorEl.textContent = I18n.t("auth.signInFailed", { error: error.message });
     }
   }
 
@@ -92,12 +96,12 @@ class AuthGate {
 
     const name = document.createElement("span");
     name.className = "user-name";
-    name.textContent = user.displayName || user.email || "Signed in";
+    name.textContent = user.displayName || user.email || I18n.t("auth.signedIn");
     chip.appendChild(name);
 
     const signOutBtn = document.createElement("button");
     signOutBtn.className = "sign-out-btn";
-    signOutBtn.textContent = "Sign out";
+    signOutBtn.textContent = I18n.t("auth.signOut");
     signOutBtn.addEventListener("click", () => window.Cloud.signOut());
     chip.appendChild(signOutBtn);
   }

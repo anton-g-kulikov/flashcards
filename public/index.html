@@ -125,8 +125,9 @@
         <div class="spinner"></div>
       </div>
       <div class="auth-card">
-        <h1>Flashcards</h1>
-        <p class="subtitle">
+        <div class="lang-switcher" data-lang-switcher></div>
+        <h1 data-i18n="app.title">Flashcards</h1>
+        <p class="subtitle" data-i18n="auth.tagline">
           Your personal vocabulary collection. Add your own words, then learn
           them with flashcards and quizzes on any device.
         </p>
@@ -137,7 +138,7 @@
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           </svg>
-          Sign in with Google
+          <span data-i18n="auth.signIn">Sign in with Google</span>
         </button>
         <p id="authError" class="auth-error"></p>
       </div>
@@ -145,15 +146,22 @@
 
     <div class="app-container">
       <div class="header">
-        <div id="userChip" class="user-chip"></div>
-        <h1>Flashcards</h1>
-        <div class="subtitle">
+        <div class="header-top">
+          <div class="lang-switcher" data-lang-switcher></div>
+          <div id="userChip" class="user-chip"></div>
+        </div>
+        <h1 data-i18n="app.title">Flashcards</h1>
+        <div class="subtitle" data-i18n-html="study.subtitle">
           Your personal collection ·
           <a href="vocabulary-manager.html">Add words</a>
         </div>
 
         <!-- Shown while the collection is empty -->
-        <div id="emptyCollectionNotice" class="empty-collection-notice hidden">
+        <div
+          id="emptyCollectionNotice"
+          class="empty-collection-notice hidden"
+          data-i18n-html="study.empty"
+        >
           Your collection is empty.
           <a href="vocabulary-manager.html">Add your first words</a> to start
           studying.
@@ -177,15 +185,23 @@
               <polyline points="7,10 12,15 17,10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Install App
+            <span data-i18n="pwa.install">Install App</span>
           </button>
         </div>
 
         <div class="mode-selector">
-          <button class="mode-btn" onclick="setMode('flashcard', event)">
+          <button
+            class="mode-btn"
+            onclick="setMode('flashcard', event)"
+            data-i18n="mode.flashcards"
+          >
             Flashcards
           </button>
-          <button class="mode-btn active" onclick="setMode('quiz', event)">
+          <button
+            class="mode-btn active"
+            onclick="setMode('quiz', event)"
+            data-i18n="mode.quiz"
+          >
             Quiz Mode
           </button>
         </div>
@@ -203,25 +219,31 @@
               >All Cards</span
             >
           </div> -->
-          <button onclick="resetProgress(this)">Reset Progress</button>
+          <button onclick="resetProgress(this)" data-i18n="progress.reset">
+            Reset Progress
+          </button>
         </div>
         <div class="stats">
           <div class="stat">
             <div class="stat-number">
               <span id="totalCards">0</span>
             </div>
-            <div>Cards</div>
-            <div class="stat-category" id="categoryInfo">
+            <div data-i18n="stats.cards">Cards</div>
+            <div
+              class="stat-category"
+              id="categoryInfo"
+              data-i18n="stats.inCollection"
+            >
               In your collection
             </div>
           </div>
           <div class="stat">
             <div class="stat-number" id="knownCards">0</div>
-            <div>Known</div>
+            <div data-i18n="stats.known">Known</div>
           </div>
           <div class="stat">
             <div class="stat-number" id="unknownCards">0</div>
-            <div>Unknown</div>
+            <div data-i18n="stats.unknown">Unknown</div>
           </div>
         </div>
 
@@ -239,10 +261,18 @@
         </div>
 
         <div class="card-actions">
-          <button class="action-btn dont-know-btn" onclick="markCard(false)">
+          <button
+            class="action-btn dont-know-btn"
+            onclick="markCard(false)"
+            data-i18n="card.dontKnow"
+          >
             I Don't Know...
           </button>
-          <button class="action-btn know-btn" onclick="markCard(true)">
+          <button
+            class="action-btn know-btn"
+            onclick="markCard(true)"
+            data-i18n="card.know"
+          >
             I Know This!
           </button>
         </div>
@@ -259,7 +289,9 @@
             <div class="quiz-loading-spinner">
               <div class="spinner-container">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading quiz...</div>
+                <div class="loading-text" data-i18n="quiz.loading">
+                  Loading quiz...
+                </div>
               </div>
             </div>
           </div>
@@ -267,6 +299,7 @@
       </div>
     </div>
 
+    <script src="src/ui/i18n.js"></script>
     <script type="module" src="src/core/cloud.js"></script>
     <script src="src/ui/auth-gate.js"></script>
     <script src="src/ui/icons.js"></script>
@@ -319,8 +352,8 @@
             if (flashcard) {
               flashcard.innerHTML = `
                 <div class="card-face card-front">
-                  <div class="spanish-word">Loading cards...</div>
-                  <div class="category-badge">Please wait</div>
+                  <div class="spanish-word">${I18n.t("card.loading")}</div>
+                  <div class="category-badge">${I18n.t("card.wait")}</div>
                 </div>
               `;
             }
@@ -371,6 +404,7 @@
           href="https://buymeacoffee.com/antonkulikov"
           target="_blank"
           rel="noopener"
+          data-i18n="footer.coffee"
           >Find this useful? Buy me a coffee! ☕️ :)
         </a>
       </div>

@@ -9,7 +9,10 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "icons/android/android-launchericon-72-72.png",
@@ -58,20 +61,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/flashcard-mode.png",
-      "sizes": "360x640",
-      "type": "image/png",
-      "form_factor": "narrow"
     },
     {
-      "src": "screenshots/quiz-mode.png",
-      "sizes": "360x640",
+      "src": "icons/android/android-launchericon-512-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [

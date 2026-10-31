@@ -5,7 +5,7 @@ class ResetProgress {
     console.log("Reset progress button clicked...");
 
     // Ask for a second tap on the button before wiping progress
-    if (button && !window.confirmOnSecondTap(button, "Tap again to reset all progress")) {
+    if (button && !window.confirmOnSecondTap(button, I18n.t("progress.resetConfirm"))) {
       return;
     }
 
@@ -113,7 +113,7 @@ class ResetProgress {
       console.log("Progress reset complete");
     } catch (error) {
       console.error("Error resetting progress:", error);
-      alert("There was an error resetting progress. Please try again.");
+      alert(I18n.t("progress.resetFailed"));
     }
   }
 
