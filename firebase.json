@@ -38,6 +38,24 @@
         "source": "/",
         "headers": [
           {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com https://*.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.googleapis.com https://apis.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com http://127.0.0.1:8080 http://127.0.0.1:9099; frame-src 'self' https://flashcards-ak-app.firebaseapp.com https://accounts.google.com http://127.0.0.1:9099; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com https://*.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.googleapis.com https://apis.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com http://127.0.0.1:8080 http://127.0.0.1:9099; frame-src 'self' https://flashcards-ak-app.firebaseapp.com https://accounts.google.com http://127.0.0.1:9099; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/",
+        "headers": [
+          {
             "key": "Cache-Control",
             "value": "no-cache"
           }

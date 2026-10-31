@@ -40,3 +40,30 @@ describe("service worker", () => {
     assert.deepEqual(absent, []);
   });
 });
+
+// firebase.json sends a Content-Security-Policy without 'unsafe-inline', so the browser refuses
+// inline scripts, on* handler attributes and style attributes in the pages.
+describe("content security policy", () => {
+  const hosting = JSON.parse(readFileSync("firebase.json", "utf8")).hosting;
+  const policies = hosting.headers.flatMap((rule) =>
+    rule.headers.filter((h) => h.key === "Content-Security-Policy").map((h) => [rule.source, h.value])
+  );
+
+  it("covers every page, with no inline scripts allowed", () => {
+    assert.deepEqual(policies.map(([source]) => source).sort(), ["**/*.html", "/"]);
+    for (const [, value] of policies) {
+      assert.doesNotMatch(value, /unsafe-inline|unsafe-eval/);
+      assert.match(value, /object-src 'none'/);
+    }
+  });
+
+  for (const page of readdirSync("public").filter((name) => name.endsWith(".html"))) {
+    it(`${page} has nothing inline`, () => {
+      const html = readFileSync(join("public", page), "utf8");
+      assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/, "inline <script>");
+      assert.doesNotMatch(html, /\son[a-z]+\s*=/i, "on* handler attribute");
+      assert.doesNotMatch(html, /\sstyle\s*=/i, "style attribute");
+      assert.doesNotMatch(html, /<style\b/i, "<style> element");
+    });
+  }
+});
