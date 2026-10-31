@@ -68,6 +68,7 @@ npm run deploy
 Deploys Hosting and the Firestore rules. When you change any file in `public/`, bump
 `CACHE_NAME` in `public/sw.js` so installed copies pick up the update.
 
-One-time console step: **Google sign-in must be enabled** under Authentication → Sign-in method
-in the [Firebase console](https://console.firebase.google.com/project/flashcards-ak-app/authentication/providers).
-It can't be turned on from the CLI.
+Live at https://flashcards-ak-app.web.app. Google sign-in is enabled under Authentication →
+Sign-in method in the [Firebase console](https://console.firebase.google.com/project/flashcards-ak-app/authentication/providers)
+(a console-only setting, needed again for any new project). A custom domain also has to be added
+to Authentication → Settings → Authorized domains.
