@@ -230,7 +230,7 @@ button.armed:hover {
 }
 
 .topbar-title {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   font-size: 1.625rem;
   white-space: nowrap;
@@ -238,7 +238,9 @@ button.armed:hover {
   text-overflow: ellipsis;
 }
 
+/* Account controls sit at the far right; anything before them stays next to the title */
 .topbar-actions {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
