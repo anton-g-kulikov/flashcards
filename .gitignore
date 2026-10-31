@@ -25,3 +25,7 @@ ui-debug.log
 
 # Browser network captures contain sign-in tokens
 *.har
+
+# Local secrets (e.g. CLOUDFLARE_API_TOKEN for DNS)
+.env
+.env.*
