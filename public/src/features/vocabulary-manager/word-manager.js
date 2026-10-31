@@ -1,45 +1,61 @@
-// Word Manager - The signed-in user's collections: pick one, create, rename, delete, import and
-// export them as CSV, add words to them one at a time, fix a translation or delete a word.
+// Word Manager - The signed-in user's collections, one collapsible card each. A card's header
+// switches the collection on or off for study, renames, exports or deletes it; its body adds
+// words one at a time and lets you fix a translation or delete a word. Collections can also be
+// created and imported from CSV (a file or a starter collection).
+
+const ICONS = {
+  chevron: '<polyline points="9 6 15 12 9 18"/>',
+  rename: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>',
+  export:
+    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  delete:
+    '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  save: '<polyline points="20 6 9 17 4 12"/>',
+  cancel: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+};
+
+function icon(name) {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+}
+
+function iconButton(name, label, className = "icon-tool") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.title = label;
+  button.setAttribute("aria-label", label);
+  button.innerHTML = icon(name);
+  return button;
+}
+
 class WordManager {
   constructor(user) {
     this.cards = [];
     this.collections = [];
-    this.selectionKey = `flashcards-collection-${user.uid}`;
-    this.selected = null;
-    this.nameFormMode = null; // "new" or "rename" while the name form is open
+    this.renaming = null; // id of the collection whose name is being edited
+    this.openKey = `flashcards-open-${user.uid}`;
+    this.open = this.loadOpenState();
 
     const $ = (id) => document.getElementById(id);
     this.collectionList = $("collectionList");
-    this.form = $("addWordForm");
-    this.wordInput = $("newWord");
-    this.translationInput = $("newTranslation");
-    this.addButton = $("addWordBtn");
-    this.list = $("wordList");
     this.nameForm = $("collectionNameForm");
     this.nameInput = $("collectionNameInput");
     this.importPanel = $("importPanel");
     this.fileInput = $("importFileInput");
-    this.deleteCollectionButton = $("deleteCollectionBtn");
 
     document.addEventListener("i18n-changed", () => this.render());
-    this.form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      this.addWord();
-    });
 
-    $("newCollectionBtn").addEventListener("click", () => this.openNameForm("new"));
-    $("renameCollectionBtn").addEventListener("click", () => this.openNameForm("rename"));
+    $("newCollectionBtn").addEventListener("click", () => this.openNameForm());
     $("collectionNameCancel").addEventListener("click", () => this.closeNameForm());
     this.nameForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      this.saveCollectionName();
+      this.createCollection();
     });
 
     $("importBtn").addEventListener("click", () => this.toggleImportPanel());
     $("importFileBtn").addEventListener("click", () => this.fileInput.click());
     this.fileInput.addEventListener("change", () => this.importFile());
-    $("exportBtn").addEventListener("click", () => this.exportCollection());
-    this.deleteCollectionButton.addEventListener("click", () => this.deleteCollection());
   }
 
   async load() {
@@ -49,40 +65,114 @@ class WordManager {
     ]);
     this.collections = collections;
     this.cards = cards;
-
-    // The collection being edited, remembered on this device
-    let saved = null;
-    try {
-      saved = localStorage.getItem(this.selectionKey);
-    } catch (error) {
-      // Storage unavailable: start with the first collection
+    // A first visit with a single collection opens it, so there is somewhere to type
+    if (this.open === null) {
+      this.open = new Set(collections.length === 1 ? [collections[0].id] : []);
     }
-    this.select(this.collections.some((c) => c.id === saved) ? saved : this.collections[0].id);
+    this.render();
   }
 
-  // --- Collections ---
+  // --- State ---
 
-  get current() {
-    return this.collections.find((c) => c.id === this.selected);
+  loadOpenState() {
+    try {
+      const saved = localStorage.getItem(this.openKey);
+      return saved ? new Set(JSON.parse(saved)) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  saveOpenState() {
+    try {
+      localStorage.setItem(this.openKey, JSON.stringify([...this.open]));
+    } catch (error) {
+      // Not remembered, but the cards still open and close
+    }
   }
 
   cardsIn(collectionId) {
     return this.cards.filter((card) => card.collectionId === collectionId);
   }
 
-  select(collectionId) {
-    this.selected = collectionId;
-    try {
-      localStorage.setItem(this.selectionKey, collectionId);
-    } catch (error) {
-      // Not remembered, but the switch still applies
-    }
-    this.closeNameForm();
-    this.render();
-  }
-
   sortCollections() {
     this.collections.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  sortCards() {
+    this.cards.sort((a, b) => a.word.localeCompare(b.word, "es"));
+  }
+
+  toggleOpen(collection) {
+    if (this.open.has(collection.id)) {
+      this.open.delete(collection.id);
+    } else {
+      this.open.add(collection.id);
+    }
+    this.saveOpenState();
+    this.renderCollection(collection);
+  }
+
+  // Opens a collection and brings its card into view, ready for the first word
+  reveal(collectionId) {
+    this.open.add(collectionId);
+    this.saveOpenState();
+    this.render();
+    const card = this.collectionList.querySelector(`[data-id="${collectionId}"]`);
+    card?.scrollIntoView({ behavior: "smooth", block: "start" });
+    card?.querySelector(".add-word-form input")?.focus({ preventScroll: true });
+  }
+
+  // --- Collections ---
+
+  openNameForm() {
+    this.importPanel.classList.add("hidden");
+    this.nameForm.classList.remove("hidden");
+    this.nameInput.value = "";
+    this.nameInput.placeholder = I18n.t("collections.namePlaceholder");
+    this.nameInput.focus();
+  }
+
+  closeNameForm() {
+    this.nameForm.classList.add("hidden");
+  }
+
+  async createCollection() {
+    const name = this.nameInput.value.trim();
+    if (!name) return;
+    try {
+      const id = await window.Cloud.createCollection(name);
+      this.collections.push({ id, name, active: true });
+      this.sortCollections();
+      this.closeNameForm();
+      this.reveal(id);
+      this.showMessage(I18n.t("collections.created", { name }), "success");
+    } catch (error) {
+      this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
+    }
+  }
+
+  async renameCollection(collection, name) {
+    name = name.trim();
+    if (!name || name === collection.name) {
+      this.stopRenaming(collection);
+      return;
+    }
+    try {
+      await window.Cloud.renameCollection(collection.id, name);
+      collection.name = name;
+      this.renaming = null;
+      this.sortCollections();
+      this.render();
+      this.showMessage(I18n.t("collections.renamed", { name }), "success");
+    } catch (error) {
+      this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
+    }
+  }
+
+  stopRenaming(collection) {
+    this.renaming = null;
+    this.renderCollection(collection);
   }
 
   async setActive(collection, active, checkbox) {
@@ -96,50 +186,8 @@ class WordManager {
     }
   }
 
-  openNameForm(mode) {
-    this.nameFormMode = mode;
-    this.importPanel.classList.add("hidden");
-    this.nameForm.classList.remove("hidden");
-    this.nameInput.value = mode === "rename" ? this.current.name : "";
-    this.nameInput.placeholder = I18n.t("collections.namePlaceholder");
-    this.nameInput.focus();
-  }
-
-  closeNameForm() {
-    this.nameFormMode = null;
-    this.nameForm.classList.add("hidden");
-  }
-
-  async saveCollectionName() {
-    const name = this.nameInput.value.trim();
-    if (!name) return;
-
-    try {
-      if (this.nameFormMode === "new") {
-        const id = await window.Cloud.createCollection(name);
-        this.collections.push({ id, name, active: true });
-        this.sortCollections();
-        this.select(id);
-        this.showMessage(I18n.t("collections.created", { name }), "success");
-        this.wordInput.focus();
-      } else {
-        await window.Cloud.renameCollection(this.current.id, name);
-        this.current.name = name;
-        this.sortCollections();
-        this.closeNameForm();
-        this.render();
-        this.showMessage(I18n.t("collections.renamed", { name }), "success");
-      }
-    } catch (error) {
-      this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
-    }
-  }
-
-  async deleteCollection() {
-    const collection = this.current;
-    if (!window.confirmOnSecondTap(this.deleteCollectionButton, I18n.t("collections.deleteConfirm"))) {
-      return;
-    }
+  async deleteCollection(collection, button) {
+    if (!window.confirmOnSecondTap(button, I18n.t("collections.deleteConfirm"))) return;
 
     const cardIds = this.cardsIn(collection.id).map((card) => card.id);
     try {
@@ -151,15 +199,33 @@ class WordManager {
 
     this.cards = this.cards.filter((card) => card.collectionId !== collection.id);
     this.collections = this.collections.filter((c) => c.id !== collection.id);
+    this.open.delete(collection.id);
+    this.saveOpenState();
     if (this.collections.length === 0) {
       // There is always somewhere to put words: this recreates the default collection
       this.collections = await window.Cloud.loadCollections(I18n.t("collections.default"));
     }
-    this.select(this.collections[0].id);
+    this.render();
     this.showMessage(I18n.t("collections.deleted", { name: collection.name }), "success");
   }
 
-  // --- Import and export ---
+  exportCollection(collection) {
+    const cards = this.cardsIn(collection.id);
+    if (cards.length === 0) {
+      this.showMessage(I18n.t("collections.exportEmpty"), "info");
+      return;
+    }
+    const blob = new Blob([window.CsvUtils.fromCards(cards)], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = window.CsvUtils.fileName(collection.name);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+
+  // --- Import ---
 
   async toggleImportPanel() {
     this.closeNameForm();
@@ -228,37 +294,22 @@ class WordManager {
     const added = await window.Cloud.importCards(id, cards);
     this.collections.push({ id, name, active: true });
     this.cards.push(...added);
-    this.cards.sort((a, b) => a.word.localeCompare(b.word, "es"));
+    this.sortCards();
     this.sortCollections();
     this.importPanel.classList.add("hidden");
-    this.select(id);
+    this.reveal(id);
     this.showMessage(I18n.t("collections.imported", { name, count: added.length }), "success");
-  }
-
-  exportCollection() {
-    const cards = this.cardsIn(this.selected);
-    if (cards.length === 0) {
-      this.showMessage(I18n.t("collections.exportEmpty"), "info");
-      return;
-    }
-    const blob = new Blob([window.CsvUtils.fromCards(cards)], { type: "text/csv;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = window.CsvUtils.fileName(this.current.name);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
   // --- Words ---
 
-  async addWord() {
-    const word = this.wordInput.value.trim();
-    const translation = this.translationInput.value.trim();
+  async addWord(collection, form) {
+    const wordInput = form.elements.word;
+    const word = wordInput.value.trim();
+    const translation = form.elements.translation.value.trim();
     if (!word) return;
 
-    const existing = this.cardsIn(this.selected).find(
+    const existing = this.cardsIn(collection.id).find(
       (card) => card.word.toLowerCase() === word.toLowerCase()
     );
     if (existing) {
@@ -266,22 +317,21 @@ class WordManager {
       return;
     }
 
-    this.addButton.disabled = true;
+    const submit = form.querySelector("button[type=submit]");
+    submit.disabled = true;
     try {
-      const card = { word, translation, collectionId: this.selected };
+      const card = { word, translation, collectionId: collection.id };
       const id = await window.Cloud.addCard(card);
       this.cards.push({ id, ...card });
-      this.cards.sort((a, b) => a.word.localeCompare(b.word, "es"));
+      this.sortCards();
     } catch (error) {
+      submit.disabled = false;
       this.showMessage(I18n.t("words.addFailed", { word, error: error.message }), "error");
       return;
-    } finally {
-      this.addButton.disabled = false;
     }
 
-    this.form.reset();
-    this.wordInput.focus();
-    this.render();
+    const section = this.renderCollection(collection);
+    section.querySelector(".add-word-form input").focus();
     this.showMessage(I18n.t("words.added", { word }), "success");
   }
 
@@ -315,28 +365,164 @@ class WordManager {
       return;
     }
     this.cards = this.cards.filter((c) => c.id !== card.id);
-    this.render();
+    this.renderCollection(this.collections.find((c) => c.id === card.collectionId));
     this.showMessage(I18n.t("words.deleted", { word: card.word }), "success");
   }
 
   // --- Rendering ---
 
   render() {
-    if (!this.current) return;
+    this.collectionList.replaceChildren(...this.collections.map((c) => this.buildCollection(c)));
+  }
 
-    this.renderCollections();
+  // Re-renders one card in place (keeps the rest of the page, and its scroll position, as is)
+  renderCollection(collection) {
+    const fresh = this.buildCollection(collection);
+    const old = this.collectionList.querySelector(`[data-id="${collection.id}"]`);
+    if (old) old.replaceWith(fresh);
+    else this.collectionList.appendChild(fresh);
+    return fresh;
+  }
 
-    const cards = this.cardsIn(this.selected);
-    document.getElementById("collectionTitle").textContent = this.current.name;
-    document.getElementById("wordCount").textContent = `(${cards.length})`;
-    this.list.innerHTML = "";
+  buildCollection(collection) {
+    const isOpen = this.open.has(collection.id);
+    const cards = this.cardsIn(collection.id);
+
+    const section = document.createElement("section");
+    section.className = "panel collection" + (isOpen ? " open" : "");
+    section.dataset.id = collection.id;
+
+    const header = document.createElement("div");
+    header.className = "collection-header";
+    header.append(this.buildSwitch(collection));
+
+    if (this.renaming === collection.id) {
+      header.append(this.buildRenameForm(collection));
+    } else {
+      // The name opens and closes the card
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "collection-toggle";
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.innerHTML = `<span class="collection-chevron">${icon("chevron")}</span>`;
+      const name = document.createElement("span");
+      name.className = "collection-name";
+      name.textContent = collection.name;
+      const count = document.createElement("span");
+      count.className = "collection-count";
+      count.textContent = cards.length;
+      toggle.append(name, count);
+      toggle.addEventListener("click", () => this.toggleOpen(collection));
+
+      const tools = document.createElement("div");
+      tools.className = "collection-tools";
+      const rename = iconButton("rename", I18n.t("collections.rename"));
+      rename.addEventListener("click", () => {
+        this.renaming = collection.id;
+        this.renderCollection(collection).querySelector(".collection-rename input").focus();
+      });
+      const exportButton = iconButton("export", I18n.t("collections.export"));
+      exportButton.addEventListener("click", () => this.exportCollection(collection));
+      const remove = iconButton("delete", I18n.t("collections.delete"), "icon-tool icon-tool-danger");
+      remove.addEventListener("click", () => this.deleteCollection(collection, remove));
+      tools.append(rename, exportButton, remove);
+
+      header.append(toggle, tools);
+    }
+    section.append(header);
+
+    if (isOpen) {
+      const body = document.createElement("div");
+      body.className = "collection-body";
+      body.append(this.buildAddForm(collection), this.buildWordList(cards));
+      section.append(body);
+    }
+    return section;
+  }
+
+  buildSwitch(collection) {
+    const toggle = document.createElement("label");
+    toggle.className = "switch";
+    toggle.title = I18n.t("collections.activeLabel", { name: collection.name });
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = collection.active;
+    checkbox.setAttribute("aria-label", I18n.t("collections.activeLabel", { name: collection.name }));
+    checkbox.addEventListener("change", () => this.setActive(collection, checkbox.checked, checkbox));
+    const track = document.createElement("span");
+    track.className = "switch-track";
+    toggle.append(checkbox, track);
+    return toggle;
+  }
+
+  buildRenameForm(collection) {
+    const form = document.createElement("form");
+    form.className = "collection-rename";
+    form.autocomplete = "off";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 100;
+    input.required = true;
+    input.value = collection.name;
+    input.setAttribute("aria-label", I18n.t("collections.namePlaceholder"));
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") this.stopRenaming(collection);
+    });
+    const save = iconButton("save", I18n.t("collections.save"));
+    save.type = "submit";
+    const cancel = iconButton("cancel", I18n.t("collections.cancel"));
+    cancel.addEventListener("click", () => this.stopRenaming(collection));
+    form.append(input, save, cancel);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      this.renameCollection(collection, input.value);
+    });
+    return form;
+  }
+
+  buildAddForm(collection) {
+    const form = document.createElement("form");
+    form.className = "add-word-form";
+    form.autocomplete = "off";
+
+    const word = document.createElement("input");
+    word.type = "text";
+    word.name = "word";
+    word.maxLength = 200;
+    word.required = true;
+    word.autocapitalize = "none";
+    word.placeholder = I18n.t("words.wordPlaceholder");
+
+    const translation = document.createElement("input");
+    translation.type = "text";
+    translation.name = "translation";
+    translation.maxLength = 500;
+    translation.autocapitalize = "none";
+    translation.placeholder = I18n.t("words.translationPlaceholder");
+
+    const add = document.createElement("button");
+    add.type = "submit";
+    add.className = "primary-btn";
+    add.textContent = I18n.t("words.add");
+
+    form.append(word, translation, add);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      this.addWord(collection, form);
+    });
+    return form;
+  }
+
+  buildWordList(cards) {
+    const list = document.createElement("ul");
+    list.className = "word-list";
 
     if (cards.length === 0) {
       const empty = document.createElement("li");
       empty.className = "word-list-empty";
       empty.textContent = I18n.t("words.empty");
-      this.list.appendChild(empty);
-      return;
+      list.appendChild(empty);
+      return list;
     }
 
     cards.forEach((card) => {
@@ -356,61 +542,14 @@ class WordManager {
       input.value = card.translation;
       input.addEventListener("change", () => this.updateTranslation(card, input));
 
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.className = "word-item-delete";
-      deleteButton.title = I18n.t("words.delete");
-      deleteButton.setAttribute("aria-label", `${I18n.t("words.delete")}: ${card.word}`);
-      deleteButton.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-          <path d="M10 11v6M14 11v6"/>
-          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-        </svg>`;
-      deleteButton.addEventListener("click", () => this.deleteWord(card, deleteButton));
+      const remove = iconButton("delete", I18n.t("words.delete"), "word-item-delete");
+      remove.setAttribute("aria-label", `${I18n.t("words.delete")}: ${card.word}`);
+      remove.addEventListener("click", () => this.deleteWord(card, remove));
 
-      item.append(word, input, deleteButton);
-      this.list.appendChild(item);
+      item.append(word, input, remove);
+      list.appendChild(item);
     });
-  }
-
-  renderCollections() {
-    this.collectionList.innerHTML = "";
-    this.collections.forEach((collection) => {
-      const item = document.createElement("li");
-      item.className = "collection-row" + (collection.id === this.selected ? " selected" : "");
-
-      // On/off for study
-      const toggle = document.createElement("label");
-      toggle.className = "switch";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = collection.active;
-      checkbox.setAttribute("aria-label", I18n.t("collections.activeLabel", { name: collection.name }));
-      checkbox.addEventListener("change", () => this.setActive(collection, checkbox.checked, checkbox));
-      const track = document.createElement("span");
-      track.className = "switch-track";
-      toggle.append(checkbox, track);
-
-      // Tapping the name opens the collection for editing below
-      const name = document.createElement("button");
-      name.type = "button";
-      name.className = "collection-row-name";
-      name.setAttribute("aria-pressed", String(collection.id === this.selected));
-      const label = document.createElement("span");
-      label.className = "collection-row-label";
-      label.textContent = collection.name;
-      const count = document.createElement("span");
-      count.className = "collection-row-count";
-      count.textContent = this.cardsIn(collection.id).length;
-      name.append(label, count);
-      name.addEventListener("click", () => this.select(collection.id));
-
-      item.append(toggle, name);
-      this.collectionList.appendChild(item);
-    });
+    return list;
   }
 
   showMessage(text, type, duration = 3000) {

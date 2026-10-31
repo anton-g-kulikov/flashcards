@@ -989,28 +989,35 @@ body.auth-pending .auth-gate .auth-loading {
 }
 
 /* === Collections === */
-.collection-list {
-  list-style: none;
-  margin-bottom: var(--spacing-3);
-}
-
-.collection-row {
+.panel-head {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-md);
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
 }
 
-.collection-row.selected {
-  background: var(--color-card-3);
+.panel-head .panel-title {
+  margin-bottom: 0;
 }
 
-.collection-row-name {
+/* One collapsible card per collection */
+.collection {
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+.collection-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 48px;
+}
+
+.collection-toggle {
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--tap);
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--spacing-2);
   padding: 0;
   border: none;
@@ -1018,28 +1025,114 @@ body.auth-pending .auth-gate .auth-loading {
   text-align: left;
 }
 
-.collection-row-name:hover {
+.collection-toggle:hover {
   background: transparent;
 }
 
-.collection-row-label {
+.collection-chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform 0.2s;
+}
+
+.collection-chevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.collection.open .collection-chevron {
+  transform: rotate(90deg);
+}
+
+.collection-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.collection-row.selected .collection-row-label {
   font-weight: 600;
   color: var(--color-primary);
 }
 
-.collection-row-count {
+.collection-count {
   flex-shrink: 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-muted);
+}
+
+.collection-tools {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.icon-tool {
+  width: 36px;
+  height: 36px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.icon-tool svg {
+  width: 17px;
+  height: 17px;
+}
+
+.icon-tool:hover {
+  background: var(--color-card-3);
+  color: var(--color-text);
+}
+
+.icon-tool-danger:hover {
+  color: var(--color-error);
+}
+
+.icon-tool.armed,
+.icon-tool.armed:hover {
+  width: auto;
+  padding: 0 var(--spacing-3);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.collection-rename {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.collection-rename input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--spacing-3);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+}
+
+.collection-rename input:focus {
+  outline: none;
+}
+
+.collection-body {
+  padding: var(--spacing-2) 0 var(--spacing-2);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--spacing-1);
+}
+
+.collection-body .add-word-form {
+  margin: var(--spacing-2) 0 var(--spacing-3);
 }
 
 /* On/off switch: a styled checkbox */

@@ -1,5 +1,5 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.4.1";
+const CACHE_NAME = "flashcards-v1.5.1";
 const urlsToCache = [
   // Main pages
   "/",
@@ -104,101 +104,40 @@ self.addEventListener("activate", (event) => {
 });
 
 // Fetch event - serve from cache with network fallback
+// Fetch: network first, cache as fallback, for every same-origin GET.
+//
+// Serving scripts from the cache first meant that, for one load after a deploy, a page fetched
+// fresh from the network could run with an older cached script, and break. Going to the network
+// first keeps every file of a page from the same deploy; the cache only answers offline. The
+// server's no-cache headers make these requests cheap revalidations.
 self.addEventListener("fetch", (event) => {
-  // Skip cross-origin requests (Firebase SDK, Google sign-in, Firestore)
-  if (!event.request.url.startsWith(self.location.origin)) {
+  const request = event.request;
+  // Cross-origin requests (Firebase SDK, Google sign-in, Firestore, Analytics) are not ours
+  if (request.method !== "GET" || !request.url.startsWith(self.location.origin)) {
     return;
   }
-
   // Firebase Hosting's reserved URLs (the sign-in handler) must always come from the network
-  if (new URL(event.request.url).pathname.startsWith("/__/")) {
+  if (new URL(request.url).pathname.startsWith("/__/")) {
     return;
   }
 
-  // For navigation requests (HTML pages), always try network first
-  // to ensure users get the latest content and service worker updates
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // If we get a valid response, cache it and return it
-          if (
-            response &&
-            response.status === 200 &&
-            response.type === "basic"
-          ) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try to serve from cache
-          return caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || caches.match("/index.html");
-          });
-        })
-    );
-    return;
-  }
-
-  // For other requests, use cache-first strategy but with network update
   event.respondWith(
-    caches
-      .match(event.request)
-      .then((cachedResponse) => {
-        // If we have a cached version, return it immediately
-        if (cachedResponse) {
-          // But also try to update the cache in the background
-          fetch(event.request)
-            .then((networkResponse) => {
-              if (
-                networkResponse &&
-                networkResponse.status === 200 &&
-                networkResponse.type === "basic"
-              ) {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-              }
-            })
-            .catch(() => {
-              // Ignore network errors for background updates
-            });
-
-          return cachedResponse;
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === "basic") {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         }
-
-        // If not cached, fetch from network
-        return fetch(event.request).then((fetchResponse) => {
-          // Check if we received a valid response
-          if (
-            !fetchResponse ||
-            fetchResponse.status !== 200 ||
-            fetchResponse.type !== "basic"
-          ) {
-            return fetchResponse;
-          }
-
-          // Clone the response as it can only be consumed once
-          const responseToCache = fetchResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
-          return fetchResponse;
-        });
+        return response;
       })
-      .catch(() => {
-        // If both cache and network fail, return a fallback page for navigation requests
-        if (event.request.destination === "document") {
-          return caches.match("/index.html");
-        }
-      })
+      .catch(() =>
+        caches.match(request).then((cached) => {
+          if (cached) return cached;
+          // Offline navigation to a page we never cached: fall back to the study page
+          if (request.mode === "navigate") return caches.match("/index.html");
+          return Response.error();
+        })
+      )
   );
 });
 

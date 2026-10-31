@@ -116,22 +116,20 @@
         </div>
       </header>
 
-      <!-- Collections: switch them on or off for study, pick one to edit -->
+      <!-- Collections: create or import; each collection is a card of its own below -->
       <section class="panel">
-        <h2 class="panel-title" data-i18n="collections.title">Collections</h2>
+        <div class="panel-head">
+          <h2 class="panel-title" data-i18n="collections.title">Collections</h2>
+          <div class="collection-actions">
+            <button type="button" id="newCollectionBtn" class="chip-btn" data-i18n="collections.new">New</button>
+            <button type="button" id="importBtn" class="chip-btn" data-i18n="collections.import">Import</button>
+          </div>
+        </div>
         <p class="hint" data-i18n="collections.activeHint">
           Study uses the collections that are switched on.
         </p>
-        <ul id="collectionList" class="collection-list"></ul>
-        <div class="collection-actions">
-          <button type="button" id="newCollectionBtn" class="chip-btn" data-i18n="collections.new">New</button>
-          <button type="button" id="renameCollectionBtn" class="chip-btn" data-i18n="collections.rename">Rename</button>
-          <button type="button" id="importBtn" class="chip-btn" data-i18n="collections.import">Import</button>
-          <button type="button" id="exportBtn" class="chip-btn" data-i18n="collections.export">Export</button>
-          <button type="button" id="deleteCollectionBtn" class="chip-btn chip-danger" data-i18n="collections.delete">Delete</button>
-        </div>
 
-        <!-- Name a new collection, or rename the current one -->
+        <!-- Name a new collection -->
         <form id="collectionNameForm" class="inline-form hidden" autocomplete="off">
           <input
             type="text"
@@ -162,41 +160,8 @@
         </div>
       </section>
 
-      <!-- Add one word at a time -->
-      <section class="panel">
-        <h2 class="panel-title" data-i18n="words.addTitle">Add a Word</h2>
-        <form id="addWordForm" class="add-word-form" autocomplete="off">
-          <input
-            type="text"
-            id="newWord"
-            placeholder="Word"
-            data-i18n-placeholder="words.wordPlaceholder"
-            maxlength="200"
-            autocapitalize="none"
-            required
-          />
-          <input
-            type="text"
-            id="newTranslation"
-            placeholder="Translation"
-            data-i18n-placeholder="words.translationPlaceholder"
-            maxlength="500"
-            autocapitalize="none"
-          />
-          <button type="submit" id="addWordBtn" class="primary-btn" data-i18n="words.add">
-            Add
-          </button>
-        </form>
-      </section>
-
-      <!-- The signed-in user's collection -->
-      <section class="panel">
-        <h2 class="panel-title">
-          <span id="collectionTitle"></span>
-          <span id="wordCount" class="word-count"></span>
-        </h2>
-        <ul id="wordList" class="word-list"></ul>
-      </section>
+      <!-- One collapsible card per collection, rendered by word-manager.js -->
+      <div id="collectionList"></div>
 
       <div id="messageContainer" class="toast-container" aria-live="polite"></div>
     </div>

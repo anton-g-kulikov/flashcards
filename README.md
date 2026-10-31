@@ -15,9 +15,10 @@ their mechanics are the same; the shared DGT vocabulary became personal collecti
   asks what a word means and offers up to four translations; Flashcard mode shows the word and
   flips to the translation. Correct answers and "I know this" mark a word known; Reset Progress
   starts these words over. Only words with a translation appear in quizzes.
-- **My Words** (`vocabulary-manager.html`): manage collections. Switch each one on or off for
-  study, tap one to see and edit its words, create, rename, import, export or delete collections,
-  and add words one at a time (the translation is optional and can be added later).
+- **My Words** (`vocabulary-manager.html`): one collapsible card per collection. Its header
+  switches it on or off for study and has rename, export and delete; open it to add words one at
+  a time (the translation is optional and can be added later) and edit or delete them. **New**
+  and **Import** at the top create collections.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.
 
 ## Collections and CSV
@@ -40,8 +41,9 @@ hacer,"to do, to make"
 
 ### Export a collection from the app
 
-1. Open **My Words** (the **+** next to the title) and tap the collection's name.
-2. Tap **Export**. You get `<collection name>.csv`; on an iPhone, save it to Files or share it.
+1. Open **My Words** (the **+** next to the title).
+2. Tap the download icon in the collection's header. You get `<collection name>.csv`; on an
+   iPhone, save it to Files or share it.
 
 ### Import someone else's collection
 
