@@ -50,7 +50,7 @@ function choose(preference) {
 function render() {
   const current = stored();
   document.querySelectorAll("[data-theme-switch]").forEach((container) => {
-    container.className = "theme-switch";
+    container.classList.add("theme-switch");
     container.setAttribute("role", "radiogroup");
     container.setAttribute("aria-label", I18n.t("theme.label"));
     container.replaceChildren(
