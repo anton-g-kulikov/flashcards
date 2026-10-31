@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashcards</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#c17743" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Flashcards" />
+    <meta
+      name="description"
+      content="Your personal vocabulary flashcards, synced with your Google account"
+    />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="icons/ios/152.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/ios/152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/ios/167.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/ios/180.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/ios/192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/ios/32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/ios/16.png" />
+
+    <link rel="stylesheet" href="src/ui/styles.css" />
+    <script>
+      // Initialize page type detection
+      window.isVocabManagerPage = false;
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      // Only register service worker if served over HTTP/HTTPS
+      if (
+        "serviceWorker" in navigator &&
+        (location.protocol === "http:" || location.protocol === "https:")
+      ) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then(function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+
+              // Check for updates only on initial load
+              registration.update().catch((err) => {
+                console.log("Service worker update check failed:", err);
+              });
+
+              // Handle updates
+              registration.addEventListener("updatefound", function () {
+                const newWorker = registration.installing;
+                console.log("New service worker found, installing...");
+
+                newWorker.addEventListener("statechange", function () {
+                  if (newWorker.state === "installed") {
+                    if (navigator.serviceWorker.controller) {
+                      // New update available
+                      console.log(
+                        "New content is available; prompting for refresh."
+                      );
+
+                      // Show update notification
+                      if (
+                        confirm(
+                          "A new version is available! Would you like to refresh to get the latest features and vocabulary?"
+                        )
+                      ) {
+                        // Tell the new service worker to skip waiting
+                        newWorker.postMessage({ type: "SKIP_WAITING" });
+
+                        // Reload the page
+                        window.location.reload();
+                      }
+                    } else {
+                      // Content is cached for the first time
+                      console.log("Content is cached for offline use.");
+                    }
+                  }
+                });
+              });
+
+              // Listen for controlling changes
+              navigator.serviceWorker.addEventListener(
+                "controllerchange",
+                () => {
+                  console.log(
+                    "Service worker controller changed, reloading..."
+                  );
+                  window.location.reload();
+                }
+              );
+
+              // Listen for messages from service worker
+              navigator.serviceWorker.addEventListener("message", (event) => {
+                if (event.data && event.data.type === "CACHE_UPDATED") {
+                  console.log("Cache updated to:", event.data.cacheName);
+                } else if (event.data && event.data.type === "CACHE_CLEARED") {
+                  console.log("Cache cleared successfully");
+                }
+              });
+            })
+            .catch(function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            });
+        });
+      } else if (location.protocol === "file:") {
+        console.info(
+          "PWA features disabled: Please serve this app over HTTP/HTTPS for full PWA functionality. Run 'python3 -m http.server 8082' and visit http://localhost:8082"
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Sign-in screen, shown until a Google account is signed in -->
+    <div id="authGate" class="auth-gate">
+      <div class="auth-loading">
+        <div class="spinner"></div>
+      </div>
+      <div class="auth-card">
+        <h1>Flashcards</h1>
+        <p class="subtitle">
+          Your personal vocabulary collection. Add your own words, then learn
+          them with flashcards and quizzes on any device.
+        </p>
+        <button id="googleSignInBtn" class="google-signin-btn">
+          <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Sign in with Google
+        </button>
+        <p id="authError" class="auth-error"></p>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <div class="header">
+        <div id="userChip" class="user-chip"></div>
+        <h1>Flashcards</h1>
+        <div class="subtitle">
+          Your personal collection ·
+          <a href="vocabulary-manager.html">Add words</a>
+        </div>
+
+        <!-- Shown while the collection is empty -->
+        <div id="emptyCollectionNotice" class="empty-collection-notice hidden">
+          Your collection is empty.
+          <a href="vocabulary-manager.html">Add your first words</a> to start
+          studying.
+        </div>
+
+        <!-- PWA Install Button -->
+        <div
+          id="pwa-install-container"
+          class="pwa-install-container"
+          style="display: none"
+        >
+          <button id="pwa-install-button" class="pwa-install-btn">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7,10 12,15 17,10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Install App
+          </button>
+        </div>
+
+        <div class="mode-selector">
+          <button class="mode-btn" onclick="setMode('flashcard', event)">
+            Flashcards
+          </button>
+          <button class="mode-btn active" onclick="setMode('quiz', event)">
+            Quiz Mode
+          </button>
+        </div>
+        <div class="controls-buttons-row">
+          <!-- <div class="toggle-container">
+            <span class="toggle-label left" onclick="toggleShowAllCards()"
+              >Unknown Only</span
+            >
+            <button
+              class="toggle-switch"
+              id="showAllToggle"
+              onclick="toggleShowAllCards()"
+            ></button>
+            <span class="toggle-label right" onclick="toggleShowAllCards()"
+              >All Cards</span
+            >
+          </div> -->
+          <button onclick="resetProgress()">Reset Progress</button>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-number">
+              <span id="totalCards">0</span>
+            </div>
+            <div>Cards</div>
+            <div class="stat-category" id="categoryInfo">
+              In your collection
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat-number" id="knownCards">0</div>
+            <div>Known</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number" id="unknownCards">0</div>
+            <div>Unknown</div>
+          </div>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Flashcard Mode -->
+      <div id="flashcardMode" class="hidden" style="display: none">
+        <div class="flashcard-container">
+          <div class="flashcard" id="flashcard">
+            <!-- Content will be populated dynamically by flashcard-mode.js -->
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="action-btn dont-know-btn" onclick="markCard(false)">
+            I Don't Know...
+          </button>
+          <button class="action-btn know-btn" onclick="markCard(true)">
+            I Know This!
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Mode -->
+      <div id="quizMode" style="display: block">
+        <div class="quiz-mode">
+          <div class="quiz-question" id="quizQuestion">
+            <!-- Empty initially, will be populated by quiz -->
+          </div>
+          <div class="quiz-options" id="quizOptions">
+            <!-- Options will be populated dynamically -->
+            <div class="quiz-loading-spinner">
+              <div class="spinner-container">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading quiz...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="src/core/cloud.js"></script>
+    <script src="src/ui/auth-gate.js"></script>
+    <script src="src/ui/icons.js"></script>
+    <script src="src/utils/analytics.js"></script>
+    <script src="src/utils/pwa-installer.js"></script>
+    <script src="src/utils/reset-progress.js"></script>
+    <script src="src/utils/cache-manager.js"></script>
+    <script src="src/utils/version-sync.js"></script>
+    <script src="src/utils/shuffle-utils.js"></script>
+    <script src="src/core/core.js"></script>
+    <script src="src/features/flashcards/flashcard-mode.js"></script>
+    <script src="src/features/flashcards/quiz-mode.js"></script>
+    <script src="src/features/stats/stats-manager.js"></script>
+    <script src="src/ui/ui-helpers.js"></script>
+    <script src="src/utils/script.js"></script>
+    <script>
+      // Global setMode function for mode switching
+      window.setMode = function (mode, event) {
+        console.log(`Switching to mode: ${mode}`);
+
+        // Update button states
+        document
+          .querySelectorAll(".mode-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        if (event && event.target) {
+          event.target.classList.add("active");
+        }
+
+        // Show/hide mode containers
+        const flashcardMode = document.getElementById("flashcardMode");
+        const quizMode = document.getElementById("quizMode");
+
+        if (mode === "flashcard") {
+          flashcardMode.classList.remove("hidden");
+          flashcardMode.style.display = "block";
+          quizMode.classList.add("hidden");
+          quizMode.style.display = "none";
+
+          // Update app mode and show current card
+          if (window.vocabApp) {
+            window.vocabApp.currentMode = "flashcard";
+            window.vocabApp.updateCurrentCards();
+            if (window.vocabApp.flashcardMode) {
+              window.vocabApp.flashcardMode.showCurrentCard();
+            }
+          } else {
+            // If vocabApp isn't ready yet, set up a temporary message
+            const flashcard = document.getElementById("flashcard");
+            if (flashcard) {
+              flashcard.innerHTML = `
+                <div class="card-face card-front">
+                  <div class="spanish-word">Loading cards...</div>
+                  <div class="category-badge">Please wait</div>
+                </div>
+              `;
+            }
+          }
+        } else if (mode === "quiz") {
+          flashcardMode.classList.add("hidden");
+          flashcardMode.style.display = "none";
+          quizMode.classList.remove("hidden");
+          quizMode.style.display = "block";
+
+          // Update app mode - but don't automatically start quiz on page load
+          if (window.vocabApp) {
+            window.vocabApp.currentMode = "quiz";
+
+            // Only start quiz if this is a user-initiated mode switch (has event)
+            // or if there's no current question showing
+            if (
+              event ||
+              !document
+                .getElementById("quizQuestion")
+                .textContent.includes("What does")
+            ) {
+              if (window.vocabApp.quizMode) {
+                window.vocabApp.quizMode.startQuiz();
+              }
+            }
+          }
+        }
+      };
+
+      // Reset function is now handled by reset-progress.js utility
+    </script>
+
+    <footer class="site-footer">
+      <div class="footer-content">
+        <span id="footer-version">Version: ...</span>
+        <span class="footer-divider">&nbsp;|&nbsp;</span>
+        <span id="footer-word-count">Vocabulary: ... words</span>
+        <span class="footer-divider">&nbsp;|&nbsp;</span>
+        <a
+          href="https://github.com/anton-g-kulikov/flashcards"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+        <span class="footer-divider">&nbsp;|&nbsp;</span>
+        <a
+          href="https://buymeacoffee.com/antonkulikov"
+          target="_blank"
+          rel="noopener"
+          >Find this useful? Buy me a coffee! ☕️ :)
+        </a>
+      </div>
+    </footer>
+  </body>
+</html>

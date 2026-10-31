@@ -1,0 +1,16 @@
+{
+  "name": "flashcards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal flashcards PWA: Google sign-in and per-user word collections on Firebase, with flashcard and quiz modes.",
+  "scripts": {
+    "dev": "firebase emulators:start --only auth,firestore,hosting",
+    "test": "firebase emulators:exec --only firestore --project demo-flashcards \"node --test test/*.test.js\"",
+    "deploy": "firebase deploy --only hosting,firestore"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.1.0"
+  }
+}

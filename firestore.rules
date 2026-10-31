@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// Flashcards security rules.
+//
+// The browser talks to Firestore directly, so these rules are the only thing keeping one person's
+// collection away from another. Ownership is the {userId} path segment, never a document field.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // A word and its optional Russian translation. The field list matches cardFields() in
+    // public/src/core/cloud.js; a new card field has to be added here in the same change.
+    function isCard(d) {
+      return d.keys().hasOnly(['word', 'translation', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['word'])
+        && d.word is string && d.word.size() > 0 && d.word.size() <= 200
+        && (!('translation' in d) || (d.translation is string && d.translation.size() <= 500))
+        && (!('createdAt' in d) || d.createdAt is timestamp)
+        && (!('updatedAt' in d) || d.updatedAt is timestamp);
+    }
+
+    // Learning progress: which cards are known, and when each was last seen.
+    function isProgress(d) {
+      return d.keys().hasOnly(['known', 'history', 'updatedAt'])
+        && (!('known' in d) || (d.known is list && d.known.size() <= 20000))
+        && (!('history' in d) || d.history is map)
+        && (!('updatedAt' in d) || d.updatedAt is timestamp);
+    }
+
+    match /users/{userId}/cards/{cardId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isCard(request.resource.data);
+    }
+
+    match /users/{userId}/meta/progress {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isProgress(request.resource.data);
+    }
+
+    // Everything else is denied, including the user document itself.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
