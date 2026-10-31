@@ -61,6 +61,15 @@ describe("fromCards", () => {
   });
 });
 
+describe("example.csv", () => {
+  it("is a valid collection that shows the format, including a quoted comma", () => {
+    const cards = toCards(readFileSync("public/collections/example.csv", "utf8"));
+    assert.ok(cards.length >= 5);
+    assert.ok(cards.every((c) => c.word && c.translation));
+    assert.ok(cards.some((c) => c.translation.includes(",")));
+  });
+});
+
 describe("starter collections", () => {
   const dir = "public/collections";
   const index = JSON.parse(readFileSync(`${dir}/index.json`, "utf8"));

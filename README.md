@@ -36,6 +36,9 @@ hacer,"to do, to make"
 - The translation may be empty. Other columns are ignored, and repeated words are skipped.
 - Any language pair works: the app shows `word` first and quizzes you on `translation`.
 
+[`public/collections/example.csv`](public/collections/example.csv) is a small example to copy
+and edit.
+
 ### Export a collection from the app
 
 1. Open **My Words** (the **+** next to the title).
@@ -69,7 +72,8 @@ are masculine singular. No Spanish word appears in more than one of these eight 
 Have a word list others could use? Send it in, and it can become a starter collection in the app.
 
 **First, make a CSV file** in the [format above](#collections-and-csv). The easiest way: build the
-collection in the app, then export it with the download icon in its header. Give every word a
+collection in the app, then export it with the download icon in its header. Or start from
+[`example.csv`](public/collections/example.csv) and replace its words with yours. Give every word a
 translation, and check the spelling (and, for nouns, the articles).
 
 **Then send it**, whichever way suits you:
