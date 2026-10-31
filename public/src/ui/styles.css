@@ -845,8 +845,9 @@ button.armed:hover {
 .theme-option {
   display: grid;
   place-items: center;
-  width: 34px;
+  width: 36px;
   height: 30px;
+  min-height: 0; /* not the 44px of other buttons: the pill around them is the target */
   padding: 0;
   border: none;
   border-radius: 999px;
@@ -1509,5 +1510,10 @@ body.auth-pending .auth-gate .auth-loading {
 
   .site-footer .footer-divider {
     display: inline;
+  }
+
+  /* The coffee line always gets a line of its own, so no divider is left dangling */
+  .site-footer .footer-coffee {
+    flex-basis: 100%;
   }
 }
