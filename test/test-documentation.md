@@ -36,12 +36,12 @@ With `npm run dev`, at http://127.0.0.1:5050:
 
 1. Signed out, both pages show only the sign-in screen.
 2. Sign in (emulator popup or `Cloud.signInForTesting()`): the account chip shows the name.
-3. My Words: add a word with and without a translation; adding the same word again (any case)
+3. My Cards: add a word with and without a translation; adding the same word again (any case)
    is refused; editing a translation and deleting a word persist after reload.
 4. Study: quiz options are the collection's translations; untranslated words are left out of the
    quiz; flashcards flip to the translation ("No translation yet" when missing).
 5. Answer a quiz question correctly, reload: the known count is kept. Reset Progress needs a
    second tap ("Tap again to reset all progress"); after it, the known count is 0, also after a
-   reload. Delete in My Words likewise needs a second tap ("Sure?"). These replace `confirm()`,
+   reload. Delete in My Cards likewise needs a second tap ("Sure?"). These replace `confirm()`,
    which embedded browsers can suppress (a suppressed dialog returns false and cancels).
 6. Sign out and in as a different account: the collection is empty.

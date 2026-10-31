@@ -10,7 +10,7 @@ sync across devices and keep working offline.
 
 - **Study** (`index.html`): learn the words of every collection that's switched on, with
   flashcards or a multiple-choice quiz. See [How studying works](#how-studying-works).
-- **My Words** (`vocabulary-manager.html`): one collapsible card per collection. Its header
+- **My Cards** (`vocabulary-manager.html`): one collapsible card per collection. Its header
   switches it on or off for study and has rename, export and delete; open it to add words one at
   a time (the translation is optional and can be added later) and edit or delete them. **New**
   and **Import** at the top create collections.
@@ -20,7 +20,7 @@ sync across devices and keep working offline.
 
 ### The words you study
 
-The study page uses every word in the collections switched on in **My Words**. Each word is
+The study page uses every word in the collections switched on in **My Cards**. Each word is
 either **known** or **not yet known**, and both modes only ever show the words you don't know
 yet. The app also remembers when you last saw each word. Both are saved to your account, so
 your progress follows you to every device.
@@ -88,7 +88,7 @@ and edit.
 
 ### Export a collection from the app
 
-1. Open **My Words** (the **+** next to the title).
+1. Open **My Cards** (the button next to the YourCards title).
 2. Tap the download icon in the collection's header. You get `<collection name>.csv`; on an
    iPhone, save it to Files or share it.
 
@@ -96,7 +96,7 @@ and edit.
 
 1. Get the CSV file: from a friend, or from [`public/collections/`](public/collections/) in this
    repository (open the file on GitHub, then **Download raw file**).
-2. In **My Words**, tap **Import → Choose a CSV file**. It becomes a new collection named after
+2. In **My Cards**, tap **Import → Choose a CSV file**. It becomes a new collection named after
    the file, switched on for study. Nothing you already have is changed.
 
 The collections in this repository are also listed under **Import → Starter collections**, so

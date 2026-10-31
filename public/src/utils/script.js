@@ -13,7 +13,7 @@ AuthGate.onSignedIn(async function () {
   window.allCardIds = new Set(allCards.map((card) => card.id));
   window.initialProgress = progress;
 
-  // Study every word in the collections switched on in My Words (cards whose collection is
+  // Study every word in the collections switched on in My Cards (cards whose collection is
   // gone count as on, so nothing silently disappears)
   const inactive = new Set(collections.filter((c) => !c.active).map((c) => c.id));
   window.vocabularyData = allCards.filter((card) => !inactive.has(card.collectionId));
