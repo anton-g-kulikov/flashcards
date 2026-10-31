@@ -13,8 +13,6 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
-  arrayRemove,
-  arrayUnion,
   collection,
   connectFirestoreEmulator,
   deleteDoc,
@@ -248,32 +246,28 @@ export const Cloud = {
     return editCards(collectionId, (cards) => cards.filter((c) => c.id !== id));
   },
 
+  // { srs } (spaced repetition), or { known, history } saved by versions before it
   async loadProgress() {
     const snapshot = await getDoc(progressRef());
-    const data = snapshot.exists() ? snapshot.data() : {};
-    return { known: data.known || [], history: data.history || {} };
+    return snapshot.exists() ? snapshot.data() : {};
   },
 
-  // Saves what changed since the last save (Progress.takeChanges), merged into what is stored,
-  // so progress saved meanwhile from another device is kept. The card ids are map keys here, not
-  // field paths, so any id is safe.
-  saveProgressChanges({ knownAdd, knownRemove, history }) {
-    const ref = progressRef();
-    const updatedAt = serverTimestamp();
-    const batch = writeBatch(db);
-    const seen = Object.fromEntries(
-      Object.entries(history).map(([id, time]) => [id, time === null ? deleteField() : time])
-    );
-    batch.set(
-      ref,
-      { ...(knownAdd.length ? { known: arrayUnion(...knownAdd) } : {}), history: seen, updatedAt },
-      { merge: true }
-    );
-    // A second write: one write can't both add to and remove from the same list
-    if (knownRemove.length) {
-      batch.set(ref, { known: arrayRemove(...knownRemove), updatedAt }, { merge: true });
+  // Saves what changed since the last save (Progress.takeChanges): single srs entries merged into
+  // what is stored, so progress saved meanwhile from another device is kept. The card ids are
+  // map keys here, not field paths, so any id is safe. `dropLegacy` removes the fields of
+  // progress saved before spaced repetition, once it has been converted.
+  saveProgressChanges({ srs, dropLegacy }) {
+    const data = {
+      srs: Object.fromEntries(
+        Object.entries(srs).map(([id, entry]) => [id, entry === null ? deleteField() : entry])
+      ),
+      updatedAt: serverTimestamp(),
+    };
+    if (dropLegacy) {
+      data.known = deleteField();
+      data.history = deleteField();
     }
-    return batch.commit();
+    return setDoc(progressRef(), data, { merge: true });
   },
 };
 

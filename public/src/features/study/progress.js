@@ -1,92 +1,147 @@
-// What the user knows: the ids of the cards marked known, and when each card was last seen.
-// Saved to the account, so progress follows the user to every device. No DOM here: the tests
-// import it directly.
+// Spaced repetition (Leitner boxes): what the user has learned, and when each word comes back.
 //
-// Every change is also recorded as pending, and saving sends only those changes (Cloud.
-// saveProgressChanges), never the whole record: two devices, or a tab left open since yesterday,
-// then add to each other's progress instead of overwriting it.
+// Every word sits in a box from 0 (new) to 5 (mastered) with a due date. Knowing a word moves it
+// up a box and schedules it further out (INTERVAL_DAYS); not knowing it drops it to box 1, due
+// again straight away. Each session studies what is due, oldest first, then new words.
+//
+// Saved to the account as `srs: { cardId: { box, due } }`, so it follows the user to every
+// device. Every change is also recorded as pending, and saving sends only those entries
+// (Cloud.saveProgressChanges): two devices, or a tab left open since yesterday, add to each
+// other's progress instead of overwriting it. No DOM here: the tests import it directly.
+import { shuffle } from "../../utils/shuffle-utils.js";
+
+export const DAY = 24 * 60 * 60 * 1000;
+// Days until a word in each box is due again; box 0 is new, box 5 is mastered
+export const INTERVAL_DAYS = [0, 1, 3, 7, 16, 35];
+export const MASTERED = INTERVAL_DAYS.length - 1;
+
+function validEntry(entry) {
+  return (
+    entry &&
+    Number.isInteger(entry.box) &&
+    entry.box >= 1 &&
+    entry.box <= MASTERED &&
+    Number.isFinite(entry.due)
+  );
+}
+
 export class Progress {
-  constructor({ known = [], history = {} } = {}) {
-    this.known = new Set(known);
-    this.history = { ...history };
-    this.pendingKnown = new Map(); // id → true (known) or false (not known)
-    this.pendingHistory = new Map(); // id → last seen (ms), or null to forget it
+  // `saved` is the stored record. Progress saved before spaced repetition ({ known, history })
+  // is converted: known words go to box 2, due now, so each gets one review; the old fields are
+  // dropped with the first save.
+  constructor({ known = [], history = {}, srs } = {}, now = Date.now()) {
+    this.srs = {};
+    this.pending = new Map(); // card id → { box, due }, or null to forget it
+    this.dropLegacy = false;
+    if (srs) {
+      for (const [id, entry] of Object.entries(srs)) {
+        if (validEntry(entry)) this.srs[id] = { box: entry.box, due: entry.due };
+      }
+    } else if (known.length > 0 || Object.keys(history).length > 0) {
+      known.forEach((id) => this.set(id, { box: 2, due: now }));
+      this.dropLegacy = true;
+    }
   }
 
-  isKnown(id) {
-    return this.known.has(id);
+  set(id, entry) {
+    if (entry) this.srs[id] = entry;
+    else delete this.srs[id];
+    this.pending.set(id, entry);
   }
 
-  // The cards not known yet, in their given order
-  unknown(cards) {
-    return cards.filter((card) => !this.known.has(card.id));
+  box(id) {
+    return this.srs[id]?.box ?? 0;
   }
 
-  knownCount(cards) {
-    return cards.length - this.unknown(cards).length;
+  // New words and words whose review is due
+  needsStudy(id, now = Date.now()) {
+    const entry = this.srs[id];
+    return !entry || entry.due <= now;
   }
 
-  seen(id, now = Date.now()) {
-    this.history[id] = now;
-    this.pendingHistory.set(id, now);
+  // Knew it: up a box, back after that box's interval
+  right(id, now = Date.now()) {
+    const box = Math.min(this.box(id) + 1, MASTERED);
+    this.set(id, { box, due: now + INTERVAL_DAYS[box] * DAY });
   }
 
-  markKnown(id, now = Date.now()) {
-    this.known.add(id);
-    this.pendingKnown.set(id, true);
-    this.seen(id, now);
+  // Didn't: box 1, due again now (it comes back later in this session)
+  wrong(id, now = Date.now()) {
+    this.set(id, { box: 1, due: now });
   }
 
-  markUnknown(id, now = Date.now()) {
-    this.known.delete(id);
-    this.pendingKnown.set(id, false);
-    this.seen(id, now);
+  // What to study now: due words, oldest due first (words due the same day in random order, so
+  // no sequence can be learned), then new words in random order
+  studyQueue(cards, now = Date.now(), random = Math.random) {
+    const due = [];
+    const fresh = [];
+    for (const card of cards) {
+      const entry = this.srs[card.id];
+      if (!entry) fresh.push(card);
+      else if (entry.due <= now) due.push(card);
+    }
+    const order = new Map(due.map((card) => [card.id, [Math.floor(this.srs[card.id].due / DAY), random()]]));
+    due.sort((a, b) => {
+      const [dayA, tieA] = order.get(a.id);
+      const [dayB, tieB] = order.get(b.id);
+      return dayA - dayB || tieA - tieB;
+    });
+    return [...due, ...shuffle(fresh, random)];
   }
 
-  // Forgets the given cards: unknown again, never seen
+  // The stats row: words to study now (due or new), learning (boxes 1–4, not due), mastered
+  // (box 5, not due), and `level`, the average box as a share of mastery (0 to 1)
+  stats(cards, now = Date.now()) {
+    const stats = { due: 0, learning: 0, mastered: 0, level: 0 };
+    let boxes = 0;
+    for (const card of cards) {
+      boxes += this.box(card.id);
+      if (this.needsStudy(card.id, now)) stats.due++;
+      else if (this.box(card.id) === MASTERED) stats.mastered++;
+      else stats.learning++;
+    }
+    stats.level = cards.length ? boxes / (cards.length * MASTERED) : 0;
+    return stats;
+  }
+
+  // When the next of these cards comes due, or null if none is scheduled
+  nextDue(cards) {
+    const dues = cards.map((card) => this.srs[card.id]?.due).filter((due) => due !== undefined);
+    return dues.length ? Math.min(...dues) : null;
+  }
+
+  // Back to new: forgets the given cards
   reset(ids) {
     for (const id of ids) {
-      if (this.known.delete(id)) this.pendingKnown.set(id, false);
-      if (id in this.history) {
-        delete this.history[id];
-        this.pendingHistory.set(id, null);
-      }
+      if (this.srs[id]) this.set(id, null);
     }
   }
 
   // Forgets cards that no longer exist, so deleted ones don't linger in the saved record.
   // Returns whether there was anything to forget.
   prune(existingIds) {
-    const gone = new Set(
-      [...this.known, ...Object.keys(this.history)].filter((id) => !existingIds.has(id))
-    );
+    const gone = Object.keys(this.srs).filter((id) => !existingIds.has(id));
     this.reset(gone);
-    return gone.size > 0;
+    return gone.length > 0;
   }
 
   hasChanges() {
-    return this.pendingKnown.size > 0 || this.pendingHistory.size > 0;
+    return this.pending.size > 0 || this.dropLegacy;
   }
 
-  // The changes since the last call, for saving: { knownAdd, knownRemove, history } where
-  // history maps a card id to when it was seen, or null to forget it
+  // The changes since the last call, for saving: { srs: { id: entry or null }, dropLegacy }
   takeChanges() {
-    const changes = { knownAdd: [], knownRemove: [], history: Object.fromEntries(this.pendingHistory) };
-    for (const [id, known] of this.pendingKnown) {
-      (known ? changes.knownAdd : changes.knownRemove).push(id);
-    }
-    this.pendingKnown.clear();
-    this.pendingHistory.clear();
+    const changes = { srs: Object.fromEntries(this.pending), dropLegacy: this.dropLegacy };
+    this.pending.clear();
+    this.dropLegacy = false;
     return changes;
   }
 
   // Puts back changes that could not be saved, unless newer ones replaced them meanwhile
-  restoreChanges({ knownAdd, knownRemove, history }) {
-    const keep = (map, id, value) => {
-      if (!map.has(id)) map.set(id, value);
-    };
-    knownAdd.forEach((id) => keep(this.pendingKnown, id, true));
-    knownRemove.forEach((id) => keep(this.pendingKnown, id, false));
-    Object.entries(history).forEach(([id, time]) => keep(this.pendingHistory, id, time));
+  restoreChanges({ srs, dropLegacy }) {
+    for (const [id, entry] of Object.entries(srs)) {
+      if (!this.pending.has(id)) this.pending.set(id, entry);
+    }
+    if (dropLegacy) this.dropLegacy = true;
   }
 }

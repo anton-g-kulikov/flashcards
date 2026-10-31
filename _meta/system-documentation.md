@@ -14,7 +14,7 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Sign-in screen, account chip, loading errors | `public/src/ui/auth-gate.js` |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
 | Study page (modes, stats, saving progress) | `public/src/study.js`, the modes in `public/src/features/flashcards/` |
-| Study logic without the DOM (progress, quiz choices, card order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
+| Study logic without the DOM (spaced repetition, quiz choices, random order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
 | Collections and words | `public/src/features/vocabulary-manager/word-manager.js` (page), `public/src/core/cloud.js` and `card-data.js` (storage) |
 | CSV reading and writing | `public/src/utils/csv.js`, tested in `test/csv.test.js` |
 | Starter collections | `public/collections/` with `index.json` |
@@ -27,15 +27,19 @@ Data lives under each user's uid; the rules allow nobody else in:
 
 ```text
 users/{uid}/collections/{id}  { name, active, cards: [{ id, word, translation }], createdAt, updatedAt }
-users/{uid}/meta/progress     { known: [cardId], history: { cardId: lastSeenMs }, updatedAt }
+users/{uid}/meta/progress     { srs: { cardId: { box, due } }, updatedAt }
 ```
 
-Progress is saved as changes, not as a whole: `Progress` in
-`public/src/features/study/progress.js` records what changed, and `Cloud.saveProgressChanges`
-merges it in (`arrayUnion`/`arrayRemove` on `known`, single entries of `history`), at most every
-2 seconds and when the page is hidden. Two devices studying at once both keep their progress.
-Progress of deleted cards is pruned when the study page loads. `updatedAt` must be the server's
-clock (`serverTimestamp()`); the rules refuse any other value.
+Progress is spaced repetition with Leitner boxes (`public/src/features/study/progress.js`, tested
+in `test/study.test.js`): box 0 is new, boxes 1–5 come back after 1, 3, 7, 16 and 35 days, a
+miss goes back to box 1 due now; `due` is in ms. It is saved as changes, not as a whole:
+`Progress` records each changed entry, and `Cloud.saveProgressChanges` merges them in (`set` with
+`merge`, `deleteField()` to forget one), at most every 2 seconds and when the page is hidden. Two
+devices studying at once both keep their progress. Progress of deleted cards is pruned when the
+study page loads. Progress saved before spaced repetition (`known: [cardId]`, `history`) is
+converted on load (known words to box 2, due now) and the old fields are deleted. The rules
+refuse a write that would drop `srs` (an old version's whole-record save) and any `updatedAt`
+other than the server's clock.
 
 A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
 1 MiB per document), so loading everything costs one read per collection, an import is a single

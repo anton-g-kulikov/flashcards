@@ -9,8 +9,6 @@ import {
 } from "@firebase/rules-unit-testing";
 import {
   Timestamp,
-  arrayRemove,
-  arrayUnion,
   deleteDoc,
   deleteField,
   doc,
@@ -139,14 +137,29 @@ describe("progress", () => {
     await assertSucceeds(getDoc(ref));
   });
 
-  it("takes changes merged in: known words added or removed, single history entries", async () => {
+  it("takes spaced-repetition entries merged in, one card at a time", async () => {
     const ref = doc(as("alice"), "users/alice/meta/progress");
     const now = serverTimestamp();
-    await assertSucceeds(setDoc(ref, { known: arrayUnion("c1", "c2"), history: { c1: 1, c2: 2 }, updatedAt: now }, { merge: true }));
-    await assertSucceeds(setDoc(ref, { known: arrayRemove("c1"), history: { c1: deleteField() }, updatedAt: now }, { merge: true }));
+    await assertSucceeds(setDoc(ref, { known: ["c1"], history: { c1: 1 }, updatedAt: now }));
+    await assertSucceeds(
+      setDoc(ref, { srs: { c1: { box: 2, due: 5 } }, known: deleteField(), history: deleteField(), updatedAt: now }, { merge: true })
+    );
+    await assertSucceeds(setDoc(ref, { srs: { c2: { box: 1, due: 6 } }, updatedAt: now }, { merge: true }));
+    await assertSucceeds(setDoc(ref, { srs: { c1: deleteField() }, updatedAt: now }, { merge: true }));
     const saved = (await getDoc(ref)).data();
-    assert.deepEqual(saved.known, ["c2"]);
-    assert.deepEqual(saved.history, { c2: 2 });
+    assert.deepEqual(saved.srs, { c2: { box: 1, due: 6 } });
+    assert.ok(!("known" in saved) && !("history" in saved));
+  });
+
+  it("refuses a whole-record rewrite without srs once srs exists (an old version's save)", async () => {
+    const ref = doc(as("alice"), "users/alice/meta/progress");
+    await assertSucceeds(setDoc(ref, { srs: { c1: { box: 2, due: 5 } }, updatedAt: serverTimestamp() }));
+    await assertFails(setDoc(ref, { known: ["c1"], history: {}, updatedAt: serverTimestamp() }));
+  });
+
+  it("caps srs at 20,000 cards", async () => {
+    const big = Object.fromEntries(Array.from({ length: 20001 }, (_, i) => [`c${i}`, { box: 1, due: 1 }]));
+    await assertFails(setDoc(doc(as("alice"), "users/alice/meta/progress"), { srs: big }));
   });
 
   it("accepts only the server's clock as updatedAt", async () => {

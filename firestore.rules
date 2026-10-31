@@ -33,10 +33,12 @@ service cloud.firestore {
         && stamped(d);
     }
 
-    // Learning progress: which cards are known, and when each was last seen. The app saves only
-    // what changed (arrayUnion/arrayRemove and single history entries), merged into this.
+    // Learning progress, spaced repetition: srs maps each card id to { box, due }. The app
+    // saves only the entries that changed, merged into this. known/history are the fields of
+    // progress saved before spaced repetition; the app converts and drops them.
     function isProgress(d) {
-      return d.keys().hasOnly(['known', 'history', 'updatedAt'])
+      return d.keys().hasOnly(['srs', 'known', 'history', 'updatedAt'])
+        && (!('srs' in d) || (d.srs is map && d.srs.size() <= 20000))
         && (!('known' in d) || (d.known is list && d.known.size() <= 20000))
         && (!('history' in d) || (d.history is map && d.history.size() <= 20000))
         && stamped(d);
@@ -55,7 +57,11 @@ service cloud.firestore {
 
     match /users/{userId}/meta/progress {
       allow read, delete: if isOwner(userId);
-      allow create, update: if isOwner(userId) && isProgress(request.resource.data);
+      allow create: if isOwner(userId) && isProgress(request.resource.data);
+      // Versions before spaced repetition rewrote the whole record; from a tab still running
+      // one, that would wipe srs. Such a write is refused instead.
+      allow update: if isOwner(userId) && isProgress(request.resource.data)
+        && (!('srs' in resource.data) || 'srs' in request.resource.data);
     }
 
     // Everything else is denied, including the user document itself.

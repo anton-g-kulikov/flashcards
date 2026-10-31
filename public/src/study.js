@@ -1,5 +1,6 @@
 // The study page: flashcards and the quiz over every word in the collections switched on in
-// My Cards. Progress (known words, when each was last seen) is saved to the account.
+// My Cards, with spaced repetition: what is due comes first, then new words. Progress (each
+// word's box and due date) is saved to the account.
 import "./core/page.js";
 import { Cloud } from "./core/cloud.js";
 import { I18n } from "./ui/i18n.js";
@@ -45,12 +46,12 @@ class StudyPage {
   start() {
     this.showCounts();
     this.renderStats();
-    Analytics.studyStart(this.mode, this.cards.length, this.progress.knownCount(this.cards));
+    Analytics.studyStart(this.mode, this.cards.length, this.progress.stats(this.cards).due);
     this.setMode(this.mode);
   }
 
-  // Quiz is the default; flashcards take over for the quiz's last word (`firstId`)
-  setMode(mode, { byUser = false, firstId } = {}) {
+  // Quiz is the default
+  setMode(mode, { byUser = false } = {}) {
     this.mode = mode;
     document.querySelectorAll(".mode-btn").forEach((button) => {
       const active = button.dataset.mode === mode;
@@ -65,7 +66,7 @@ class StudyPage {
 
     if (mode === "flashcard") {
       this.quiz.stop();
-      this.flashcards.start(firstId);
+      this.flashcards.start();
     } else {
       this.quiz.start();
     }
@@ -90,7 +91,7 @@ class StudyPage {
     });
   }
 
-  // Marks the words being studied unknown again; other collections keep their progress
+  // Makes the words being studied new again; other collections keep their progress
   reset(button) {
     if (!confirmOnSecondTap(button, I18n.t("progress.resetConfirm"))) return;
     this.progress.reset(this.cards.map((card) => card.id));
@@ -101,13 +102,25 @@ class StudyPage {
     else this.quiz.start();
   }
 
+  // Due (to study now, new words included) · Learning · Mastered; the bar is the average box
   renderStats() {
-    const total = this.cards.length;
-    const known = this.progress.knownCount(this.cards);
-    document.getElementById("totalCards").textContent = total;
-    document.getElementById("knownCards").textContent = known;
-    document.getElementById("unknownCards").textContent = total - known;
-    document.getElementById("progressFill").style.width = `${total ? (known / total) * 100 : 0}%`;
+    const { due, learning, mastered, level } = this.progress.stats(this.cards);
+    document.getElementById("dueCards").textContent = due;
+    document.getElementById("learningCards").textContent = learning;
+    document.getElementById("masteredCards").textContent = mastered;
+    document.getElementById("progressFill").style.width = `${level * 100}%`;
+  }
+
+  // Shown by both modes when nothing is left to study now
+  caughtUpMessage() {
+    const next = this.progress.nextDue(this.cards);
+    return {
+      tone: "success",
+      badge: I18n.t("srs.caughtUp.badge"),
+      title: I18n.t("srs.caughtUp.title"),
+      text: next ? I18n.t("srs.caughtUp.next", { when: whenText(next) }) : undefined,
+      hintHtml: I18n.t("srs.caughtUp.hint"),
+    };
   }
 
   showCounts() {
@@ -115,6 +128,15 @@ class StudyPage {
     document.getElementById("emptyCollectionNotice").classList.toggle("hidden", count > 0);
     document.getElementById("footer-word-count").textContent = I18n.t("footer.words", { count });
   }
+}
+
+// "in 3 hours", "tomorrow", "in 16 days", in the interface language
+function whenText(time) {
+  const format = new Intl.RelativeTimeFormat(I18n.lang, { numeric: "auto" });
+  const minutes = Math.max(1, Math.round((time - Date.now()) / 60000));
+  if (minutes < 60) return format.format(minutes, "minute");
+  if (minutes < 24 * 60) return format.format(Math.round(minutes / 60), "hour");
+  return format.format(Math.round(minutes / (24 * 60)), "day");
 }
 
 initInstallPrompt();
@@ -134,7 +156,9 @@ AuthGate.onSignedIn(async () => {
 
   const progress = new Progress(saved);
   const page = new StudyPage(cards, progress);
-  // Progress of cards deleted since (in any collection) is dropped from the saved record
-  if (progress.prune(new Set(allCards.map((card) => card.id)))) page.save();
+  // Progress of cards deleted since (in any collection) is dropped from the saved record, and
+  // progress from before spaced repetition is saved in its converted form
+  progress.prune(new Set(allCards.map((card) => card.id)));
+  page.save();
   page.start();
 });

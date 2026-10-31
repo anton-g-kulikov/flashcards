@@ -1,23 +1,29 @@
-// Quiz: "What does <word> mean?" with up to four translations to choose from. Right on the first
-// try, the word is known and leaves the quiz; a wrong answer turns that card over to show whose
-// translation it is, and the word stays unknown. The last word is studied as a flashcard.
+// Quiz: "What does <word> mean?" with up to four translations to choose from. It asks about
+// the study queue (due words, then new ones); the options come from every word with a
+// translation. Right on the first try moves the word up a box; a wrong answer turns that card
+// over to show whose translation it is, drops the word to box 1, and it comes back later.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
-import { weightedShuffle } from "../../utils/shuffle-utils.js";
 import { el, showMessageCard } from "../study/message-card.js";
-import { nextStep, pickOptions, pickQuestion, quizPool, recordAnswer } from "../study/quiz-logic.js";
+import {
+  distinctTranslations,
+  hasTranslation,
+  pickOptions,
+  pickQuestion,
+  quizPool,
+} from "../study/quiz-logic.js";
 
 const CHECK_ICON = "M20 6L9 17l-5-5";
 const CROSS_ICON = "M18 6L6 18M6 6l12 12";
 
 export class QuizMode {
-  // study: { cards, progress, changed(), setMode(mode, options) }
+  // study: { cards, progress, changed(), caughtUpMessage() }
   constructor(study) {
     this.study = study;
     this.questionEl = document.getElementById("quizQuestion");
     this.optionsEl = document.getElementById("quizOptions");
-    this.pool = [];
     this.current = null; // the card being asked about
+    this.lastId = null; // the card asked before, not asked twice in a row
     this.firstTry = true;
     this.answered = false;
     this.timers = [];
@@ -27,7 +33,7 @@ export class QuizMode {
     this.timers.push(setTimeout(callback, ms));
   }
 
-  // Cancels pending steps (the next question, the switch to flashcards) when leaving the quiz
+  // Cancels a pending next question when leaving the quiz
   stop() {
     this.timers.forEach(clearTimeout);
     this.timers = [];
@@ -37,20 +43,7 @@ export class QuizMode {
 
   start() {
     this.stop();
-    const { cards, progress } = this.study;
-    this.pool = weightedShuffle(quizPool(cards, progress), progress.history);
-    if (this.pool.length < 2) {
-      this.showMessage(
-        {
-          tone: "warning",
-          title: I18n.t("quiz.needTwo.title"),
-          text: I18n.t("quiz.needTwo.count", { count: this.pool.length }),
-          hintHtml: I18n.t("quiz.needTwo.hint"),
-        },
-        2000
-      );
-      return;
-    }
+    this.lastId = null;
     this.ask();
   }
 
@@ -61,28 +54,44 @@ export class QuizMode {
   }
 
   ask() {
-    const correct = pickQuestion(this.pool);
-    const options = pickOptions(correct, this.pool);
-    if (options.length < 2) {
+    const { cards, progress } = this.study;
+    const translations = distinctTranslations(cards);
+    if (translations < 2) {
       this.showMessage(
         {
           tone: "warning",
-          badge: I18n.t("quiz.notUnique.badge"),
-          title: I18n.t("quiz.notUnique.title"),
-          text: I18n.t("quiz.notUnique.next"),
-          hintHtml: I18n.t("quiz.notUnique.hint"),
+          title: I18n.t("quiz.needTwo.title"),
+          text: I18n.t("quiz.needTwo.count", { count: translations }),
+          hintHtml: I18n.t("quiz.needTwo.hint"),
         },
         2000
       );
       return;
     }
 
+    const pool = quizPool(cards, progress);
+    if (pool.length === 0) {
+      const untranslated = progress.studyQueue(cards).length > 0;
+      this.showMessage(
+        untranslated
+          ? {
+              tone: "warning",
+              title: I18n.t("quiz.untranslated.title"),
+              hintHtml: I18n.t("quiz.untranslated.hint"),
+            }
+          : this.study.caughtUpMessage(),
+        2000
+      );
+      return;
+    }
+
+    const correct = pickQuestion(pool, this.lastId);
     this.current = correct;
+    this.lastId = correct.id;
     this.firstTry = true;
     this.answered = false;
-    this.study.progress.seen(correct.id);
-    this.study.changed();
     this.renderQuestion();
+    const options = pickOptions(correct, cards.filter(hasTranslation));
     this.optionsEl.replaceChildren(...options.map((option) => this.renderOption(option)));
   }
 
@@ -121,52 +130,20 @@ export class QuizMode {
     button.setAttribute("aria-disabled", "true");
 
     if (!correct) {
+      if (this.firstTry) {
+        progress.wrong(this.current.id);
+        this.study.changed();
+      }
       this.firstTry = false;
-      progress.seen(option.id);
-      this.study.changed();
       return;
     }
 
     this.answered = true;
-    this.pool = recordAnswer(progress, this.pool, option.id, this.firstTry);
-    weightedShuffle(this.pool, progress.history);
-    this.study.changed();
-    this.later(() => this.afterAnswer(), 750);
-  }
-
-  afterAnswer() {
-    const step = nextStep(this.pool);
-    if (step === "ask") {
-      this.ask();
-    } else if (step === "last") {
-      this.showLast(this.pool[0]);
-    } else {
-      this.showMessage(
-        {
-          tone: "success",
-          badge: I18n.t("quiz.complete.badge"),
-          title: I18n.t("quiz.complete.title"),
-          text: I18n.t("quiz.complete.next"),
-          hintHtml: I18n.t("quiz.complete.hint"),
-        },
-        2000
-      );
+    if (this.firstTry) {
+      progress.right(this.current.id);
+      this.study.changed();
     }
-  }
-
-  // One word left: say so, then study it as a flashcard
-  showLast(card) {
-    this.showMessage(
-      {
-        tone: "accent",
-        badge: I18n.t("quiz.last.badge"),
-        title: I18n.t("quiz.last.title"),
-        text: I18n.t("quiz.last.next"),
-        hintHtml: I18n.t("quiz.last.hint", { word: I18n.escape(card.word) }),
-      },
-      1000
-    );
-    this.later(() => this.study.setMode("flashcard", { firstId: card.id }), 3000);
+    this.later(() => this.ask(), 750);
   }
 
   showMessage(message, flipAfter) {

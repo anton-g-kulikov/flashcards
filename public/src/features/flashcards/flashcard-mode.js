@@ -1,21 +1,20 @@
-// Flashcards: the word on the front, its translation on the back. "I know this!" marks the word
-// known and it leaves the deck; "I don't know…" turns the card over and waits for a tap before
-// the next word. The deck is every unknown word, least recently seen first (roughly).
+// Flashcards: the word on the front, its translation on the back. The deck is the study queue
+// (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
+// "I don't know…" turns the card over, waits for a tap, and the word comes back at the end of
+// the deck.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
-import { weightedShuffle } from "../../utils/shuffle-utils.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
 
 const FLIP_MS = 600; // the .flashcard transform transition in styles.css
 
 export class FlashcardMode {
-  // study: { cards, progress, changed() }
+  // study: { cards, progress, changed(), caughtUpMessage() }
   constructor(study) {
     this.study = study;
     this.card = document.getElementById("flashcard");
     this.actions = document.getElementById("cardActions");
     this.deck = [];
-    this.index = 0;
     this.flipped = false;
     this.waitingForTap = false; // the back is showing after "I don't know"
     this.showingMessage = false;
@@ -28,16 +27,11 @@ export class FlashcardMode {
   }
 
   get current() {
-    return this.deck[this.index];
+    return this.deck[0];
   }
 
-  // A fresh deck of the unknown words. `firstId` (the quiz's last word) goes first.
-  start(firstId) {
-    const { cards, progress } = this.study;
-    this.deck = weightedShuffle(progress.unknown(cards), progress.history);
-    const first = this.deck.findIndex((card) => card.id === firstId);
-    if (first > 0) this.deck.unshift(...this.deck.splice(first, 1));
-    this.index = 0;
+  start() {
+    this.deck = this.study.progress.studyQueue(this.study.cards);
     this.show();
   }
 
@@ -64,7 +58,7 @@ export class FlashcardMode {
     this.card.replaceChildren(front, back);
   }
 
-  // No words left: all learned, or nothing to study at all
+  // Nothing left to study now, or nothing to study at all
   showEnd() {
     this.showingMessage = true;
     this.actions.classList.add("hidden");
@@ -74,13 +68,7 @@ export class FlashcardMode {
         hintHtml: I18n.t("flash.none.hint"),
       });
     } else {
-      renderMessage(this.card, {
-        tone: "success",
-        badge: I18n.t("flash.complete.badge"),
-        title: I18n.t("flash.complete.title"),
-        text: I18n.t("flash.complete.next"),
-        hintHtml: I18n.t("flash.complete.hint"),
-      });
+      renderMessage(this.card, this.study.caughtUpMessage());
     }
     this.flipTimer = setTimeout(() => this.card.classList.add("flipped"), 2000);
   }
@@ -97,18 +85,14 @@ export class FlashcardMode {
     }
     this.flipped = !this.flipped;
     this.card.classList.toggle("flipped", this.flipped);
-    if (this.flipped) {
-      this.study.progress.seen(this.current.id);
-      this.study.changed();
-    }
   }
 
   mark(known) {
     const card = this.current;
     if (!card || this.busy || this.showingMessage) return;
     const { progress } = this.study;
-    if (known) progress.markKnown(card.id);
-    else progress.markUnknown(card.id);
+    if (known) progress.right(card.id);
+    else progress.wrong(card.id);
     Analytics.cardMarked(known);
     this.study.changed();
 
@@ -137,17 +121,10 @@ export class FlashcardMode {
     this.flipTimer = setTimeout(() => this.next(), FLIP_MS);
   }
 
+  // A word still due (not known this time) goes to the end of the deck; a known one leaves it
   next() {
-    const { progress } = this.study;
-    const card = this.current;
-    if (card && progress.isKnown(card.id)) {
-      // Known words leave the deck; the rest is reshuffled so no order can be learned
-      this.deck.splice(this.index, 1);
-      weightedShuffle(this.deck, progress.history);
-      this.index = 0;
-    } else if (this.deck.length > 0) {
-      this.index = (this.index + 1) % this.deck.length;
-    }
+    const card = this.deck.shift();
+    if (card && this.study.progress.needsStudy(card.id)) this.deck.push(card);
     this.show();
   }
 }

@@ -40,7 +40,7 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 
 ## Planned
 
-### TASK-003 — Spaced repetition (proposed 2026-10-31, awaiting approval)
+### TASK-003 — Spaced repetition (done 2026-11-01)
 
 - **Goal:** Words come back for review at growing intervals instead of leaving the rotation
   for good once known. Each session shows what is due first.
@@ -67,9 +67,9 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Docs:** README "How studying works" rewritten for the new rules.
 - **Out of scope for now:** daily limits on new words, per-word ease (SM-2/FSRS), review
   reminders or notifications.
-- **Open decisions:** the interval ladder above; whether to cap new words per day.
+- **Decided:** the interval ladder above; no daily cap on new words for now.
+- **As built:** progress lives in `public/src/features/study/progress.js` (not `core/srs.js`). The stats bar shows the average box. Words seen before spaced repetition but never marked known start as new. The quiz no longer hands the last word over to Flashcards.
 
 ## Backlog
 
-- Decide on a custom domain and add it to Firebase Auth's authorized domains.
 - Account deletion (delete the user's cards and progress, then the Auth user).

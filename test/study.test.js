@@ -1,172 +1,175 @@
-// Study logic: progress bookkeeping and the quiz's choices.
+// Study logic: spaced repetition (Leitner boxes) and the quiz's choices.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { Progress } from "../public/src/features/study/progress.js";
+import { DAY, INTERVAL_DAYS, MASTERED, Progress } from "../public/src/features/study/progress.js";
 import {
   MAX_OPTIONS,
-  nextStep,
+  distinctTranslations,
   pickOptions,
   pickQuestion,
   quizPool,
-  recordAnswer,
 } from "../public/src/features/study/quiz-logic.js";
 
 const card = (id, translation = `t-${id}`) => ({ id, word: `w-${id}`, translation });
+const NOW = 1_000 * DAY;
 
-describe("Progress", () => {
-  it("marks cards known and unknown, and remembers when each was seen", () => {
+describe("boxes and due dates", () => {
+  it("moves a known word up a box and schedules it by that box's interval", () => {
     const progress = new Progress();
-    progress.markKnown("a", 100);
-    progress.markUnknown("b", 200);
-    assert.ok(progress.isKnown("a"));
-    assert.ok(!progress.isKnown("b"));
-    assert.deepEqual(progress.history, { a: 100, b: 200 });
-
-    progress.markUnknown("a", 300);
-    assert.ok(!progress.isKnown("a"));
-    assert.equal(progress.history.a, 300);
+    progress.right("a", NOW);
+    assert.deepEqual(progress.srs.a, { box: 1, due: NOW + 1 * DAY });
+    progress.right("a", NOW);
+    assert.deepEqual(progress.srs.a, { box: 2, due: NOW + 3 * DAY });
+    assert.deepEqual(INTERVAL_DAYS, [0, 1, 3, 7, 16, 35]);
   });
 
-  it("lists unknown cards in order and counts known ones", () => {
-    const progress = new Progress({ known: ["b"] });
-    const cards = [card("a"), card("b"), card("c")];
-    assert.deepEqual(progress.unknown(cards).map((c) => c.id), ["a", "c"]);
-    assert.equal(progress.knownCount(cards), 1);
+  it("keeps a mastered word in the top box, back every 35 days", () => {
+    const progress = new Progress({ srs: { a: { box: MASTERED, due: NOW } } });
+    progress.right("a", NOW);
+    assert.deepEqual(progress.srs.a, { box: MASTERED, due: NOW + 35 * DAY });
   });
 
-  it("resets only the given cards", () => {
-    const progress = new Progress({ known: ["a", "b"], history: { a: 1, b: 2 } });
-    progress.reset(["a"]);
-    assert.deepEqual([...progress.known], ["b"]);
-    assert.deepEqual(progress.history, { b: 2 });
+  it("drops a word not known to box 1, due straight away", () => {
+    const progress = new Progress({ srs: { a: { box: 4, due: NOW } } });
+    progress.wrong("a", NOW);
+    assert.deepEqual(progress.srs.a, { box: 1, due: NOW });
+    assert.ok(progress.needsStudy("a", NOW));
   });
 
-  it("records each change for saving, the latest one per card", () => {
-    const progress = new Progress({ known: ["b"], history: { b: 1 } });
-    progress.markKnown("a", 10);
-    progress.markUnknown("b", 20);
-    progress.markKnown("c", 30);
-    progress.markUnknown("c", 40);
-    progress.seen("d", 50);
+  it("studies new and due words only", () => {
+    const progress = new Progress({ srs: { due: { box: 2, due: NOW - 1 }, later: { box: 2, due: NOW + 1 } } });
+    assert.ok(progress.needsStudy("new", NOW));
+    assert.ok(progress.needsStudy("due", NOW));
+    assert.ok(!progress.needsStudy("later", NOW));
+  });
+});
+
+describe("studyQueue", () => {
+  it("puts due words first, oldest day first, then new words; leaves out words not due", () => {
+    const progress = new Progress({
+      srs: {
+        today: { box: 1, due: NOW },
+        lastWeek: { box: 3, due: NOW - 7 * DAY },
+        tomorrow: { box: 2, due: NOW + DAY },
+      },
+    });
+    const queue = progress.studyQueue([card("new1"), card("today"), card("tomorrow"), card("lastWeek"), card("new2")], NOW);
+    assert.deepEqual(queue.slice(0, 2).map((c) => c.id), ["lastWeek", "today"]);
+    assert.deepEqual(queue.slice(2).map((c) => c.id).sort(), ["new1", "new2"]);
+  });
+
+  it("shuffles words due on the same day", () => {
+    const srs = Object.fromEntries(["a", "b", "c"].map((id) => [id, { box: 1, due: NOW }]));
+    const firsts = new Set();
+    for (let run = 0; run < 100; run++) {
+      firsts.add(new Progress({ srs }).studyQueue([card("a"), card("b"), card("c")], NOW)[0].id);
+    }
+    assert.equal(firsts.size, 3);
+  });
+});
+
+describe("stats and next review", () => {
+  it("counts due (and new), learning and mastered words, and the average box", () => {
+    const progress = new Progress({
+      srs: {
+        due: { box: 1, due: NOW },
+        learning: { box: 3, due: NOW + DAY },
+        mastered: { box: 5, due: NOW + DAY },
+      },
+    });
+    const cards = [card("new"), card("due"), card("learning"), card("mastered")];
+    assert.deepEqual(progress.stats(cards, NOW), { due: 2, learning: 1, mastered: 1, level: 9 / 20 });
+    assert.equal(progress.nextDue(cards), NOW);
+    assert.equal(new Progress().nextDue(cards), null);
+  });
+});
+
+describe("saved progress", () => {
+  it("records each change for saving, the latest one per word", () => {
+    const progress = new Progress();
+    progress.right("a", NOW);
+    progress.wrong("b", NOW);
+    progress.right("b", NOW);
     assert.ok(progress.hasChanges());
     assert.deepEqual(progress.takeChanges(), {
-      knownAdd: ["a"],
-      knownRemove: ["b", "c"],
-      history: { a: 10, b: 20, c: 40, d: 50 },
+      srs: { a: { box: 1, due: NOW + DAY }, b: { box: 2, due: NOW + 3 * DAY } },
+      dropLegacy: false,
     });
     assert.ok(!progress.hasChanges());
-    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: [], history: {} });
   });
 
-  it("records a reset as forgetting, only for what was there", () => {
-    const progress = new Progress({ known: ["a"], history: { a: 1, b: 2 } });
-    progress.reset(["a", "b", "c"]);
-    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: ["a"], history: { a: null, b: null } });
+  it("resets words to new, recording only words that had progress", () => {
+    const progress = new Progress({ srs: { a: { box: 3, due: NOW } } });
+    progress.reset(["a", "b"]);
+    assert.equal(progress.box("a"), 0);
+    assert.deepEqual(progress.takeChanges(), { srs: { a: null }, dropLegacy: false });
   });
 
-  it("prunes cards that no longer exist", () => {
-    const progress = new Progress({ known: ["a", "gone"], history: { a: 1, gone: 2, old: 3 } });
+  it("prunes words that no longer exist", () => {
+    const progress = new Progress({ srs: { a: { box: 1, due: NOW }, gone: { box: 2, due: NOW } } });
     assert.ok(progress.prune(new Set(["a"])));
-    assert.deepEqual([...progress.known], ["a"]);
-    assert.deepEqual(progress.history, { a: 1 });
-    assert.deepEqual(progress.takeChanges(), {
-      knownAdd: [],
-      knownRemove: ["gone"],
-      history: { gone: null, old: null },
-    });
+    assert.deepEqual(Object.keys(progress.srs), ["a"]);
+    assert.deepEqual(progress.takeChanges().srs, { gone: null });
     assert.ok(!progress.prune(new Set(["a"])));
   });
 
   it("puts unsaved changes back, unless newer ones replaced them", () => {
     const progress = new Progress();
-    progress.markKnown("a", 1);
-    progress.seen("b", 2);
+    progress.right("a", NOW);
+    progress.right("b", NOW);
     const failed = progress.takeChanges();
-    progress.markUnknown("a", 3);
+    progress.wrong("a", NOW);
     progress.restoreChanges(failed);
-    assert.deepEqual(progress.takeChanges(), { knownAdd: [], knownRemove: ["a"], history: { a: 3, b: 2 } });
+    assert.deepEqual(progress.takeChanges().srs, { a: { box: 1, due: NOW }, b: { box: 1, due: NOW + DAY } });
   });
 
-  it("doesn't share state with what it was loaded from", () => {
-    const saved = { known: ["a"], history: { a: 1 } };
-    const progress = new Progress(saved);
-    progress.markKnown("b", 2);
-    assert.deepEqual(saved, { known: ["a"], history: { a: 1 } });
-  });
-});
-
-describe("quizPool", () => {
-  it("holds unknown cards that have a translation", () => {
-    const progress = new Progress({ known: ["a"] });
-    const pool = quizPool([card("a"), card("b"), card("c", ""), card("d", "  ")], progress);
-    assert.deepEqual(pool.map((c) => c.id), ["b"]);
-  });
-});
-
-describe("pickQuestion", () => {
-  const pool = Array.from({ length: 10 }, (_, i) => card(`c${i}`));
-
-  it("draws from the first 80% of a larger pool", () => {
-    assert.equal(pickQuestion(pool, () => 0).id, "c0");
-    assert.equal(pickQuestion(pool, () => 0.999).id, "c7");
+  it("ignores malformed stored entries", () => {
+    const progress = new Progress({ srs: { a: { box: 9, due: 1 }, b: { box: 2 }, c: "x", d: { box: 2, due: NOW } } });
+    assert.deepEqual(Object.keys(progress.srs), ["d"]);
   });
 
-  it("draws from the whole of a small pool", () => {
-    assert.equal(pickQuestion(pool.slice(0, 5), () => 0.999).id, "c4");
+  it("converts progress saved before spaced repetition: known words to box 2, due now", () => {
+    const progress = new Progress({ known: ["a", "b"], history: { a: 1, c: 2 } }, NOW);
+    assert.deepEqual(progress.srs, { a: { box: 2, due: NOW }, b: { box: 2, due: NOW } });
+    assert.deepEqual(progress.takeChanges(), {
+      srs: { a: { box: 2, due: NOW }, b: { box: 2, due: NOW } },
+      dropLegacy: true,
+    });
+    assert.ok(!new Progress({ known: ["a"], srs: {} }).hasChanges(), "already converted");
   });
 });
 
-describe("pickOptions", () => {
-  it("offers the right card and up to three others, each once", () => {
-    const pool = Array.from({ length: 10 }, (_, i) => card(`c${i}`));
-    const options = pickOptions(pool[3], pool);
-    assert.equal(options.length, MAX_OPTIONS);
-    assert.ok(options.includes(pool[3]));
-    assert.equal(new Set(options.map((o) => o.id)).size, MAX_OPTIONS);
+describe("quiz", () => {
+  it("asks about queued words that have a translation", () => {
+    const progress = new Progress({ srs: { later: { box: 2, due: NOW + DAY } } });
+    const pool = quizPool([card("a"), card("b", ""), card("later")], progress, NOW);
+    assert.deepEqual(pool.map((c) => c.id), ["a"]);
   });
 
-  it("never offers two options that read the same", () => {
-    const pool = [card("a", "house"), card("b", "House "), card("c", "house"), card("d", "dog")];
-    const options = pickOptions(pool[0], pool);
-    assert.deepEqual(options.map((o) => o.id).sort(), ["a", "d"]);
-  });
-
-  it("offers fewer options when the pool is small", () => {
+  it("asks the first word in the queue, but not the same word twice in a row", () => {
     const pool = [card("a"), card("b")];
-    assert.equal(pickOptions(pool[0], pool).length, 2);
+    assert.equal(pickQuestion(pool, null).id, "a");
+    assert.equal(pickQuestion(pool, "a").id, "b");
+    assert.equal(pickQuestion([card("a")], "a").id, "a");
+  });
+
+  it("offers the right card and up to three others from any word, each reading differently", () => {
+    const cards = Array.from({ length: 10 }, (_, i) => card(`c${i}`));
+    const options = pickOptions(cards[3], cards);
+    assert.equal(options.length, MAX_OPTIONS);
+    assert.ok(options.includes(cards[3]));
+    const same = [card("a", "house"), card("b", "House "), card("c", ""), card("d", "dog")];
+    assert.deepEqual(pickOptions(same[0], same).map((o) => o.id).sort(), ["a", "d"]);
   });
 
   it("puts the right card in any position", () => {
-    const pool = Array.from({ length: 4 }, (_, i) => card(`c${i}`));
+    const cards = Array.from({ length: 4 }, (_, i) => card(`c${i}`));
     const positions = new Set();
-    for (let run = 0; run < 200; run++) positions.add(pickOptions(pool[0], pool).indexOf(pool[0]));
+    for (let run = 0; run < 200; run++) positions.add(pickOptions(cards[0], cards).indexOf(cards[0]));
     assert.equal(positions.size, 4);
   });
-});
 
-describe("recordAnswer", () => {
-  it("first try: the word is known and leaves the pool", () => {
-    const progress = new Progress();
-    const pool = [card("a"), card("b")];
-    const next = recordAnswer(progress, pool, "a", true, 5);
-    assert.ok(progress.isKnown("a"));
-    assert.deepEqual(next.map((c) => c.id), ["b"]);
-  });
-
-  it("after a wrong answer: the word stays unknown and in the pool", () => {
-    const progress = new Progress();
-    const pool = [card("a"), card("b")];
-    const next = recordAnswer(progress, pool, "a", false, 5);
-    assert.ok(!progress.isKnown("a"));
-    assert.equal(progress.history.a, 5);
-    assert.equal(next, pool);
-  });
-});
-
-describe("nextStep", () => {
-  it("asks while two or more words are left, then the last word, then done", () => {
-    assert.equal(nextStep([card("a"), card("b")]), "ask");
-    assert.equal(nextStep([card("a")]), "last");
-    assert.equal(nextStep([]), "done");
+  it("counts different translations", () => {
+    assert.equal(distinctTranslations([card("a", "x"), card("b", " X"), card("c", ""), card("d", "y")]), 2);
   });
 });

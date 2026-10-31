@@ -21,50 +21,60 @@ back online).
 
 ### The words you study
 
-The study page uses every word in the collections switched on in **My Cards**. Each word is
-either **known** or **not yet known**, and both modes only ever show the words you don't know
-yet. The app also remembers when you last saw each word. Both are saved to your account, so
-your progress follows you to every device.
+The study page uses every word in the collections switched on in **My Cards**. It uses spaced
+repetition: each word comes back for review after a growing interval, so you spend your time on
+the words you're about to forget rather than the ones you know well. Your progress is saved to
+your account and follows you to every device.
+
+### Boxes and reviews
+
+Every word sits in one of six boxes. New words start in box 0.
+
+| Box | Comes back after |
+| --- | --- |
+| 1 | 1 day |
+| 2 | 3 days |
+| 3 | 7 days |
+| 4 | 16 days |
+| 5 (mastered) | 35 days |
+
+- **You know it** ("I know this!", or the right quiz answer on the first try): the word moves up
+  one box and comes back after that box's interval.
+- **You don't** ("I don't know…", or any wrong quiz answer): the word drops to box 1 and comes back
+  later in the same session.
+
+Both modes show what is **due** first, the words whose review date has passed, oldest first.
+New words come after them. Words due on the same day, and new words, come in random order, so you
+can't learn the list by its order. When nothing is left, you get an **All caught up** card that
+says when the next review is.
+
+The numbers above the cards are **Due** (to study now, new words included), **Learning** (boxes 1
+to 4, not due yet) and **Mastered** (box 5, not due yet). The bar shows how far along the words are
+on average, from all new to all mastered.
 
 ### Flashcards
 
-The card shows the word; tap it to flip to the translation.
+The card shows the word; tap it (or press Enter or Space) to flip to the translation.
 
-- **I know this!** marks the word known and moves on. It won't come back.
+- **I know this!** moves the word up a box and on to the next.
 - **I don't know…** flips the card to show the translation; tap the card when you're ready to go
-  on. The word stays unknown and comes back later.
-- When every word is known, you get a "All cards learned!" card.
+  on. The word goes to the back of the pile and comes back in this session.
 
 ### Quiz
 
-The quiz asks "What does *word* mean?" and offers up to four translations, taken from other
-words you don't know yet. It needs at least two such words that have a translation; words
-without one are left out.
+The quiz asks "What does *word* mean?" about the next word due and offers up to four translations,
+taken from all the words in your switched-on collections. No two options read the same. Words
+without a translation can't be quizzed; study them as flashcards.
 
-- **Right on the first try:** the word is marked known and leaves the quiz.
+- **Right on the first try:** the word moves up a box.
 - **Wrong answer:** that card turns over to show which word the translation actually belongs to,
-  and you pick again. Once you find the right one, the word stays unknown and comes back later.
-- **One word left:** the app switches to Flashcards for it. When all are known, the quiz is
-  complete.
-
-### Which word comes next
-
-The order is shuffled every time, so you can't learn the list by its order. The shuffle leans
-towards words you haven't seen for a while: a word you've never seen or haven't seen for about
-four days gets the most weight, one you saw in the last hour the least. About a third of the
-time the order ignores that and is purely random.
+  and you pick again. The word drops to box 1 and comes back later.
 
 ### Starting over
 
-**Reset Progress** (below the cards) marks the words you're studying as unknown again. Other
-collections keep their progress. Switching a collection off keeps its progress too; switch it
-back on to continue where you left off.
-
-### Is this spaced repetition?
-
-No. There are no review intervals and nothing is scheduled to come back: once a word is known,
-it stays out of the rotation until you reset. The "least recently seen" weighting above only
-changes the order of the words you don't know yet.
+**Reset Progress** (below the cards) makes the words you're studying new again. Other collections
+keep their progress. Switching a collection off keeps its progress too; switch it back on to
+continue where you left off.
 
 ## Collections and CSV
 

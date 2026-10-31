@@ -13,7 +13,9 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Owner saves and reads own progress | allowed |
 | Another user reads or writes someone's progress | denied |
 | Progress with an unexpected field | denied |
-| Progress changes merged in (`arrayUnion`, `arrayRemove`, single history entries, `deleteField`) | allowed, and merged correctly |
+| Spaced-repetition entries merged in one card at a time, old fields deleted (`deleteField`) | allowed, and merged correctly |
+| A whole-record rewrite without `srs` once `srs` exists (an old version's save) | denied |
+| More than 20,000 `srs` entries | denied |
 | `updatedAt` other than the server's clock, on progress or a collection | denied |
 | User document, or any other `meta/*` document | denied |
 
@@ -47,16 +49,17 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 
 | Case | Expectation |
 | --- | --- |
-| Mark known / unknown | known set and last-seen time updated |
-| Unknown cards, known count | in order; counted within the given cards |
-| Reset | only the given cards forgotten |
-| Saved progress | only the changes, the latest per card; a reset forgets only what was there; cards that no longer exist are pruned; unsaved changes go back unless newer ones replaced them; loading copies the saved data |
-| Quiz pool | unknown cards with a non-blank translation |
-| Question | drawn from the first 80% of the (weighted) pool, or all of a pool of 5 or fewer |
-| Options | the right card plus up to 3 others, no two reading the same, right card in any position |
-| Right answer | first try: known, leaves the pool; after a wrong one: stays unknown |
-| Next step | ask while 2+ words left, then the last word, then done |
-| Card order | a permutation, stale cards earlier on average, 5,000 cards in under 200 ms |
+| Known word | up one box, due after that box's interval (1, 3, 7, 16, 35 days); box 5 stays 5 |
+| Word not known | box 1, due now |
+| Needs study | new words and words due; not words scheduled later |
+| Study queue | due words first, oldest day first, same-day ones shuffled; then new words; nothing not due |
+| Stats | due (new included), learning, mastered, average box; next review time |
+| Saved progress | only the changed entries, the latest per word; reset and pruning forget entries; unsaved changes go back unless newer ones replaced them; malformed entries ignored |
+| Progress from before spaced repetition | known words to box 2, due now; old fields dropped with the first save |
+| Quiz pool | queued words with a translation |
+| Question | first in the queue, not the same word twice in a row while there's another |
+| Options | the right card plus up to 3 others from any translated word, no two reading the same, right card in any position |
+| Shuffle | a permutation, any item can come first, 5,000 items quickly |
 
 ## Automated: app shell (`app-shell.test.js`) and XSS guard (`xss.test.js`)
 
@@ -86,5 +89,8 @@ With `npm run dev`, at http://127.0.0.1:5050:
 7. Old layout: with rules bypassed (REST with `Authorization: Bearer owner`), create
    `users/{uid}/cards/*` documents, some naming a collection and some not. Opening My Cards moves
    them into their collections (orphans into the default one) and the old documents are gone.
-8. Two tabs of the same account: mark different words known in each, wait 2 seconds, reload:
-   the known count includes both.
+8. Two tabs of the same account: answer different words in each, wait 2 seconds, reload: the
+   Learning count includes both.
+9. Spaced repetition: with three new words, miss one in the quiz (it comes back after another
+   word), answer the rest; the "All caught up" card says the next review is tomorrow. Reset
+   Progress makes all three due again. At phone width, the stats row fits in all three languages.
