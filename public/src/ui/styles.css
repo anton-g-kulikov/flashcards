@@ -1775,13 +1775,8 @@ body.vocab-manager-page .vocab-table {
 }
 
 /* === Mobile Vocabulary Manager Styles === */
-/* Hide Expand Vocabulary section on mobile devices */
 @media (max-width: 768px) {
-  .expand-vocabulary-section {
-    display: none;
-  }
-
-  /* Ensure Current Vocabulary section is visible and mobile-friendly */
+  /* Keep the collection section mobile-friendly */
   .current-vocabulary-section {
     margin-bottom: var(--spacing-3);
     padding: var(--spacing-3);
@@ -1830,51 +1825,25 @@ body.vocab-manager-page .vocab-table {
     border-bottom: none;
   }
 
-  /* Add labels before each data cell */
-  .vocab-table tbody td:before {
-    font-weight: 600;
-    color: var(--color-text-light);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  /* Each word is a card: the word on top, then its translation field and Delete */
+  .vocab-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--spacing-2);
   }
 
-  .vocab-table tbody td:nth-child(1):before {
-    content: "Spanish: ";
-  }
-  .vocab-table tbody td:nth-child(2):before {
-    content: "English: ";
-  }
-  .vocab-table tbody td:nth-child(3):before {
-    content: "Русский: ";
-  }
-  .vocab-table tbody td:nth-child(4):before {
-    content: "Category: ";
-  }
-  .vocab-table tbody td:nth-child(5):before {
-    content: "Topic: ";
-  }
-  .vocab-table tbody td:nth-child(6):before {
-    content: "Example: ";
-  }
-
-  /* Style the first cell (Spanish word) prominently */
   .vocab-table tbody td:nth-child(1) {
+    grid-column: 1 / -1;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-primary);
-    margin-bottom: var(--spacing-2);
-    padding-bottom: var(--spacing-2);
-    border-bottom: 1px solid var(--color-border);
   }
 
-  /* Style the example cell with smaller text and italic */
-  .vocab-table tbody td:nth-child(6) {
-    font-style: italic;
+  .vocab-table tbody td.empty-table-message {
+    font-size: 0.875rem;
+    font-weight: 400;
     color: var(--color-text-light);
-    margin-top: var(--spacing-2);
-    padding-top: var(--spacing-2);
-    border-top: 1px solid var(--color-border);
   }
 
   /* Mobile filter controls styling */
@@ -2252,6 +2221,7 @@ body.auth-pending .auth-gate .auth-loading {
 }
 
 .user-chip .sign-out-btn {
+  white-space: nowrap;
   background: transparent;
   color: var(--color-text-light);
   border: 1px solid var(--color-border);
@@ -2310,8 +2280,25 @@ body.auth-pending .auth-gate .auth-loading {
   outline-offset: -1px;
 }
 
-.add-word-form button {
+.add-word-form button,
+.add-word-form button:hover {
   flex: 0 0 auto;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+  font-weight: 600;
+}
+
+.add-word-form button:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Phones: one field per row, so the placeholders are never cut off */
+@media (max-width: 600px) {
+  .add-word-form input,
+  .add-word-form button {
+    flex: 1 1 100%;
+  }
 }
 
 .word-count {
@@ -2381,4 +2368,91 @@ button.armed:hover {
 .lang-switcher .lang-option.active {
   background: var(--color-accent);
   color: white;
+}
+
+/* Narrow headers: the account name gives way (with an ellipsis) before anything overflows */
+.header-top .user-chip {
+  min-width: 0;
+}
+
+.header-top .user-name {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Phones: keep the three stats on one row */
+@media (max-width: 480px) {
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+  }
+
+  .stat {
+    padding: var(--spacing-3) var(--spacing-1);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* === Header: language dropdown, avatar, sign-out icon === */
+.lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23565248' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 6px 30px 6px 12px;
+  cursor: pointer;
+}
+
+.lang-select:hover {
+  background-color: var(--color-card-2);
+}
+
+.lang-select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.user-chip .user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-chip .user-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.user-chip .sign-out-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  min-width: 0;
+}
+
+.user-chip .sign-out-btn svg {
+  width: 17px;
+  height: 17px;
 }

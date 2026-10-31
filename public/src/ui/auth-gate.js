@@ -85,23 +85,36 @@ class AuthGate {
     if (!chip) return;
 
     chip.innerHTML = "";
-    if (user.photoURL) {
-      const avatar = document.createElement("img");
-      avatar.className = "user-avatar";
-      avatar.src = user.photoURL;
-      avatar.alt = "";
-      avatar.referrerPolicy = "no-referrer";
-      chip.appendChild(avatar);
-    }
+    const name = user.displayName || user.email || I18n.t("auth.signedIn");
 
-    const name = document.createElement("span");
-    name.className = "user-name";
-    name.textContent = user.displayName || user.email || I18n.t("auth.signedIn");
-    chip.appendChild(name);
+    // Just the portrait; the name shows on hover. Accounts without a photo get their initial.
+    let avatar;
+    if (user.photoURL) {
+      avatar = document.createElement("img");
+      avatar.src = user.photoURL;
+      avatar.alt = name;
+      avatar.referrerPolicy = "no-referrer";
+    } else {
+      avatar = document.createElement("span");
+      avatar.className = "user-initial";
+      avatar.textContent = name.trim().charAt(0).toUpperCase();
+      avatar.setAttribute("aria-label", name);
+    }
+    avatar.classList.add("user-avatar");
+    avatar.title = user.email ? `${name} (${user.email})` : name;
+    chip.appendChild(avatar);
 
     const signOutBtn = document.createElement("button");
     signOutBtn.className = "sign-out-btn";
-    signOutBtn.textContent = I18n.t("auth.signOut");
+    signOutBtn.title = I18n.t("auth.signOut");
+    signOutBtn.setAttribute("aria-label", I18n.t("auth.signOut"));
+    signOutBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>`;
     signOutBtn.addEventListener("click", () => window.Cloud.signOut());
     chip.appendChild(signOutBtn);
   }

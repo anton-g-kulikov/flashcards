@@ -12,6 +12,7 @@ const TRANSLATIONS = {
       "Your personal vocabulary collection. Add your own words, then learn them with flashcards and quizzes on any device.",
     "auth.signIn": "Sign in with Google",
     "auth.signOut": "Sign out",
+    "auth.language": "Language",
     "auth.signedIn": "Signed in",
     "auth.signInFailed": "Sign-in failed: {error}",
     "auth.loadFailed": "Could not load your collection. Please check your connection and reload.",
@@ -89,6 +90,7 @@ const TRANSLATIONS = {
       "Ваша личная коллекция слов. Добавляйте свои слова и учите их с помощью карточек и тестов на любом устройстве.",
     "auth.signIn": "Войти через Google",
     "auth.signOut": "Выйти",
+    "auth.language": "Язык",
     "auth.signedIn": "Вы вошли",
     "auth.signInFailed": "Не удалось войти: {error}",
     "auth.loadFailed": "Не удалось загрузить коллекцию. Проверьте подключение и обновите страницу.",
@@ -167,6 +169,7 @@ const TRANSLATIONS = {
       "Tu colección personal de vocabulario. Añade tus propias palabras y apréndelas con tarjetas y tests en cualquier dispositivo.",
     "auth.signIn": "Iniciar sesión con Google",
     "auth.signOut": "Cerrar sesión",
+    "auth.language": "Idioma",
     "auth.signedIn": "Sesión iniciada",
     "auth.signInFailed": "No se pudo iniciar sesión: {error}",
     "auth.loadFailed": "No se pudo cargar tu colección. Comprueba la conexión y recarga la página.",
@@ -241,9 +244,9 @@ const TRANSLATIONS = {
 };
 
 const LANGUAGES = [
-  { code: "en", label: "EN" },
-  { code: "ru", label: "RU" },
-  { code: "es", label: "ES" },
+  { code: "en", label: "EN", name: "English" },
+  { code: "ru", label: "RU", name: "Русский" },
+  { code: "es", label: "ES", name: "Español" },
 ];
 const STORAGE_KEY = "flashcards-ui-language";
 
@@ -308,11 +311,24 @@ class I18n {
     I18n.renderSwitchers(root);
   }
 
+  // data-lang-switcher="select" renders a dropdown (the header); otherwise a row of buttons
   static renderSwitchers(root = document) {
     root.querySelectorAll("[data-lang-switcher]").forEach((container) => {
       container.innerHTML = "";
+      if (container.dataset.langSwitcher === "select") {
+        const select = document.createElement("select");
+        select.className = "lang-select";
+        select.setAttribute("aria-label", I18n.t("auth.language"));
+        LANGUAGES.forEach(({ code, name }) => {
+          select.add(new Option(name, code, false, code === I18n.lang));
+        });
+        select.addEventListener("change", () => I18n.setLanguage(select.value));
+        container.appendChild(select);
+        return;
+      }
+
       container.setAttribute("role", "group");
-      container.setAttribute("aria-label", "Language");
+      container.setAttribute("aria-label", I18n.t("auth.language"));
       LANGUAGES.forEach(({ code, label }) => {
         const button = document.createElement("button");
         button.type = "button";
