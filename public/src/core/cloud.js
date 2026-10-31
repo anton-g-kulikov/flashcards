@@ -22,10 +22,11 @@ import {
   getDocs,
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager,
+  persistentSingleTabManager,
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 // Public by design: it identifies the project and grants nothing on its own. What protects a
@@ -44,8 +45,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 // Offline cache on, so studying keeps working without a connection, as it did before accounts.
+// Single-tab: with the multi-tab manager one tab does the networking for all of them, and a
+// frozen background tab could leave the others waiting forever. Another open tab now simply
+// works from memory instead.
 const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() }),
 });
 
 // Local development runs against the Emulator Suite (`npm run dev`).
@@ -61,17 +65,38 @@ function uid() {
 }
 
 const cardsRef = () => collection(db, "users", uid(), "cards");
+const collectionsRef = () => collection(db, "users", uid(), "collections");
 const progressRef = () => doc(db, "users", uid(), "meta", "progress");
 
 const text = (value, max) => String(value || "").trim().slice(0, max);
 
-// The stored shape of a card: a word and its optional Russian translation.
+// Cards saved before collections existed have no collectionId; they belong to this one.
+const DEFAULT_COLLECTION = "default";
+
+// A Firestore batch holds at most 500 writes.
+const BATCH_LIMIT = 450;
+
+// The stored shape of a card: a word, its optional translation and its collection.
 // Must match isCard() in firestore.rules.
 function cardFields(card) {
   return {
     word: text(card.word, 200),
     translation: text(card.translation, 500),
+    collectionId: text(card.collectionId, 100) || DEFAULT_COLLECTION,
   };
+}
+
+// Must match isCollection() in firestore.rules.
+function collectionFields(name) {
+  return { name: text(name, 100) };
+}
+
+async function commitInChunks(writes) {
+  for (let start = 0; start < writes.length; start += BATCH_LIMIT) {
+    const batch = writeBatch(db);
+    writes.slice(start, start + BATCH_LIMIT).forEach((write) => write(batch));
+    await batch.commit();
+  }
 }
 
 window.Cloud = {
@@ -90,6 +115,70 @@ window.Cloud = {
 
   signOut() {
     return signOut(auth);
+  },
+
+  // The user's collections, sorted by name. A first visit gets the default collection, named
+  // in the interface language, so there is always somewhere to put words.
+  async loadCollections(defaultName) {
+    const snapshot = await getDocs(collectionsRef());
+    const collections = snapshot.docs.map((c) => ({
+      id: c.id,
+      ...collectionFields(c.data().name),
+      active: c.data().active !== false,
+    }));
+    if (collections.length === 0) {
+      const now = serverTimestamp();
+      await setDoc(doc(collectionsRef(), DEFAULT_COLLECTION), {
+        ...collectionFields(defaultName),
+        active: true,
+        createdAt: now,
+        updatedAt: now,
+      });
+      collections.push({ id: DEFAULT_COLLECTION, ...collectionFields(defaultName), active: true });
+    }
+    return collections.sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  async createCollection(name) {
+    const ref = doc(collectionsRef());
+    const now = serverTimestamp();
+    await setDoc(ref, { ...collectionFields(name), active: true, createdAt: now, updatedAt: now });
+    return ref.id;
+  },
+
+  // Active collections are the ones the study page uses.
+  setCollectionActive(id, active) {
+    return updateDoc(doc(collectionsRef(), id), { active: !!active, updatedAt: serverTimestamp() });
+  },
+
+  renameCollection(id, name) {
+    return updateDoc(doc(collectionsRef(), id), {
+      ...collectionFields(name),
+      updatedAt: serverTimestamp(),
+    });
+  },
+
+  // Deletes a collection and the given cards (the ones in it).
+  deleteCollection(id, cardIds) {
+    return commitInChunks([
+      ...cardIds.map((cardId) => (batch) => batch.delete(doc(cardsRef(), cardId))),
+      (batch) => batch.delete(doc(collectionsRef(), id)),
+    ]);
+  },
+
+  // Adds many cards to a collection at once; returns them with their new ids.
+  async importCards(collectionId, cards) {
+    const now = serverTimestamp();
+    const added = cards.map((card) => ({
+      id: doc(cardsRef()).id,
+      ...cardFields({ ...card, collectionId }),
+    }));
+    await commitInChunks(
+      added.map(({ id, ...fields }) => (batch) =>
+        batch.set(doc(cardsRef(), id), { ...fields, createdAt: now, updatedAt: now })
+      )
+    );
+    return added;
   },
 
   async loadCards() {

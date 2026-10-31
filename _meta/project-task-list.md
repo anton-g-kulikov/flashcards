@@ -22,7 +22,26 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   add/duplicate/edit/delete, quiz and flashcards, progress surviving reload, a second account
   seeing an empty collection.
 
+### TASK-002 — Collections, CSV and starter decks (2026-10-31)
+
+- **Goal:** Organise words into collections that can be shared as CSV files.
+- **Success criteria:**
+  - Words belong to collections; existing words land in a default "My words" collection.
+  - Collections are managed in My Words: create, rename, delete (with their words), switch
+    on/off for study. The study page uses every switched-on collection.
+  - Export a collection to `word,translation` CSV; import a CSV as a new collection.
+  - Eight Spanish→English starter collections (A1/A2 × nouns, verbs, adjectives, adverbs,
+    100 words each) in `public/collections/`, importable from the app.
+  - README explains exporting, importing and contributing collections.
+- **Also fixed:** the study page could hang on "Loading quiz…": the Firestore cache moved to
+  single-tab mode, and loading now shows an error with a retry after 15 s instead of hanging.
+- **Verification:** 14 rules tests and 9 CSV/collection tests; manual check on the emulators at
+  375px (library import, file import, toggles driving the study page, new/rename/delete).
+
 ## Backlog
+
+- Google Analytics: needs a GA4 property for `flashcards-ak-app` (Firebase console →
+  Integrations) before a tag can be added; dgt-vocab's property was removed on purpose.
 
 - Decide on a custom domain and add it to Firebase Auth's authorized domains.
 - Card-level spaced repetition (the study modes still use known/unknown plus last-seen ordering).

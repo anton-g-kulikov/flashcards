@@ -99,6 +99,52 @@
         </div>
       </header>
 
+      <!-- Collections: switch them on or off for study, pick one to edit -->
+      <section class="panel">
+        <h2 class="panel-title" data-i18n="collections.title">Collections</h2>
+        <p class="hint" data-i18n="collections.activeHint">
+          Study uses the collections that are switched on.
+        </p>
+        <ul id="collectionList" class="collection-list"></ul>
+        <div class="collection-actions">
+          <button type="button" id="newCollectionBtn" class="chip-btn" data-i18n="collections.new">New</button>
+          <button type="button" id="renameCollectionBtn" class="chip-btn" data-i18n="collections.rename">Rename</button>
+          <button type="button" id="importBtn" class="chip-btn" data-i18n="collections.import">Import</button>
+          <button type="button" id="exportBtn" class="chip-btn" data-i18n="collections.export">Export</button>
+          <button type="button" id="deleteCollectionBtn" class="chip-btn chip-danger" data-i18n="collections.delete">Delete</button>
+        </div>
+
+        <!-- Name a new collection, or rename the current one -->
+        <form id="collectionNameForm" class="inline-form hidden" autocomplete="off">
+          <input
+            type="text"
+            id="collectionNameInput"
+            maxlength="100"
+            autocapitalize="sentences"
+            required
+          />
+          <div class="inline-form-actions">
+            <button type="button" id="collectionNameCancel" class="text-btn" data-i18n="collections.cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary-btn" data-i18n="collections.save">Save</button>
+          </div>
+        </form>
+
+        <!-- Import a CSV file or a starter collection -->
+        <div id="importPanel" class="import-panel hidden">
+          <p class="hint" data-i18n="collections.importHint">
+            A CSV file with the columns word,translation becomes a new collection.
+          </p>
+          <button type="button" id="importFileBtn" class="primary-btn" data-i18n="collections.importFile">
+            Choose a CSV file
+          </button>
+          <input type="file" id="importFileInput" accept=".csv,text/csv" hidden />
+          <h3 class="import-library-title" data-i18n="collections.library">Starter collections</h3>
+          <ul id="libraryList" class="library-list"></ul>
+        </div>
+      </section>
+
       <!-- Add one word at a time -->
       <section class="panel">
         <h2 class="panel-title" data-i18n="words.addTitle">Add a Word</h2>
@@ -119,7 +165,6 @@
             data-i18n-placeholder="words.translationPlaceholder"
             maxlength="500"
             autocapitalize="none"
-            lang="ru"
           />
           <button type="submit" id="addWordBtn" class="primary-btn" data-i18n="words.add">
             Add
@@ -130,7 +175,7 @@
       <!-- The signed-in user's collection -->
       <section class="panel">
         <h2 class="panel-title">
-          <span data-i18n="words.collection">My Collection</span>
+          <span id="collectionTitle"></span>
           <span id="wordCount" class="word-count"></span>
         </h2>
         <ul id="wordList" class="word-list"></ul>
@@ -143,6 +188,7 @@
     <script type="module" src="src/core/cloud.js"></script>
     <script src="src/ui/auth-gate.js"></script>
     <script src="src/ui/confirm-button.js"></script>
+    <script src="src/utils/csv.js"></script>
     <script src="src/utils/pwa-installer.js"></script>
     <script src="src/utils/cache-manager.js"></script>
     <script src="src/utils/version-sync.js"></script>

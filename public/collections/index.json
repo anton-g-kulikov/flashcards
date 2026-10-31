@@ -1,0 +1,60 @@
+{
+  "collections": [
+    {
+      "file": "es-en/a1-nouns.csv",
+      "name": "Spanish A1 · Nouns",
+      "language": "es-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "es-en/a1-verbs.csv",
+      "name": "Spanish A1 · Verbs",
+      "language": "es-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "es-en/a1-adjectives.csv",
+      "name": "Spanish A1 · Adjectives",
+      "language": "es-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "es-en/a1-adverbs.csv",
+      "name": "Spanish A1 · Adverbs",
+      "language": "es-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "es-en/a2-nouns.csv",
+      "name": "Spanish A2 · Nouns",
+      "language": "es-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "es-en/a2-verbs.csv",
+      "name": "Spanish A2 · Verbs",
+      "language": "es-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "es-en/a2-adjectives.csv",
+      "name": "Spanish A2 · Adjectives",
+      "language": "es-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "es-en/a2-adverbs.csv",
+      "name": "Spanish A2 · Adverbs",
+      "language": "es-en",
+      "level": "A2",
+      "words": 100
+    }
+  ]
+}

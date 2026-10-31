@@ -33,12 +33,8 @@ class DGTVocabulary {
     try {
       // Use embedded vocabulary data
       if (typeof window.vocabularyData !== "undefined") {
-        // Cards come from the signed-in user's collection; their ids are Firestore document ids.
-        this.allCards = window.vocabularyData.map((card) => ({
-          id: card.id,
-          word: card.word || "",
-          translation: card.translation || "", // Russian translation, optional
-        }));
+        // Cards of the selected collection; their ids are Firestore document ids.
+        this.allCards = DGTVocabulary.toStudyCards(window.vocabularyData);
       } else {
         console.error(
           "Vocabulary data not found. The collection has not been loaded yet."
@@ -92,6 +88,26 @@ class DGTVocabulary {
     }
   }
 
+  static toStudyCards(cards) {
+    return cards.map((card) => ({
+      id: card.id,
+      word: card.word || "",
+      translation: card.translation || "", // optional
+    }));
+  }
+
+  // Switches to another set of cards (a collection), keeping progress and the current mode.
+  setCards(cards) {
+    this.allCards = DGTVocabulary.toStudyCards(cards);
+    this.updateCurrentCards();
+    this.updateStats();
+    if (this.currentMode === "flashcard" && this.flashcardMode) {
+      this.flashcardMode.showCurrentCard();
+    } else if (this.quizMode) {
+      this.quizMode.startQuiz();
+    }
+  }
+
   loadProgress() {
     // Progress is per account: loaded from the cloud before the app starts.
     const progress = window.initialProgress || { known: [], history: {} };
@@ -114,7 +130,8 @@ class DGTVocabulary {
     this.progressDirty = false;
 
     // Only keep entries for cards that still exist, so deleted cards don't linger in progress.
-    const ids = new Set(this.allCards.map((card) => card.id));
+    // That means every card of the user, not just the collection being studied.
+    const ids = window.allCardIds || new Set(this.allCards.map((card) => card.id));
     const history = {};
     Object.entries(this.cardInteractionHistory).forEach(([id, time]) => {
       if (ids.has(id)) history[id] = time;

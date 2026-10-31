@@ -1,5 +1,5 @@
 // Service Worker for the Flashcards App
-const CACHE_NAME = "flashcards-v1.3.3";
+const CACHE_NAME = "flashcards-v1.4.0";
 const urlsToCache = [
   // Main pages
   "/",
@@ -31,6 +31,7 @@ const urlsToCache = [
   "/src/utils/cache-manager.js",
   "/src/utils/version-sync.js",
   "/src/utils/shuffle-utils.js",
+  "/src/utils/csv.js",
   "/src/utils/script.js",
 
   // PWA files

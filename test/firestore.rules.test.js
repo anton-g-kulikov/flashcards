@@ -83,6 +83,55 @@ describe("cards", () => {
   });
 });
 
+describe("collections", () => {
+  const collection = (overrides = {}) => ({
+    name: "A1 Nouns",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ...overrides,
+  });
+
+  it("lets a user create, rename and delete their own collections", async () => {
+    const ref = doc(as("alice"), "users/alice/collections/k1");
+    await assertSucceeds(setDoc(ref, collection()));
+    await assertSucceeds(getDoc(ref));
+    await assertSucceeds(updateDoc(ref, { name: "Nouns", updatedAt: serverTimestamp() }));
+    await assertSucceeds(deleteDoc(ref));
+  });
+
+  it("keeps other users away from someone's collections", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "users/alice/collections/k1"), { name: "Mine" });
+    });
+    await assertFails(getDoc(doc(as("bob"), "users/alice/collections/k1")));
+    await assertFails(setDoc(doc(as("bob"), "users/alice/collections/k2"), collection()));
+    await assertFails(deleteDoc(doc(as("bob"), "users/alice/collections/k1")));
+  });
+
+  it("rejects collections without a name, with a long name or unknown fields", async () => {
+    const db = as("alice");
+    await assertFails(setDoc(doc(db, "users/alice/collections/k1"), collection({ name: "" })));
+    await assertFails(
+      setDoc(doc(db, "users/alice/collections/k2"), collection({ name: "x".repeat(101) }))
+    );
+    await assertFails(setDoc(doc(db, "users/alice/collections/k3"), collection({ public: true })));
+  });
+
+  it("lets a collection be switched off and on, with a true/false flag only", async () => {
+    const db = as("alice");
+    const ref = doc(db, "users/alice/collections/k1");
+    await assertSucceeds(setDoc(ref, collection({ active: true })));
+    await assertSucceeds(updateDoc(ref, { active: false, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { active: "no" }));
+  });
+
+  it("lets a card name its collection, but only with a string id", async () => {
+    const db = as("alice");
+    await assertSucceeds(setDoc(doc(db, "users/alice/cards/c1"), card({ collectionId: "k1" })));
+    await assertFails(setDoc(doc(db, "users/alice/cards/c2"), card({ collectionId: 7 })));
+  });
+});
+
 describe("progress", () => {
   it("lets a user save and read their own progress", async () => {
     const db = as("alice");

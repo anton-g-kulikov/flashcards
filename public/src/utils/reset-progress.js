@@ -29,8 +29,12 @@ class ResetProgress {
         if (window.vocabApp.unknownCards) {
           window.vocabApp.unknownCards.clear();
         }
+        // Only the collection being studied: other collections keep their progress
         if (window.vocabApp.knownCardsSet) {
-          window.vocabApp.knownCardsSet.clear();
+          window.vocabApp.allCards.forEach((card) => {
+            window.vocabApp.knownCardsSet.delete(card.id);
+            delete window.vocabApp.cardInteractionHistory[card.id];
+          });
         }
         if (window.vocabApp.unknownCardsSet) {
           window.vocabApp.unknownCardsSet.clear();

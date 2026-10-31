@@ -16,6 +16,20 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Progress with an unexpected field | denied |
 | User document, or any other `meta/*` document | denied |
 
+## Automated: CSV and starter collections (`csv.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| Quotes, embedded commas, doubled quotes, CRLF, BOM, newlines in quotes | parsed correctly |
+| Header in any column order; no header | uses `word`/`translation` columns, else the first two |
+| Empty and repeated words | skipped |
+| Export then import | round-trips exactly |
+| Every file in `public/collections/` | listed in `index.json` with the right word count, no empty fields |
+| Spanish words across starter collections | never repeated |
+
+Collection documents and a card's `collectionId` / a collection's `active` flag are covered in
+`firestore.rules.test.js`.
+
 ## Manual: end-to-end on the emulators
 
 With `npm run dev`, at http://127.0.0.1:5050:

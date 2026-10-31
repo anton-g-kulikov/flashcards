@@ -11,13 +11,26 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // A word and its optional Russian translation. The field list matches cardFields() in
-    // public/src/core/cloud.js; a new card field has to be added here in the same change.
+    // A word, its optional translation and the collection it belongs to. The field list matches
+    // cardFields() in public/src/core/cloud.js; a new card field has to be added here in the
+    // same change. Cards without a collectionId belong to the "default" collection.
     function isCard(d) {
-      return d.keys().hasOnly(['word', 'translation', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['word', 'translation', 'collectionId', 'createdAt', 'updatedAt'])
         && d.keys().hasAll(['word'])
         && d.word is string && d.word.size() > 0 && d.word.size() <= 200
         && (!('translation' in d) || (d.translation is string && d.translation.size() <= 500))
+        && (!('collectionId' in d) || (d.collectionId is string && d.collectionId.size() <= 100))
+        && (!('createdAt' in d) || d.createdAt is timestamp)
+        && (!('updatedAt' in d) || d.updatedAt is timestamp);
+    }
+
+    // A named group of cards; studied when active (the default). Matches collectionFields() in
+    // public/src/core/cloud.js.
+    function isCollection(d) {
+      return d.keys().hasOnly(['name', 'active', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['name'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 100
+        && (!('active' in d) || d.active is bool)
         && (!('createdAt' in d) || d.createdAt is timestamp)
         && (!('updatedAt' in d) || d.updatedAt is timestamp);
     }
@@ -33,6 +46,11 @@ service cloud.firestore {
     match /users/{userId}/cards/{cardId} {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId) && isCard(request.resource.data);
+    }
+
+    match /users/{userId}/collections/{collectionId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isCollection(request.resource.data);
     }
 
     match /users/{userId}/meta/progress {

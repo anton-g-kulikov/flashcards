@@ -3,31 +3,36 @@
 // Global instance
 let vocabApp;
 
-// Start the application once the user is signed in and their collection is loaded
+// Start the application once the user is signed in and their collections are loaded
 AuthGate.onSignedIn(async function () {
-  const [cards, progress] = await Promise.all([
+  const [collections, allCards, progress] = await Promise.all([
+    window.Cloud.loadCollections(I18n.t("collections.default")),
     window.Cloud.loadCards(),
     window.Cloud.loadProgress(),
   ]);
-  window.vocabularyData = cards;
+  window.allCardIds = new Set(allCards.map((card) => card.id));
   window.initialProgress = progress;
 
-  window.vocabApp = new window.DGTVocabulary();
-  console.log(`DGTVocabulary app initialized with ${cards.length} cards`);
+  // Study every word in the collections switched on in My Words (cards whose collection is
+  // gone count as on, so nothing silently disappears)
+  const inactive = new Set(collections.filter((c) => !c.active).map((c) => c.id));
+  window.vocabularyData = allCards.filter((card) => !inactive.has(card.collectionId));
 
   const emptyNotice = document.getElementById("emptyCollectionNotice");
-  if (emptyNotice) emptyNotice.classList.toggle("hidden", cards.length > 0);
   const wordCount = document.getElementById("footer-word-count");
-  const showWordCount = () => {
-    if (wordCount) {
-      wordCount.textContent = I18n.t("footer.words", { count: cards.length });
-    }
+  const showCounts = () => {
+    const count = window.vocabularyData.length;
+    if (emptyNotice) emptyNotice.classList.toggle("hidden", count > 0);
+    if (wordCount) wordCount.textContent = I18n.t("footer.words", { count });
   };
-  showWordCount();
+
+  window.vocabApp = new window.DGTVocabulary();
+  console.log(`DGTVocabulary app initialized with ${window.vocabularyData.length} cards`);
+  showCounts();
 
   // Switching the interface language redraws the footer and the current card or question
   document.addEventListener("i18n-changed", () => {
-    showWordCount();
+    showCounts();
     if (window.VersionSync) window.VersionSync.syncVersions();
     if (window.vocabApp.currentMode === "flashcard") {
       window.vocabApp.flashcardMode.showCurrentCard();

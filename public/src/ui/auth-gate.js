@@ -57,12 +57,38 @@ class AuthGate {
 
     const callbacks = AuthGate.callbacks;
     AuthGate.callbacks = [];
-    callbacks.forEach((callback) => {
-      Promise.resolve(callback(user)).catch((error) => {
+    // Loading the collection must never hang silently: after 15 seconds, or on any error,
+    // the page says so and offers a retry (an alert() can be suppressed by the browser).
+    const slow = setTimeout(() => AuthGate.showLoadProblem(I18n.t("auth.loadSlow")), 15000);
+    Promise.all(callbacks.map((callback) => Promise.resolve().then(() => callback(user))))
+      .then(() => {
+        clearTimeout(slow);
+        document.getElementById("loadProblem")?.remove();
+      })
+      .catch((error) => {
+        clearTimeout(slow);
         console.error("Error starting the app:", error);
-        alert(I18n.t("auth.loadFailed"));
+        AuthGate.showLoadProblem(`${I18n.t("auth.loadFailed")} (${error.message})`);
       });
-    });
+  }
+
+  static showLoadProblem(text) {
+    let panel = document.getElementById("loadProblem");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "loadProblem";
+      panel.className = "notice load-problem";
+      panel.setAttribute("role", "alert");
+      const message = document.createElement("p");
+      const retry = document.createElement("button");
+      retry.className = "primary-btn";
+      retry.textContent = I18n.t("auth.retry");
+      retry.addEventListener("click", () => window.location.reload());
+      panel.append(message, retry);
+      const container = document.querySelector(".app-container");
+      container.insertBefore(panel, container.querySelector(".topbar").nextSibling);
+    }
+    panel.querySelector("p").textContent = text;
   }
 
   static async signIn() {

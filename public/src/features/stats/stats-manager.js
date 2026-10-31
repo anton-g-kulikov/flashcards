@@ -37,7 +37,10 @@ class StatsManager {
 
     // Also calculate overall stats for display
     const totalAllCards = this.vocabApp.allCards.length;
-    const allKnownCards = this.vocabApp.knownCardsSet.size;
+    // Known cards in the collection being studied (progress also covers other collections)
+    const allKnownCards = this.vocabApp.allCards.filter((card) =>
+      this.vocabApp.knownCardsSet.has(card.id)
+    ).length;
     const allUnknownCards = totalAllCards - allKnownCards;
 
     // Add null checks for all DOM elements
