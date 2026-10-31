@@ -1,6 +1,8 @@
-// Set-up every app page shares: the service worker, analytics and the version in the footer.
+// Set-up every app page shares: the service worker, analytics, the appearance switch and the
+// version in the footer.
 import { VERSION } from "./version.js";
 import { I18n } from "../ui/i18n.js";
+import "../ui/theme-switch.js";
 import "../utils/analytics.js";
 
 // The service worker keeps a copy of the app for offline use. It never reloads the page: a new

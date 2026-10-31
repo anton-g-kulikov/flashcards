@@ -61,6 +61,15 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Options | the right card plus up to 3 others from any translated word, no two reading the same, right card in any position |
 | Shuffle | a permutation, any item can come first, 5,000 items quickly |
 
+## Automated: appearance (`theme.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| Stored preference | "system" unless "light" or "dark" |
+| `data-theme` | none for "system", the choice otherwise |
+| `theme-init.js` | same storage key and colours as `theme.js`; dark page background matches the dark browser-chrome colour |
+| Every page | loads `theme-init.js` before its stylesheet, after a `theme-color` tag per scheme |
+
 ## Automated: app shell (`app-shell.test.js`) and XSS guard (`xss.test.js`)
 
 | Case | Expectation |
@@ -94,3 +103,5 @@ With `npm run dev`, at http://127.0.0.1:5050:
 9. Spaced repetition: with three new words, miss one in the quiz (it comes back after another
    word), answer the rest; the "All caught up" card says the next review is tomorrow. Reset
    Progress makes all three due again. At phone width, the stats row fits in all three languages.
+10. Appearance: pick Dark at the foot of Study; My Cards and the privacy page open dark, with no
+   light flash. Light holds while the device is dark; "Match the device" follows the device again.

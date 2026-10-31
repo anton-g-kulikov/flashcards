@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Privacy - YourFlashCards</title>
     <meta name="description" content="How YourFlashCards handles your data." />
-    <meta name="theme-color" content="#c17743" />
+    <meta name="theme-color" content="#c17743" media="(prefers-color-scheme: light)" data-scheme="light" />
+    <meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)" data-scheme="dark" />
+    <!-- A saved light or dark choice, applied before the page paints -->
+    <script src="src/ui/theme-init.js"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="icons/ios/32.png?v=2" />
     <link rel="apple-touch-icon" href="icons/ios/180.png?v=2" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -63,8 +66,9 @@
             address. Your name, email, account id and words are never sent to Google Analytics.
           </li>
           <li>
-            <strong>On your device only</strong>: your interface language, which collections you
-            last had open, and an offline copy of the app's files so it starts quickly.
+            <strong>On your device only</strong>: your interface language, your light or dark
+            choice, which collections you last had open, and an offline copy of the app's files so
+            it starts quickly.
           </li>
         </ul>
 

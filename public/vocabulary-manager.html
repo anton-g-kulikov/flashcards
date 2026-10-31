@@ -7,7 +7,10 @@
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#c17743" />
+    <meta name="theme-color" content="#c17743" media="(prefers-color-scheme: light)" data-scheme="light" />
+    <meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)" data-scheme="dark" />
+    <!-- A saved light or dark choice, applied before the page paints -->
+    <script src="src/ui/theme-init.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="YourCards" />
@@ -131,6 +134,10 @@
 
       <!-- One collapsible card per collection, rendered by word-manager.js -->
       <div id="collectionList"></div>
+
+      <div class="page-foot">
+        <div data-theme-switch></div>
+      </div>
 
       <div id="messageContainer" class="toast-container" aria-live="polite"></div>
     </div>

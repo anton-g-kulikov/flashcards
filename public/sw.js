@@ -24,6 +24,9 @@ const urlsToCache = [
   "/src/ui/i18n.js",
   "/src/ui/auth-gate.js",
   "/src/ui/confirm-button.js",
+  "/src/ui/theme.js",
+  "/src/ui/theme-init.js",
+  "/src/ui/theme-switch.js",
 
   // Features
   "/src/features/flashcards/flashcard-mode.js",

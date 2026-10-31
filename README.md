@@ -16,6 +16,8 @@ back online).
   a time (the translation is optional and can be added later) and edit or delete them. **New**
   and **Import** at the top create collections.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.
+- **Appearance**: light, dark, or matching the device (the default), from the switch at the foot
+  of Study and My Cards. Saved on that device.
 
 ## How studying works
 

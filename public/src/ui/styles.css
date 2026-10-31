@@ -26,6 +26,7 @@
   --color-warning: #e29e45;
   --color-warning-hover: #c58a3a;
   --color-error: #d16b6b;
+  --color-toast: #222222;
 
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
@@ -45,6 +46,62 @@
   --serif: "DM Serif Display", Georgia, "Times New Roman", serif;
   --sans: "Inter", system-ui, -apple-system, sans-serif;
   --tap: 44px; /* minimum touch target */
+  color-scheme: light;
+}
+
+/* Dark follows the device unless the switch says light; data-theme="dark" forces it (see
+ * theme-switch.js). Keep --color-bg in step with THEME_COLOR.dark in theme.js. Text on the
+ * coloured faces (card fronts, buttons, toasts) stays white in both. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #161412;
+    --color-surface: #211e1b;
+    --color-card-1: #3a332b;
+    --color-card-2: #2c2722;
+    --color-card-3: #3d2c25;
+    --color-primary: #f4efe7;
+    --color-text: #e9e3d9;
+    --color-text-light: #b8b0a2;
+    --color-muted: #8f887b;
+    --color-accent: #e29a70;
+    --color-accent-hover: #eaa982;
+    --color-accent-strong: #d97757;
+    --color-border: #36312b;
+    --color-shadow: rgba(0, 0, 0, 0.35);
+    --color-success: #4e9a6b;
+    --color-success-hover: #5aa978;
+    --color-warning: #c98a3a;
+    --color-warning-hover: #d49849;
+    --color-error: #d97474;
+    --color-toast: #3a3631;
+    --shadow-lg: 0 6px 24px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #161412;
+  --color-surface: #211e1b;
+  --color-card-1: #3a332b;
+  --color-card-2: #2c2722;
+  --color-card-3: #3d2c25;
+  --color-primary: #f4efe7;
+  --color-text: #e9e3d9;
+  --color-text-light: #b8b0a2;
+  --color-muted: #8f887b;
+  --color-accent: #e29a70;
+  --color-accent-hover: #eaa982;
+  --color-accent-strong: #d97757;
+  --color-border: #36312b;
+  --color-shadow: rgba(0, 0, 0, 0.35);
+  --color-success: #4e9a6b;
+  --color-success-hover: #5aa978;
+  --color-warning: #c98a3a;
+  --color-warning-hover: #d49849;
+  --color-error: #d97474;
+  --color-toast: #3a3631;
+  --shadow-lg: 0 6px 24px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
 }
 
 /* === Base === */
@@ -356,7 +413,7 @@ button.armed:hover {
 }
 
 .mode-btn:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
 }
 
 .mode-btn.active,
@@ -766,6 +823,57 @@ button.armed:hover {
   text-decoration: underline;
 }
 
+/* --- Appearance switch: small and quiet, a preference set once --- */
+.footer-prefs,
+.page-foot {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.page-foot {
+  margin-top: var(--spacing-5);
+}
+
+.theme-switch {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.theme-option {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.theme-option svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-option:hover {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.theme-option[aria-checked="true"] {
+  background: var(--color-card-2);
+  color: var(--color-text);
+}
+
 /* === My Cards === */
 .add-word-form {
   display: flex;
@@ -918,7 +1026,7 @@ button.armed:hover {
 }
 
 .info-message {
-  background: var(--color-text);
+  background: var(--color-toast);
 }
 
 /* === Sign-in screen === */
