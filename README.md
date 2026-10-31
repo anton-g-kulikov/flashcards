@@ -56,7 +56,7 @@ The numbers above the cards are **Due** (to study now, new words included), **Le
 to 4, not due yet) and **Mastered** (box 5, not due yet). The bar shows how far along the words are
 on average, from all new to all mastered.
 
-### Flashcards
+### Flash Mode
 
 The card shows the word; tap it (or press Enter or Space) to flip to the translation.
 

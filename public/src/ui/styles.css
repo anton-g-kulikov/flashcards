@@ -400,7 +400,7 @@ button.armed:hover {
   padding: var(--spacing-1);
   background: var(--color-card-2);
   border-radius: 999px;
-  margin-bottom: var(--spacing-3);
+  margin: var(--spacing-5) 0;
 }
 
 .mode-btn {

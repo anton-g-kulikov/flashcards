@@ -21,7 +21,7 @@ const TRANSLATIONS = {
     "auth.retry": "Try again",
     "study.empty":
       'Nothing to study yet. <a href="vocabulary-manager.html">Add words, import a collection or switch one on</a> in My Cards.',
-    "mode.flashcards": "Flashcards",
+    "mode.flashcards": "Flash Mode",
     "mode.quiz": "Quiz Mode",
     "progress.reset": "Reset Progress",
     "progress.resetConfirm": "Tap again to reset these words",
@@ -42,7 +42,7 @@ const TRANSLATIONS = {
     "quiz.needTwo.count": "You have {count} right now.",
     "quiz.needTwo.hint": 'Add words or translations in <a href="vocabulary-manager.html">My Cards</a>.',
     "quiz.untranslated.title": "The words due now have no translation",
-    "quiz.untranslated.hint": 'Study them in Flashcards, or add translations in <a href="vocabulary-manager.html">My Cards</a>.',
+    "quiz.untranslated.hint": 'Study them in Flash Mode, or add translations in <a href="vocabulary-manager.html">My Cards</a>.',
     "quiz.question": "What does “{word}” mean?",
     "theme.label": "Appearance",
     "theme.system": "Match the device",
