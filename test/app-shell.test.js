@@ -81,3 +81,32 @@ describe("Firebase SDK preloads", () => {
     }
   });
 });
+
+describe("iOS launch screens", () => {
+  const sizes = readFileSync("scripts/launch-images.txt", "utf8")
+    .split("\n")
+    .filter((line) => line.trim() && !line.startsWith("#"))
+    .map((line) => line.trim().split(/\s+/).map(Number));
+
+  for (const page of ["index.html", "vocabulary-manager.html"]) {
+    it(`${page} links a light and a dark image for every listed screen, and each exists`, () => {
+      const html = readFileSync(join("public", page), "utf8");
+      for (const [w, h, ratio] of sizes) {
+        for (const scheme of ["light", "dark"]) {
+          const file = `icons/splash/${w * ratio}x${h * ratio}-${scheme}.png`;
+          assert.ok(existsSync(join("public", file)), file);
+          assert.ok(
+            html.includes(`href="${file}" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: portrait) and (prefers-color-scheme: ${scheme})"`),
+            `${page}: ${file}`
+          );
+        }
+      }
+    });
+  }
+
+  it("has no image without a listed screen", () => {
+    const expected = new Set(sizes.flatMap(([w, h, r]) => ["light", "dark"].map((s) => `${w * r}x${h * r}-${s}.png`)));
+    const extra = readdirSync("public/icons/splash").filter((name) => !expected.has(name));
+    assert.deepEqual(extra, []);
+  });
+});

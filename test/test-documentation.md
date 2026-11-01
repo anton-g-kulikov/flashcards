@@ -73,6 +73,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | `sw.js` cache name | `flashcards-v` + `VERSION` from `src/core/version.js` |
 | Every page, script and stylesheet | in the precache list; every precached file exists |
 | `innerHTML` templates in `public/src` | interpolate card text only through `I18n.escape` |
+| iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Manual: end-to-end on the emulators
 

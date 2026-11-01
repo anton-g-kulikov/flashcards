@@ -87,6 +87,8 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   paint.
 - A missed word comes back after three other words, in both Flash Mode and Quiz Mode.
 - "Flashcards" renamed to Flash Mode; more room around the mode switcher.
+- Dark iOS launch screen: light and dark launch images per screen size. The home-screen
+  shortcuts (`?mode=flashcard`, `?mode=quiz`) now open the mode they name.
 
 ### TASK-006 — Account deletion (2026-11-01)
 
@@ -103,4 +105,5 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).
 - Spaced repetition: per-word difficulty (SM-2 or FSRS) instead of fixed boxes.
 - Review reminders or notifications.
-- A dark launch screen for the installed app (the manifest has one fixed colour).
+- Android launch screen in dark mode: Chrome takes one `background_color` from the manifest, so
+  it stays light until browsers support a dark variant.

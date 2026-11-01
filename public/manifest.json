@@ -4,7 +4,7 @@
   "description": "Your personal vocabulary flashcards, synced with your Google account",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f0",
+  "background_color": "#f8f6f0",
   "theme_color": "#c17743",
   "orientation": "portrait-primary",
   "scope": "/",
@@ -71,9 +71,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Flashcards",
+      "name": "Flash Mode",
       "short_name": "Flash",
-      "description": "Start flashcard mode",
+      "description": "Start Flash Mode",
       "url": "/?mode=flashcard",
       "icons": [
         {
@@ -85,7 +85,7 @@
     {
       "name": "Quiz Mode",
       "short_name": "Quiz",
-      "description": "Start quiz mode",
+      "description": "Start Quiz Mode",
       "url": "/?mode=quiz",
       "icons": [
         {

@@ -18,7 +18,8 @@ class StudyPage {
   constructor(cards, progress) {
     this.cards = cards;
     this.progress = progress;
-    this.mode = "quiz";
+    // Quiz by default; the home-screen shortcuts (manifest.json) open /?mode=flashcard or quiz
+    this.mode = new URLSearchParams(location.search).get("mode") === "flashcard" ? "flashcard" : "quiz";
     this.saveTimer = null;
 
     this.flashcards = new FlashcardMode(this);
