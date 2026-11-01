@@ -20,9 +20,9 @@ service cloud.firestore {
     // collection document itself, as a list of { id, word, translation }, so loading every word
     // costs one read per collection rather than one per card, and an import is a single write.
     // Rules can't look inside list items: cloud.js trims each card to its fields and length
-    // limits (cardFields), and only the owner can write here anyway. 5,000 cards keep a
-    // collection well under Firestore's 1 MiB document limit. Matches collectionFields() in
-    // public/src/core/cloud.js.
+    // limits (cardFields), and only the owner can write here anyway. Typical words keep 5,000
+    // cards well under Firestore's 1 MiB document limit; long ones could pass it, so cloud.js
+    // checks the size before writing (MAX_CARDS_BYTES in card-data.js).
     function isCollection(d) {
       return d.keys().hasOnly(['name', 'active', 'cards', 'createdAt', 'updatedAt'])
         && d.keys().hasAll(['name'])

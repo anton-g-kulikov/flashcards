@@ -14,7 +14,7 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Sign-in screen, account chip, loading errors | `public/src/ui/auth-gate.js` |
 | Light and dark appearance (as in NoChords and What's Next) | `public/src/ui/theme.js` decides, `theme-switch.js` renders the three-icon switch into `[data-theme-switch]` (foot of Study and My Cards), `theme-init.js` is a classic script in each page's `<head>` that applies a saved choice before first paint (the CSP allows no inline script). "Match the device" sets nothing and the stylesheet's `prefers-color-scheme` rule follows the device live; light and dark set `data-theme` on `<html>`. Saved per device (`flashcards-theme` in `localStorage`). Dark colours are the second token set at the top of `styles.css`; tested in `test/theme.test.js` |
 | Account deletion | `public/src/features/vocabulary-manager/delete-account.js` (the Account section of My Cards) calls `Cloud.deleteAccount`: confirms a sign-in older than 4 minutes in Google's popup, deletes every collection and the progress record in one batch, then the Auth user. The sign-in screen says so afterwards (a `sessionStorage` flag read by `auth-gate.js`) |
-| Audit results | [`audit-2026-10-31.md`](audit-2026-10-31.md): every finding of the 31 October review and its outcome |
+| Audit results | [`audit-2026-10-31.md`](audit-2026-10-31.md): every finding of the 31 October review, its outcome, and the follow-up re-check |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
 | Study page (modes, stats, saving progress) | `public/src/study.js`, the modes in `public/src/features/flashcards/` |
 | Study logic without the DOM (spaced repetition, quiz choices, random order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
@@ -24,7 +24,7 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
 | Launch screens | iOS: `public/icons/splash/`, the icon on the light or dark page background per screen size, linked from both pages with `prefers-color-scheme` media queries. Rendered by `scripts/make-launch-images.sh` (ImageMagick) from the sizes in `scripts/launch-images.txt`; rerun it when the icon or the background colours change. iOS picks one by the device's light or dark mode (not the in-app switch) and stores it when the app is added to the home screen. Android uses the manifest's single `background_color` (light) |
 | Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |
-| Security headers | `firebase.json`: an enforced Content-Security-Policy on the pages (scripts only from the app, Google's CDN for Firebase, `apis.google.com` for sign-in and Google Tag Manager; no inline scripts, handlers or style attributes; the emulator ports are allowed for local development), plus `nosniff`, `X-Frame-Options: SAMEORIGIN` (Firebase Auth's frame is same-origin on yourflashcards.app), Referrer-Policy and Permissions-Policy. `test/app-shell.test.js` checks the pages stay inline-free. The emulators read headers at start-up, so restart `npm run dev` after changing them |
+| Security headers | `firebase.json`: an enforced Content-Security-Policy on the pages (scripts only from the app, Google's CDN for Firebase, `apis.google.com` for sign-in and Google Tag Manager; no inline scripts, handlers or style attributes; `npm run dev` adds the emulator addresses in a generated, git-ignored `firebase.dev.json`, so the deployed policy has none; `scripts/dev-config.js`), plus `nosniff`, `X-Frame-Options: SAMEORIGIN` (Firebase Auth's frame is same-origin on yourflashcards.app), Referrer-Policy and Permissions-Policy. `test/app-shell.test.js` checks the pages stay inline-free. The emulators read headers at start-up, so restart `npm run dev` after changing them |
 | Analytics | GA4 property `flashcards-ak-app` (measurement ID `G-E0J0MDFKE6`), loaded and sent by `public/src/utils/analytics.js`; skipped on localhost. The cookie note at the foot of Study and My Cards (`public/src/ui/analytics-note.js`) lets people opt out per device (`flashcards-analytics` = `off` in `localStorage`): Analytics then never loads there, and turning it off mid-visit also sets `ga-disable-<id>` and deletes the `_ga` cookies. Events: `study_start`, `mode_switch`, `study_time`, `quiz_answer`, `card_marked`, `language_switch`, `progress_reset`, `pwa_*` |
 
 Data lives under each user's uid; the rules allow nobody else in:
@@ -49,8 +49,9 @@ remaining data was migrated server-side, and the migration code and the rules fo
 were removed. The old card path stayed readable by its owner for one release (1.13.1) so cached
 1.12.1 apps could still load; 1.14.0 denies it.
 
-A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
-1 MiB per document), so loading everything costs one read per collection, an import is a single
+A collection's cards live in its own document, at most 5,000 of them and at most about 1 MB of
+text (Firestore allows 1 MiB per document; `cardsSize` in `card-data.js` measures it, and an
+import or edit past it gets a translated "too long" message instead of Firestore's), so loading everything costs one read per collection, an import is a single
 atomic write, and word edits are transactions on that document (`public/src/core/cloud.js`).
 Firestore rules can't check list items, so `public/src/core/card-data.js` trims every card to
 its fields and lengths.
@@ -67,7 +68,9 @@ npm install
 npm run dev
 ```
 
-`npm run dev` starts the Auth, Firestore and Hosting emulators; open http://127.0.0.1:5050. On
+`npm run dev` writes `firebase.dev.json` (firebase.json plus the emulator addresses in the
+security policy) and starts the Auth, Firestore and Hosting emulators with it; open
+http://127.0.0.1:5050. On
 localhost the app talks to the emulators, so nothing touches production. The emulator's sign-in
 popup lets you create test Google accounts; for scripted checks, `window.Cloud.signInForTesting()`
 signs in without the popup (`window.Cloud` exists only on the emulators).

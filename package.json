@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Personal flashcards PWA: Google sign-in and per-user word collections on Firebase, with flashcard and quiz modes.",
   "scripts": {
-    "dev": "firebase emulators:start --only auth,firestore,hosting",
+    "dev": "node scripts/dev-config.js && firebase emulators:start --only auth,firestore,hosting --config firebase.dev.json",
     "test": "firebase emulators:exec --only firestore --project demo-flashcards \"node --test test/*.test.js\"",
     "deploy": "firebase deploy --only hosting,firestore"
   },

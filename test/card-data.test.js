@@ -1,7 +1,13 @@
 // The stored card shape.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { cardFields, storedCards } from "../public/src/core/card-data.js";
+import {
+  MAX_CARDS,
+  MAX_CARDS_BYTES,
+  cardFields,
+  cardsSize,
+  storedCards,
+} from "../public/src/core/card-data.js";
 
 describe("cardFields and storedCards", () => {
   it("keep only the word and translation, trimmed and cut to length", () => {
@@ -19,3 +25,23 @@ describe("cardFields and storedCards", () => {
     assert.deepEqual(storedCards({ a: 1 }), []);
   });
 });
+
+describe("cardsSize", () => {
+  const card = (word, translation) => ({ id: "x".repeat(20), word, translation });
+
+  it("counts UTF-8 bytes plus one per string, field names included", () => {
+    // 20 for the field names, 20 + 1 for the id, 4 + 1 for "ños" (ñ is two bytes), 3 + 1 for "yes"
+    assert.equal(cardsSize([card("ños", "yes")]), 20 + 21 + 5 + 4);
+  });
+
+  it("leaves 5,000 typical cards far below the limit", () => {
+    const typical = Array.from({ length: MAX_CARDS }, () => card("la palabra", "the word, a translation"));
+    assert.ok(cardsSize(typical) < MAX_CARDS_BYTES / 2);
+  });
+
+  it("puts 5,000 cards of the longest words and translations over it", () => {
+    const longest = Array.from({ length: MAX_CARDS }, () => card("w".repeat(200), "t".repeat(500)));
+    assert.ok(cardsSize(longest) > MAX_CARDS_BYTES);
+  });
+});
+

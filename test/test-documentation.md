@@ -40,6 +40,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Case | Expectation |
 | --- | --- |
 | Card fields | only word and translation, trimmed and cut to length; list items without id or word dropped |
+| Collection size | counted as Firestore does (UTF-8 bytes plus one per string, field names included); 5,000 typical cards far below the 1 MB budget, 5,000 longest cards over it |
 
 ## Automated: study logic (`study.test.js`, `shuffle.test.js`)
 
@@ -72,7 +73,8 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | --- | --- |
 | `sw.js` cache name | `flashcards-v` + `VERSION` from `src/core/version.js` |
 | Every page, script and stylesheet | in the precache list; every precached file exists |
-| `innerHTML` templates in `public/src` | interpolate card text only through `I18n.escape` |
+| Every `innerHTML` / `outerHTML` assignment in `public/src` | an empty string, a template whose parts are translation text, or one of the reviewed sinks listed in the test; `insertAdjacentHTML` and `document.write` not used; a planted `innerHTML = card.word` fails |
+| Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Manual: end-to-end on the emulators

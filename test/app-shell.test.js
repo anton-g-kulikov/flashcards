@@ -6,6 +6,7 @@ import { join, relative } from "node:path";
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { VERSION } from "../public/src/core/version.js";
+import { withEmulators } from "../scripts/dev-config.js";
 
 const sw = readFileSync("public/sw.js", "utf8");
 const precached = [...sw.match(/const urlsToCache = \[([\s\S]*?)\];/)[1].matchAll(/"([^"]+)"/g)].map(
@@ -48,6 +49,15 @@ describe("content security policy", () => {
   const policies = hosting.headers.flatMap((rule) =>
     rule.headers.filter((h) => h.key === "Content-Security-Policy").map((h) => [rule.source, h.value])
   );
+
+  it("never lets the deployed policy reach local addresses (only `npm run dev` adds the emulators)", () => {
+    for (const [, value] of policies) {
+      assert.doesNotMatch(value, /127\.0\.0\.1|localhost/);
+      const dev = withEmulators(value);
+      assert.match(dev, /connect-src [^;]*http:\/\/127\.0\.0\.1:8080 http:\/\/127\.0\.0\.1:9099/);
+      assert.match(dev, /frame-src [^;]*http:\/\/127\.0\.0\.1:9099/);
+    }
+  });
 
   it("covers every page, with no inline scripts allowed", () => {
     assert.deepEqual(policies.map(([source]) => source).sort(), ["**/*.html", "/"]);

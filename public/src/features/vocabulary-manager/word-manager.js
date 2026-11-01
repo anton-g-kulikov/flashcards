@@ -25,6 +25,13 @@ function icon(name) {
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
 }
 
+// A failed save, in words: the collection limits get a translated reason
+function failure(error) {
+  if (error.code === "collection-full") return I18n.t("words.collectionFull", { max: MAX_CARDS });
+  if (error.code === "collection-too-big") return I18n.t("collections.tooBig");
+  return error.message;
+}
+
 function iconButton(name, label, className = "icon-tool") {
   const button = document.createElement("button");
   button.type = "button";
@@ -268,7 +275,7 @@ class WordManager {
       if (!response.ok) throw new Error(response.statusText);
       await this.importCards(entry.name, readCards(await response.text()));
     } catch (error) {
-      this.showMessage(I18n.t("collections.importFailed", { error: error.message }), "error");
+      this.showMessage(I18n.t("collections.importFailed", { error: failure(error) }), "error");
     } finally {
       button.disabled = false;
     }
@@ -281,7 +288,7 @@ class WordManager {
     try {
       await this.importCards(file.name.replace(/\.csv$/i, ""), readCards(await file.text()));
     } catch (error) {
-      this.showMessage(I18n.t("collections.importFailed", { error: error.message }), "error");
+      this.showMessage(I18n.t("collections.importFailed", { error: failure(error) }), "error");
     }
   }
 
@@ -334,8 +341,7 @@ class WordManager {
       this.sortCards();
     } catch (error) {
       submit.disabled = false;
-      const reason = error.code === "collection-full" ? I18n.t("words.collectionFull", { max: MAX_CARDS }) : error.message;
-      this.showMessage(I18n.t("words.addFailed", { word, error: reason }), "error");
+      this.showMessage(I18n.t("words.addFailed", { word, error: failure(error) }), "error");
       return;
     }
 
@@ -355,7 +361,7 @@ class WordManager {
     } catch (error) {
       input.value = card.translation;
       this.showMessage(
-        I18n.t("words.saveFailed", { word: card.word, error: error.message }),
+        I18n.t("words.saveFailed", { word: card.word, error: failure(error) }),
         "error"
       );
     }

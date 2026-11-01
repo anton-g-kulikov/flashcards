@@ -33,7 +33,9 @@ import {
 import {
   DEFAULT_COLLECTION,
   MAX_CARDS,
+  MAX_CARDS_BYTES,
   cardFields,
+  cardsSize,
   collectionName,
   storedCards,
 } from "./card-data.js";
@@ -93,7 +95,7 @@ function editCards(collectionId, edit) {
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists()) throw new Error("This collection no longer exists");
     transaction.update(ref, {
-      cards: edit(storedCards(snapshot.data().cards)),
+      cards: checkSize(edit(storedCards(snapshot.data().cards))),
       updatedAt: serverTimestamp(),
     });
   });
@@ -103,6 +105,14 @@ function collectionFull() {
   const error = new Error(`A collection holds up to ${MAX_CARDS} words`);
   error.code = "collection-full";
   return error;
+}
+
+// Too much text for one collection document, before Firestore would refuse it with its own message
+function checkSize(cards) {
+  if (cardsSize(cards) <= MAX_CARDS_BYTES) return cards;
+  const error = new Error("These words are too long to store in one collection");
+  error.code = "collection-too-big";
+  throw error;
 }
 
 export const Cloud = {
@@ -176,7 +186,7 @@ export const Cloud = {
   async createCollection(name, cards = []) {
     if (cards.length > MAX_CARDS) throw collectionFull();
     const id = newId();
-    const stored = cards.map((card) => ({ id: newId(), ...cardFields(card) }));
+    const stored = checkSize(cards.map((card) => ({ id: newId(), ...cardFields(card) })));
     const now = serverTimestamp();
     await setDoc(collectionRef(id), {
       name: collectionName(name),
