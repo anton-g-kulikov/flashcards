@@ -42,6 +42,7 @@ export class AuthGate {
       }
       document.body.classList.add("signed-out");
       document.body.classList.remove("signed-in");
+      AuthGate.showAccountDeleted();
       return;
     }
 
@@ -66,6 +67,20 @@ export class AuthGate {
         console.error("Error starting the app:", error);
         AuthGate.showLoadProblem(`${I18n.t("auth.loadFailed")} (${error.message})`);
       });
+  }
+
+  // After "Delete my account" (My Cards), the page reloads onto this screen: say it worked
+  static showAccountDeleted() {
+    try {
+      if (!sessionStorage.getItem("flashcards-account-deleted")) return;
+      sessionStorage.removeItem("flashcards-account-deleted");
+    } catch (error) {
+      return;
+    }
+    const message = document.getElementById("authError");
+    if (!message) return;
+    message.textContent = I18n.t("account.deleted");
+    message.classList.add("auth-info");
   }
 
   static showLoadProblem(text) {

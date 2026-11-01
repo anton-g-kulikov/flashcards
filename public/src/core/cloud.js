@@ -5,8 +5,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import {
   GoogleAuthProvider,
   connectAuthEmulator,
+  deleteUser,
   getAuth,
   onAuthStateChanged,
+  reauthenticateWithPopup,
   signInWithCredential,
   signInWithPopup,
   signInWithRedirect,
@@ -26,6 +28,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import {
   DEFAULT_COLLECTION,
@@ -115,6 +118,25 @@ export const Cloud = {
 
   signOut() {
     return signOut(auth);
+  },
+
+  // Deletes the account: every collection (with its cards), the progress record, then the
+  // sign-in itself, which also signs out. Firebase only deletes a sign-in made in the last few
+  // minutes, so an older one is confirmed first in Google's popup; that happens before anything
+  // is deleted, so cancelling it leaves everything as it was.
+  async deleteAccount() {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not signed in");
+    const signedInAt = Date.parse(user.metadata.lastSignInTime) || 0;
+    if (Date.now() - signedInAt > 4 * 60 * 1000) {
+      await reauthenticateWithPopup(user, new GoogleAuthProvider());
+    }
+    const snapshot = await getDocs(collectionsRef());
+    const batch = writeBatch(db);
+    snapshot.docs.forEach((collectionDoc) => batch.delete(collectionDoc.ref));
+    batch.delete(progressRef());
+    await batch.commit();
+    await deleteUser(user);
   },
 
   // Everything the user has: their collections, sorted by name, and every card with the id of

@@ -18,6 +18,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 
 let env;
@@ -40,15 +41,10 @@ beforeEach(async () => {
 const as = (uid) => env.authenticatedContext(uid).firestore();
 
 describe("cards outside collections (the layout before 1.9.0)", () => {
-  it("can be read by their owner, so an older cached version still loads, but not written", async () => {
+  it("can't be read or written, even by their owner (cards live in their collection)", async () => {
     const db = as("alice");
-    await assertSucceeds(getDocs(collection(db, "users/alice/cards")));
+    await assertFails(getDocs(collection(db, "users/alice/cards")));
     await assertFails(setDoc(doc(db, "users/alice/cards/c1"), { word: "abrir" }));
-    await assertFails(deleteDoc(doc(db, "users/alice/cards/c1")));
-  });
-
-  it("stay closed to other users", async () => {
-    await assertFails(getDocs(collection(as("bob"), "users/alice/cards")));
   });
 });
 
@@ -151,6 +147,26 @@ describe("progress", () => {
     await assertFails(
       setDoc(doc(as("alice"), "users/alice/meta/progress"), { srs: {}, score: 10 })
     );
+  });
+});
+
+describe("deleting an account", () => {
+  it("lets the owner delete every collection and the progress record in one batch", async () => {
+    const db = as("alice");
+    await setDoc(doc(db, "users/alice/collections/k1"), { name: "A", cards: [], updatedAt: serverTimestamp() });
+    await setDoc(doc(db, "users/alice/meta/progress"), { srs: {}, updatedAt: serverTimestamp() });
+    const batch = writeBatch(db);
+    batch.delete(doc(db, "users/alice/collections/k1"));
+    batch.delete(doc(db, "users/alice/meta/progress"));
+    await assertSucceeds(batch.commit());
+  });
+
+  it("doesn't let anyone delete another user's data", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "users/alice/collections/k1"), { name: "A" });
+    });
+    await assertFails(deleteDoc(doc(as("bob"), "users/alice/collections/k1")));
+    await assertFails(deleteDoc(doc(as("bob"), "users/alice/meta/progress")));
   });
 });
 

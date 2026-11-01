@@ -6,8 +6,9 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 
 | Case | Expectation |
 | --- | --- |
-| The old card path (`users/{uid}/cards`): owner reads it (empty; older cached versions query it on load) | allowed |
-| The old card path: anyone writes or deletes, or another user reads | denied |
+| The old card path (`users/{uid}/cards`), even the owner's | denied |
+| Owner deletes every collection and the progress record in one batch (account deletion) | allowed |
+| Another user deletes someone's collections or progress | denied |
 | Collection with up to 5,000 cards in its `cards` list | allowed; 5,001, or `cards` not a list, denied |
 | Owner saves and reads own progress | allowed |
 | Another user reads or writes someone's progress | denied |
@@ -101,3 +102,7 @@ With `npm run dev`, at http://127.0.0.1:5050:
    the `_ga` cookies and switches the note to "Analytics is off on this device"; after a reload no
    googletagmanager script loads (check on a deployed site, it never loads on localhost). "Turn it
    back on" restores it.
+11. Account deletion: on My Cards, "Delete my account" asks for a second tap, then lands on the
+   sign-in screen with "Your account and all your words were deleted." On the emulators no
+   collection, progress record or Auth user is left for that account. With a sign-in older than 4
+   minutes, Google's popup asks to confirm first; closing it deletes nothing.

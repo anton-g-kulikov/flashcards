@@ -1418,6 +1418,36 @@ body.auth-pending .auth-gate .auth-loading {
   margin-bottom: var(--spacing-3);
 }
 
+/* --- Account (My Cards): deleting it --- */
+.account-panel {
+  margin-top: var(--spacing-5);
+}
+
+.danger-btn {
+  width: 100%;
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 45%, var(--color-border));
+  background: transparent;
+}
+
+.danger-btn:hover,
+.danger-btn.armed,
+.danger-btn.armed:hover {
+  color: white;
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.account-status:not(:empty) {
+  margin-top: var(--spacing-3);
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+.auth-error.auth-info {
+  color: var(--color-success);
+}
+
 .import-panel .primary-btn {
   width: 100%;
   min-height: 48px;

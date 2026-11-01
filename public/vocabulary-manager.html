@@ -136,6 +136,19 @@
       <!-- One collapsible card per collection, rendered by word-manager.js -->
       <div id="collectionList"></div>
 
+      <!-- Deleting the account, after a second tap (delete-account.js) -->
+      <section class="panel account-panel">
+        <h2 class="panel-title" data-i18n="account.title">Account</h2>
+        <p class="hint" data-i18n="account.deleteHint">
+          Deletes your collections, your progress and your sign-in. This can't be undone, so
+          export any collection you want to keep first.
+        </p>
+        <button type="button" id="deleteAccountBtn" class="danger-btn" data-i18n="account.delete">
+          Delete my account
+        </button>
+        <p id="deleteAccountStatus" class="account-status" role="status"></p>
+      </section>
+
       <div class="page-foot">
         <div data-theme-switch></div>
         <p data-analytics-note></p>

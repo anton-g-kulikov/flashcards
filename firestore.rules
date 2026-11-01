@@ -41,14 +41,6 @@ service cloud.firestore {
         && stamped(d);
     }
 
-    // Cards used to be one document each; none are left. Versions up to 1.12.1 still look here
-    // when they load, and an installed app runs its previous version for one session after a
-    // deploy (the service worker serves it from its cache), so the owner may still read the
-    // (empty) path. Nothing can be written here.
-    match /users/{userId}/cards/{cardId} {
-      allow read: if isOwner(userId);
-    }
-
     match /users/{userId}/collections/{collectionId} {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId) && isCollection(request.resource.data);

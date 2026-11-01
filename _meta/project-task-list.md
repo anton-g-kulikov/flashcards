@@ -38,8 +38,6 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Verification:** 14 rules tests and 9 CSV/collection tests; manual check on the emulators at
   375px (library import, file import, toggles driving the study page, new/rename/delete).
 
-## Planned
-
 ### TASK-003 — Spaced repetition (done 2026-11-01)
 
 - **Goal:** Words come back for review at growing intervals instead of leaving the rotation
@@ -70,6 +68,39 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Decided:** the interval ladder above; no daily cap on new words for now.
 - **As built:** progress lives in `public/src/features/study/progress.js` (not `core/srs.js`). The stats bar shows the average box. Words seen before spaced repetition but never marked known start as new. The quiz no longer hands the last word over to Flashcards.
 
+### TASK-004 — Audit fixes (2026-11-01)
+
+- **Goal:** resolve every finding of the 31 October review; results per finding in
+  [`audit-2026-10-31.md`](audit-2026-10-31.md).
+- **Done:** ES modules without inline code and an enforced CSP; dead dgt-vocab code removed;
+  keyboard access; pure, tested study logic; one document per collection (atomic imports); progress
+  saved as merged changes; server-clock timestamps; a versioned cache-first service worker with a
+  pre-deploy version check; fonts and SDK preloaded; import reports; old data migrated and the
+  migration code removed.
+- **Decided:** analytics stays opt-out (cookie note with "Turn off analytics").
+- **Lesson:** rules must accept what the previous app version does, since installed apps run it
+  for one more session after a deploy (1.13.0 broke the first open; fixed in 1.13.1).
+
+### TASK-005 — Appearance and study polish (2026-11-01)
+
+- Light / dark / match-the-device switch (as in NoChords and What's Next), applied before first
+  paint.
+- A missed word comes back after three other words, in both Flash Mode and Quiz Mode.
+- "Flashcards" renamed to Flash Mode; more room around the mode switcher.
+
+### TASK-006 — Account deletion (2026-11-01)
+
+- **Goal:** let people delete their account themselves, as the privacy page promises.
+- **Done:** an Account section at the foot of My Cards. "Delete my account", after a second tap,
+  deletes every collection and the progress record in one batch, then the Firebase Auth user. A
+  sign-in older than a few minutes is confirmed in Google's popup first, before anything is deleted.
+  The sign-in screen then says the account is gone.
+- **Verification:** rules tests for the batch delete (owner only); end to end on the emulators,
+  where no collection, progress record or Auth user was left.
+
 ## Backlog
 
-- Account deletion (delete the user's cards and progress, then the Auth user).
+- Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).
+- Spaced repetition: per-word difficulty (SM-2 or FSRS) instead of fixed boxes.
+- Review reminders or notifications.
+- A dark launch screen for the installed app (the manifest has one fixed colour).

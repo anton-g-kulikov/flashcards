@@ -13,6 +13,8 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Firebase access (Google sign-in, Firestore) | `public/src/core/cloud.js`, importing the Firebase SDK from Google's CDN |
 | Sign-in screen, account chip, loading errors | `public/src/ui/auth-gate.js` |
 | Light and dark appearance (as in NoChords and What's Next) | `public/src/ui/theme.js` decides, `theme-switch.js` renders the three-icon switch into `[data-theme-switch]` (foot of Study and My Cards), `theme-init.js` is a classic script in each page's `<head>` that applies a saved choice before first paint (the CSP allows no inline script). "Match the device" sets nothing and the stylesheet's `prefers-color-scheme` rule follows the device live; light and dark set `data-theme` on `<html>`. Saved per device (`flashcards-theme` in `localStorage`). Dark colours are the second token set at the top of `styles.css`; tested in `test/theme.test.js` |
+| Account deletion | `public/src/features/vocabulary-manager/delete-account.js` (the Account section of My Cards) calls `Cloud.deleteAccount`: confirms a sign-in older than 4 minutes in Google's popup, deletes every collection and the progress record in one batch, then the Auth user. The sign-in screen says so afterwards (a `sessionStorage` flag read by `auth-gate.js`) |
+| Audit results | [`audit-2026-10-31.md`](audit-2026-10-31.md): every finding of the 31 October review and its outcome |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
 | Study page (modes, stats, saving progress) | `public/src/study.js`, the modes in `public/src/features/flashcards/` |
 | Study logic without the DOM (spaced repetition, quiz choices, random order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
@@ -43,8 +45,8 @@ clock.
 Until 1.9.0 each card was a document of its own (`users/{uid}/cards`), and until 1.11.0
 progress was `{ known, history }`. The app migrated both on load; on 1 November 2026 the last
 remaining data was migrated server-side, and the migration code and the rules for the old layout
-were removed, except that the owner may still read the (empty) old card path, which versions up
-to 1.12.1 query on load.
+were removed. The old card path stayed readable by its owner for one release (1.13.1) so cached
+1.12.1 apps could still load; 1.14.0 denies it.
 
 A collection's cards live in its own document, at most 5,000 of them (well under Firestore's
 1 MiB per document), so loading everything costs one read per collection, an import is a single
@@ -102,8 +104,9 @@ two deploys).
 Because of that, **Firestore rules must keep accepting what the previous app version does**:
 rules deploy at once, while an installed app runs its old version for one more session. 1.13.0
 broke this by denying the old card path that 1.12.1 still read on load ("Missing or insufficient
-permissions" on the first open after the deploy); 1.13.1 lets the owner read that empty path
-again. Tighten rules one release after the app stops needing what they remove.
+permissions" on the first open after the deploy); 1.13.1 let the owner read that empty path
+again, and 1.14.0 removed it. Tighten rules one release after the app stops needing what they
+remove.
 
 The in-app browser of the Claude desktop app can't fetch service-worker scripts from the local
 emulator (127.0.0.1); to try service-worker changes, deploy a preview channel:
