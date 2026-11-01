@@ -77,6 +77,13 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
+## Automated: search engines (`crawl.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| `robots.txt` | allows every crawler; names `https://yourflashcards.app/sitemap.xml` |
+| `sitemap.xml` | lists exactly `/` and `/privacy.html` on `https://yourflashcards.app`; every listed URL is a file in `public` |
+
 ## Manual: end-to-end on the emulators
 
 With `npm run dev`, at http://127.0.0.1:5050:

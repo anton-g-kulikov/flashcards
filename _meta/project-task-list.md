@@ -100,6 +100,19 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Verification:** rules tests for the batch delete (owner only); end to end on the emulators,
   where no collection, progress record or Auth user was left.
 
+### TASK-007 — Sitemap and robots.txt (2026-11-01)
+
+- **Goal:** Google had not discovered yourflashcards.app (Search Console: "URL is unknown to
+  Google"); `/sitemap.xml` and `/robots.txt` returned 404.
+- **Success criteria:**
+  - `/robots.txt` allows crawling and names `https://yourflashcards.app/sitemap.xml`.
+  - `/sitemap.xml` lists the public pages (`/`, `/privacy.html`). My Cards is left out: signed
+    out, it shows only the sign-in screen.
+  - Neither file is precached, so no version bump.
+  - The sitemap is submitted in Search Console (property `sc-domain:yourflashcards.app`).
+- **Verification:** `crawl.test.js` (4 tests); full suite 105 passing; both files checked live
+  after deploy.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).
