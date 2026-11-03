@@ -13,7 +13,8 @@ back online).
   flashcards or a multiple-choice quiz. See [How studying works](#how-studying-works).
 - **My Cards** (`vocabulary-manager.html`): one collapsible card per collection. Its header
   switches it on or off for study and has rename, export and delete; open it to add words one at
-  a time (the translation is optional and can be added later) and edit or delete them. **New**
+  a time (the translation is optional and can be added later). Tap a word or its translation in
+  the list to change it; long ones wrap onto more lines. **New**
   and **Import** at the top create collections. **Delete my account** at the bottom deletes your
   collections, progress and sign-in.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.

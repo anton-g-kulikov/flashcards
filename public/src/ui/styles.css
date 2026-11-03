@@ -912,18 +912,22 @@ button.armed:hover {
   gap: var(--spacing-3);
 }
 
-.add-word-form input {
+.add-word-form textarea {
+  display: block;
   font: inherit;
   font-size: 1rem; /* 16px stops iOS zooming into the field */
+  line-height: 1.4;
   min-height: 48px;
-  padding: 0 var(--spacing-4);
+  padding: 12px var(--spacing-4);
+  resize: none;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
   color: var(--color-text);
 }
 
-.add-word-form input:focus {
+.add-word-form textarea:focus {
   outline: none;
   border-color: var(--color-accent);
   background: var(--color-surface);
@@ -942,10 +946,13 @@ button.armed:hover {
   list-style: none;
 }
 
+/* Two rows: the word with its delete button, then the translation across the full width, so a
+ * long translation isn't cut off */
 .word-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--spacing-2);
+  column-gap: var(--spacing-2);
   padding: var(--spacing-2) 0;
   border-bottom: 1px solid var(--color-border);
 }
@@ -954,35 +961,47 @@ button.armed:hover {
   border-bottom: none;
 }
 
-.word-item-word {
-  flex: 0 1 42%;
-  min-width: 0;
-  font-family: var(--serif);
-  font-size: 1.1875rem;
-  color: var(--color-primary);
-  overflow-wrap: anywhere;
-}
-
-/* Reads as text until tapped */
+.word-item-word,
 .word-item-translation {
-  flex: 1 1 auto;
   min-width: 0;
-  min-height: var(--tap);
+  width: calc(100% + var(--spacing-2));
+  margin-left: calc(-1 * var(--spacing-2));
+  display: block;
   font: inherit;
-  font-size: 1rem;
-  color: var(--color-text);
+  line-height: 1.4;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  padding: 0 var(--spacing-2);
+  padding: 4px var(--spacing-2);
+  resize: none;
+  overflow: hidden;
   transition: border-color 0.15s, background-color 0.15s;
 }
 
+.word-item-word {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--serif);
+  font-size: 1.1875rem;
+  line-height: 1.3;
+  color: var(--color-primary);
+}
+
+/* Both read as text until tapped; their padding sits outside the column so the text lines up */
+.word-item-translation {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.word-item-word::placeholder,
 .word-item-translation::placeholder {
   color: var(--color-muted);
   font-style: italic;
 }
 
+.word-item-word:focus,
 .word-item-translation:focus {
   outline: none;
   background: var(--color-bg);
@@ -990,7 +1009,8 @@ button.armed:hover {
 }
 
 .word-item-delete {
-  flex: 0 0 auto;
+  grid-column: 2;
+  grid-row: 1;
   width: var(--tap);
   height: var(--tap);
   padding: 0;
@@ -1551,7 +1571,7 @@ body.auth-pending .auth-gate .auth-loading {
     flex-direction: row;
   }
 
-  .add-word-form input {
+  .add-word-form textarea {
     flex: 1 1 0;
     min-width: 0;
   }

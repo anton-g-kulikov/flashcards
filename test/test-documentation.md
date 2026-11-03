@@ -91,7 +91,10 @@ With `npm run dev`, at http://127.0.0.1:5050:
 1. Signed out, both pages show only the sign-in screen.
 2. Sign in (emulator popup or `Cloud.signInForTesting()`): the account chip shows the name.
 3. My Cards: add a word with and without a translation; adding the same word again (any case)
-   is refused; editing a translation and deleting a word persist after reload.
+   is refused; editing a word or a translation in place and deleting a word persist after reload.
+   A word can't be changed to empty or to one the collection already has (it reverts, with
+   "already in your collection"). Long words and translations wrap at phone width, in the list
+   and in the add form; Enter in the add form adds the word.
 4. Study: quiz options are the collection's translations; untranslated words are left out of the
    quiz; flashcards flip to the translation ("No translation yet" when missing). Keyboard: Tab
    reaches the mode buttons, quiz options and the flashcard; Enter or Space answers or flips.

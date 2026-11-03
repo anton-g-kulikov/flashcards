@@ -32,6 +32,27 @@ function failure(error) {
   return error.message;
 }
 
+// A text field that wraps long text onto more lines on narrow screens and grows to fit it. Enter
+// runs `onEnter` (add the word, save the translation) instead of starting a new line.
+function growingField(onEnter) {
+  const field = document.createElement("textarea");
+  field.rows = 1;
+  const fit = () => {
+    field.style.height = "auto";
+    field.style.height = `${field.scrollHeight + field.offsetHeight - field.clientHeight}px`;
+  };
+  field.addEventListener("input", fit);
+  field.addEventListener("focus", fit);
+  field.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    onEnter();
+  });
+  // Fields are drawn only for an open collection, so they are on screen by the next frame
+  requestAnimationFrame(fit);
+  return field;
+}
+
 function iconButton(name, label, className = "icon-tool") {
   const button = document.createElement("button");
   button.type = "button";
@@ -130,7 +151,7 @@ class WordManager {
     this.render();
     const card = this.collectionList.querySelector(`[data-id="${collectionId}"]`);
     card?.scrollIntoView({ behavior: "smooth", block: "start" });
-    card?.querySelector(".add-word-form input")?.focus({ preventScroll: true });
+    card?.querySelector(".add-word-form textarea")?.focus({ preventScroll: true });
   }
 
   // --- Collections ---
@@ -346,8 +367,40 @@ class WordManager {
     }
 
     const section = this.renderCollection(collection);
-    section.querySelector(".add-word-form input").focus();
+    section.querySelector(".add-word-form textarea").focus();
     this.showMessage(I18n.t("words.added", { word }), "success");
+  }
+
+  // A word changed in place: not empty, and not a word the collection already has
+  async updateWord(card, field) {
+    const word = field.value.trim();
+    const restore = () => {
+      field.value = card.word;
+      field.dispatchEvent(new Event("input"));
+    };
+    if (word === card.word) return;
+    if (!word) {
+      restore();
+      return;
+    }
+    const existing = this.cardsIn(card.collectionId).find(
+      (other) => other.id !== card.id && other.word.toLowerCase() === word.toLowerCase()
+    );
+    if (existing) {
+      restore();
+      this.showMessage(I18n.t("words.exists", { word: existing.word }), "info");
+      return;
+    }
+
+    try {
+      await Cloud.updateCard(card.id, { ...card, word });
+      card.word = word;
+      this.sortCards(); // takes its place next time the list is drawn, not under the user's finger
+      this.showMessage(I18n.t("words.wordSaved", { word }), "success");
+    } catch (error) {
+      restore();
+      this.showMessage(I18n.t("words.saveFailed", { word: card.word, error: failure(error) }), "error");
+    }
   }
 
   async updateTranslation(card, input) {
@@ -360,6 +413,7 @@ class WordManager {
       this.showMessage(I18n.t("words.saved", { word: card.word }), "success");
     } catch (error) {
       input.value = card.translation;
+      input.dispatchEvent(new Event("input"));
       this.showMessage(
         I18n.t("words.saveFailed", { word: card.word, error: failure(error) }),
         "error"
@@ -500,16 +554,15 @@ class WordManager {
     form.className = "add-word-form";
     form.autocomplete = "off";
 
-    const word = document.createElement("input");
-    word.type = "text";
+    const submit = () => form.requestSubmit();
+    const word = growingField(submit);
     word.name = "word";
     word.maxLength = 200;
     word.required = true;
     word.autocapitalize = "none";
     word.placeholder = I18n.t("words.wordPlaceholder");
 
-    const translation = document.createElement("input");
-    translation.type = "text";
+    const translation = growingField(submit);
     translation.name = "translation";
     translation.maxLength = 500;
     translation.autocapitalize = "none";
@@ -544,12 +597,17 @@ class WordManager {
       const item = document.createElement("li");
       item.className = "word-item";
 
-      const word = document.createElement("span");
+      // Both the word and its translation are edited in place; leaving a field saves it
+      const word = growingField(() => word.blur());
       word.className = "word-item-word";
-      word.textContent = card.word;
+      word.maxLength = 200;
+      word.required = true;
+      word.autocapitalize = "none";
+      word.setAttribute("aria-label", I18n.t("words.wordPlaceholder"));
+      word.value = card.word;
+      word.addEventListener("change", () => this.updateWord(card, word));
 
-      const input = document.createElement("input");
-      input.type = "text";
+      const input = growingField(() => input.blur());
       input.className = "word-item-translation";
       input.maxLength = 500;
       input.placeholder = I18n.t("words.translationPlaceholder");
