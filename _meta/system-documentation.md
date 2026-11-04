@@ -71,9 +71,13 @@ npm run dev
 `npm run dev` writes `firebase.dev.json` (firebase.json plus the emulator addresses in the
 security policy) and starts the Auth, Firestore and Hosting emulators with it; open
 http://127.0.0.1:5050. On
-localhost the app talks to the emulators, so nothing touches production. The emulator's sign-in
-popup lets you create test Google accounts; for scripted checks, `window.Cloud.signInForTesting()`
-signs in without the popup (`window.Cloud` exists only on the emulators).
+localhost the app talks to the emulators, so nothing touches production. Sign-in on localhost
+always redirects to the emulator's page, where you create test Google accounts, because Claude's
+in-app browser opens popups in the app's own tab, which fails with "No matching frame". The live
+site uses the popup, so test that path on a preview channel. For scripted checks,
+`window.Cloud.signInForTesting()` signs in without that page (`window.Cloud` exists only on the
+emulators). Confirming an old sign-in before deleting an account still uses a popup, so on
+localhost in the in-app browser delete within 4 minutes of signing in.
 
 ```bash
 npm test

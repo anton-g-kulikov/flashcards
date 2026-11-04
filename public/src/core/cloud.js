@@ -117,6 +117,9 @@ function checkSize(cards) {
 
 export const Cloud = {
   async signIn() {
+    // Locally, always on this page: Claude's in-app browser opens a popup in the app's own tab,
+    // which leaves it no window to report back to ("No matching frame").
+    if (usesEmulators) return signInWithRedirect(auth, new GoogleAuthProvider());
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
     } catch (error) {

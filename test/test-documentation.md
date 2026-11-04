@@ -89,7 +89,8 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 With `npm run dev`, at http://127.0.0.1:5050:
 
 1. Signed out, both pages show only the sign-in screen.
-2. Sign in (emulator popup or `Cloud.signInForTesting()`): the account chip shows the name.
+2. Sign in (the emulator's redirect page or `Cloud.signInForTesting()`): the account chip shows
+   the name.
 3. My Cards: add a word with and without a translation; adding the same word again (any case)
    is refused; editing a word or a translation in place and deleting a word persist after reload.
    A word can't be changed to empty or to one the collection already has (it reverts, with
