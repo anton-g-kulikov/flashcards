@@ -129,3 +129,17 @@ describe("iOS launch screens", () => {
     assert.deepEqual(extra, []);
   });
 });
+
+describe("footer", () => {
+  for (const page of ["index.html", "vocabulary-manager.html"]) {
+    it(`${page} starts collapsed, with its contents out of reach until opened`, () => {
+      const html = readFileSync(join("public", page), "utf8");
+      assert.match(html, /<footer class="site-footer" data-collapsed>/);
+      assert.match(html, /class="footer-fold" id="footerFold" inert>/);
+      assert.match(html, /aria-controls="footerFold"\s+aria-expanded="false"/);
+      const footer = html.slice(html.indexOf("<footer"), html.indexOf("</footer>"));
+      assert.ok(footer.includes("data-theme-switch") && footer.includes("data-analytics-note"));
+    });
+  }
+});
+

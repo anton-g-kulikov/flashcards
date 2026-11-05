@@ -854,13 +854,94 @@ button.armed:hover {
 
 /* --- Footer --- */
 .site-footer {
+  position: relative;
   max-width: 560px;
-  margin: 0 auto;
+  margin: var(--spacing-3) auto 0;
   padding: var(--spacing-4) var(--spacing-4) calc(var(--spacing-5) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--color-border);
   color: var(--color-muted);
   font-size: 0.8125rem;
   text-align: center;
+}
+
+/* A tab on the divider, in the same place whether the footer is open or collapsed */
+.footer-toggle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 32px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  transform: translate(-50%, -50%);
+}
+
+.footer-toggle:hover {
+  background: none;
+  color: var(--color-text);
+}
+
+.footer-toggle svg {
+  width: 40px;
+  height: 18px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The arrow turns; the pill around it stays level */
+.footer-toggle path {
+  transform: rotate(180deg);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.28s ease;
+}
+
+.site-footer[data-collapsed] .footer-toggle path {
+  transform: none;
+}
+
+/* Rows from 1fr to 0fr, so it folds from whatever height its text takes in each language. The
+ * margin and padding cancel out, and leave room for focus rings inside the clipping. */
+.footer-fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  margin: -4px;
+  padding: 4px;
+  overflow: hidden;
+  transition: grid-template-rows 0.28s ease;
+}
+
+.site-footer[data-collapsed] .footer-fold {
+  grid-template-rows: 0fr;
+}
+
+.footer-body {
+  min-height: 0;
+  transition: visibility 0.28s;
+}
+
+.site-footer[data-collapsed] .footer-body {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-toggle path,
+  .footer-fold,
+  .footer-body {
+    transition: none;
+  }
 }
 
 .site-footer .footer-content {
@@ -885,17 +966,10 @@ button.armed:hover {
 }
 
 /* --- Appearance switch: small and quiet, a preference set once --- */
-.footer-prefs,
-.page-foot {
+.footer-prefs {
   display: flex;
   justify-content: center;
   margin-bottom: var(--spacing-3);
-}
-
-.page-foot {
-  flex-direction: column;
-  align-items: center;
-  margin-top: var(--spacing-5);
 }
 
 /* The cookie note under the footer: small, with its way out as an inline link */

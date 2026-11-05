@@ -247,33 +247,48 @@
       </div>
     </div>
 
-    <footer class="site-footer">
-      <div class="footer-prefs">
-        <div data-theme-switch></div>
+    <footer class="site-footer" data-collapsed>
+      <button
+        type="button"
+        class="footer-toggle"
+        aria-controls="footerFold"
+        aria-expanded="false"
+        data-i18n-label="footer.expand"
+        aria-label="Show settings and info"
+        title="Show settings and info"
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" /></svg>
+      </button>
+      <div class="footer-fold" id="footerFold" inert>
+        <div class="footer-body">
+          <div class="footer-prefs">
+            <div data-theme-switch></div>
+          </div>
+          <div class="footer-content">
+            <span id="footer-version">Version: ...</span>
+            <span class="footer-divider">&nbsp;|&nbsp;</span>
+            <span id="footer-word-count">Vocabulary: ... words</span>
+            <span class="footer-divider">&nbsp;|&nbsp;</span>
+            <a
+              href="https://github.com/anton-g-kulikov/flashcards"
+              target="_blank"
+              rel="noopener"
+              >GitHub</a
+            >
+            <span class="footer-divider">&nbsp;|&nbsp;</span>
+            <a href="privacy.html" data-i18n="footer.privacy">Privacy</a>
+            <a
+              class="footer-coffee"
+              href="https://buymeacoffee.com/antonkulikov"
+              target="_blank"
+              rel="noopener"
+              data-i18n="footer.coffee"
+              >Find this useful? Buy me a coffee! ☕️ :)
+            </a>
+          </div>
+          <p data-analytics-note></p>
+        </div>
       </div>
-      <div class="footer-content">
-        <span id="footer-version">Version: ...</span>
-        <span class="footer-divider">&nbsp;|&nbsp;</span>
-        <span id="footer-word-count">Vocabulary: ... words</span>
-        <span class="footer-divider">&nbsp;|&nbsp;</span>
-        <a
-          href="https://github.com/anton-g-kulikov/flashcards"
-          target="_blank"
-          rel="noopener"
-          >GitHub</a
-        >
-        <span class="footer-divider">&nbsp;|&nbsp;</span>
-        <a href="privacy.html" data-i18n="footer.privacy">Privacy</a>
-        <a
-          class="footer-coffee"
-          href="https://buymeacoffee.com/antonkulikov"
-          target="_blank"
-          rel="noopener"
-          data-i18n="footer.coffee"
-          >Find this useful? Buy me a coffee! ☕️ :)
-        </a>
-      </div>
-      <p data-analytics-note></p>
     </footer>
   </body>
 </html>

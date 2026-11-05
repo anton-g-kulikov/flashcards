@@ -76,6 +76,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Every page, script and stylesheet | in the precache list; every precached file exists |
 | Every `innerHTML` / `outerHTML` assignment in `public/src` | an empty string, a template whose parts are translation text, or one of the reviewed sinks listed in the test; `insertAdjacentHTML` and `document.write` not used; a planted `innerHTML = card.word` fails |
 | Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
+| Footer, on both pages | starts collapsed and inert, and holds the appearance switch and the cookie note |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Automated: search engines (`crawl.test.js`)
@@ -116,9 +117,9 @@ With `npm run dev`, at http://127.0.0.1:5050:
 8. Spaced repetition: with three new words, miss one in the quiz (it comes back after another
    word), answer the rest; the "All caught up" card says the next review is tomorrow. Reset
    Progress makes all three due again. At phone width, the stats row fits in all three languages.
-9. Appearance: pick Dark at the foot of Study; My Cards and the privacy page open dark, with no
+9. Appearance: open the footer and pick Dark; My Cards and the privacy page open dark, with no
    light flash. Light holds while the device is dark; "Match the device" follows the device again.
-10. Cookie note: under the footer of Study, at the foot of My Cards, and on the sign-in screen. "Turn off analytics" deletes
+10. Cookie note: in the footer of both pages and on the sign-in screen. "Turn off analytics" deletes
    the `_ga` cookies and switches the note to "Analytics is off on this device"; after a reload no
    googletagmanager script loads (check on a deployed site, it never loads on localhost). "Turn it
    back on" restores it.
@@ -126,3 +127,6 @@ With `npm run dev`, at http://127.0.0.1:5050:
    sign-in screen with "Your account and all your words were deleted." On the emulators no
    collection, progress record or Auth user is left for that account. With a sign-in older than 4
    minutes, Google's popup asks to confirm first; closing it deletes nothing.
+12. Footer: on Study and My Cards it starts collapsed, also after a reload, with only the tab on
+   the divider showing. The tab opens it (the arrow turns, the page scrolls it into view) and
+   closes it; while closed, nothing in it can be reached with the keyboard.

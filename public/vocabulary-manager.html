@@ -193,12 +193,29 @@
         <p id="deleteAccountStatus" class="account-status" role="status"></p>
       </section>
 
-      <div class="page-foot">
-        <div data-theme-switch></div>
-        <p data-analytics-note></p>
-      </div>
-
       <div id="messageContainer" class="toast-container" aria-live="polite"></div>
     </div>
+
+    <footer class="site-footer" data-collapsed>
+      <button
+        type="button"
+        class="footer-toggle"
+        aria-controls="footerFold"
+        aria-expanded="false"
+        data-i18n-label="footer.expand"
+        aria-label="Show settings and info"
+        title="Show settings and info"
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" /></svg>
+      </button>
+      <div class="footer-fold" id="footerFold" inert>
+        <div class="footer-body">
+          <div class="footer-prefs">
+            <div data-theme-switch></div>
+          </div>
+          <p data-analytics-note></p>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

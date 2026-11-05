@@ -18,10 +18,12 @@ back online).
   and **Import** at the top create collections. **Delete my account** at the bottom deletes your
   collections, progress and sign-in.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.
-- **Appearance**: light, dark, or matching the device (the default), from the switch at the foot
-  of Study and My Cards. Saved on that device.
-- **Analytics**: Google Analytics counts which features get used; the note at the foot of the
-  pages turns it off (or back on) for that device. See the [privacy page](https://yourflashcards.app/privacy.html).
+- **Footer**: the tab on the line at the bottom of Study and My Cards opens it. It starts folded
+  away each time.
+- **Appearance**: light, dark, or matching the device (the default), from the switch in the
+  footer. Saved on that device.
+- **Analytics**: Google Analytics counts which features get used; the note in the footer and on
+  the sign-in screen turns it off (or back on) for that device. See the [privacy page](https://yourflashcards.app/privacy.html).
 
 ## How studying works
 
