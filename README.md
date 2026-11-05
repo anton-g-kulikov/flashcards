@@ -143,11 +143,25 @@ and edit.
 
 1. Get the CSV file: from a friend, or from [`public/collections/`](public/collections/) in this
    repository (open the file on GitHub, then **Download raw file**).
-2. In **My Cards**, tap **Import → Choose a CSV file**. It becomes a new collection named after
+2. In **My Cards**, tap **Import → Choose a file**. It becomes a new collection named after
    the file, switched on for study. Nothing you already have is changed.
 
 The collections in this repository are also listed under **Import → Starter collections**, so
 you can add them in one tap, without downloading anything.
+
+### Import from Anki
+
+1. In Anki, choose **File → Export**, pick the deck, and set the format to **Notes in Plain Text
+   (.txt)**.
+2. In **My Cards**, tap **Import → Choose a file** and pick the `.txt` file.
+3. Set the collection's languages in **My Cards** if you want to hear the words read aloud.
+
+The first two fields of each note become the word and translation; the rest are left out. Markup
+and sound references are removed. Every word starts as new, because Anki's review history doesn't
+come across, and neither do images or audio. Cloze notes keep their `{{c1::…}}` text, so they aren't
+worth importing. Anki's `.apkg` deck packages can't be imported.
+
+Any tab-separated file works the same way.
 
 ### Starter collections
 

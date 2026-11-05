@@ -32,6 +32,9 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Export then import | round-trips exactly, languages included |
 | Header of language codes (`es,en`, `es,translation`) | read as a header; sets `language`, either side may be missing |
 | First row with only one column name or code (`es,yes`) | read as a word, no language |
+| Anki text export (`#separator:`, `#html:`, `#… column:` lines) | follows those lines, skips meta columns, removes markup and sound references |
+| Tab in the first line, no Anki lines | read as tab-separated |
+| Ordinary CSV starting with `#` | not mistaken for Anki |
 | Every file in `public/collections/` | listed in `index.json` with the right word count, no empty fields |
 | Spanish words across starter collections | never repeated |
 
@@ -169,3 +172,7 @@ With `npm run dev`, at http://127.0.0.1:5050:
 17. CSV languages: import a file with the header `es,en`: the collection arrives with Spanish and
    English set. Export it: the first line is `es,en`. A `word,translation` file imports with no
    languages, and its export keeps that header.
+18. Anki import: in Anki, export a deck as Notes in Plain Text, with and without HTML, and import the
+   `.txt` from My Cards. The words and translations are clean, with one card per note, and the
+   collection is named after the file. Try the file picker on an iPhone: `.txt` files must be
+   selectable.

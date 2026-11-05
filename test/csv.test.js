@@ -114,6 +114,57 @@ describe("languages in the header", () => {
   });
 });
 
+describe("Anki's plain text export", () => {
+  const words = (text) => readCards(text).cards.map((c) => [c.word, c.translation]);
+
+  it("follows its header lines and doesn't import them", () => {
+    const text = "#separator:tab\n#html:false\n#tags column:3\nla casa\thouse\tnouns\ncomer\tto eat\t\n";
+    assert.deepEqual(words(text), [["la casa", "house"], ["comer", "to eat"]]);
+  });
+
+  it("takes the first two fields, past any guid, note type and deck columns", () => {
+    const text =
+      "#separator:tab\n#html:true\n#guid column:1\n#notetype column:2\n#deck column:3\n#tags column:6\n" +
+      "aB3$x\tBasic\tSpanish::A1\tla casa\thouse\tnouns\n";
+    assert.deepEqual(words(text), [["la casa", "house"]]);
+  });
+
+  it("removes markup and decodes entities when the file has HTML", () => {
+    const text =
+      '#separator:tab\n#html:true\n<b>comer</b>\t"<div>to eat</div><div>to dine</div>"\n' +
+      "caf&eacute;&nbsp;solo\tR&amp;B &lt;3 &#233;<img src=a.jpg>\n";
+    assert.deepEqual(words(text), [["comer", "to eat to dine"], ["caf&eacute; solo", "R&B <3 é"]]);
+  });
+
+  it("leaves angle brackets alone when the file has no HTML", () => {
+    assert.deepEqual(words("#separator:tab\n#html:false\n<b>\ta tag\n"), [["<b>", "a tag"]]);
+  });
+
+  it("removes sound references either way", () => {
+    const text = "#separator:tab\n#html:false\nhola [sound:hola.mp3]\thi\n[sound:only.mp3]\tskipped\n";
+    const { cards, skipped } = readCards(text);
+    assert.deepEqual(cards, [{ word: "hola", translation: "hi" }]);
+    assert.equal(skipped, 1);
+  });
+
+  it("reads quoted fields with line breaks", () => {
+    assert.deepEqual(words('#separator:tab\n#html:true\nhola\t"hi<br>\nhello"\n'), [["hola", "hi hello"]]);
+  });
+
+  it("takes the separators Anki names, by name or as the character, with a BOM and CRLF", () => {
+    assert.deepEqual(words("\uFEFF#separator:Semicolon\r\n#html:false\r\nuno;one\r\n"), [["uno", "one"]]);
+    assert.deepEqual(words("#separator:|\nuno|one\n"), [["uno", "one"]]);
+  });
+
+  it("reads a tab-separated file with no header lines", () => {
+    assert.deepEqual(words("hola\thi, hello\nuno\tone\n"), [["hola", "hi, hello"], ["uno", "one"]]);
+  });
+
+  it("leaves an ordinary CSV alone, even one starting with #", () => {
+    assert.deepEqual(words("#1,first\n<b>x</b>,[sound:y]\n"), [["#1", "first"], ["<b>x</b>", "[sound:y]"]]);
+  });
+});
+
 describe("example.csv", () => {
   it("is a valid collection that shows the format, including a quoted comma", () => {
     const cards = toCards(readFileSync("public/collections/example.csv", "utf8"));

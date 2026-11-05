@@ -167,12 +167,12 @@
         <div id="importPanel" class="import-panel hidden">
           <p class="hint" data-i18n="collections.importHint">
             A CSV file with the columns word,translation becomes a new collection. Language codes as
-            column names, like es,en, also set its languages.
+            column names, like es,en, also set its languages. Anki's plain text export works too.
           </p>
           <button type="button" id="importFileBtn" class="primary-btn" data-i18n="collections.importFile">
-            Choose a CSV file
+            Choose a file
           </button>
-          <input type="file" id="importFileInput" accept=".csv,text/csv" hidden />
+          <input type="file" id="importFileInput" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden />
           <h3 class="import-library-title" data-i18n="collections.library">Starter collections</h3>
           <ul id="libraryList" class="library-list"></ul>
         </div>

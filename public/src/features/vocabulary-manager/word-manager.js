@@ -316,7 +316,7 @@ class WordManager {
     if (!file) return;
     try {
       const result = readCards(await file.text());
-      await this.importCards(file.name.replace(/\.csv$/i, ""), result, result.language);
+      await this.importCards(file.name.replace(/\.(csv|tsv|txt)$/i, ""), result, result.language);
     } catch (error) {
       this.showMessage(I18n.t("collections.importFailed", { error: failure(error) }), "error");
     }

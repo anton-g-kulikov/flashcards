@@ -171,6 +171,15 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   the collection's languages from them and an export writes them. The example and starter files use
   the new header. Old `word,translation` files work as before.
 
+### TASK-014 — Anki import (2026-11-05)
+
+- **Goal:** bring an Anki deck in without converting it by hand.
+- **Done:** the import takes Anki's Notes in Plain Text export and any tab-separated file. It follows
+  the file's own header lines, skips deck and note type columns, and removes markup and sound
+  references. The first two fields become the word and translation.
+- **Note:** no `.apkg`, review history, images or audio. Checked against Anki's documented format
+  with a sample file, not yet with a real export from Anki.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).
