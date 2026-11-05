@@ -60,11 +60,14 @@ on average, from all new to all mastered.
 
 ### Flash Mode
 
-The card shows the word; tap it (or press Enter or Space) to flip to the translation.
+The card shows the word; tap it (or press Enter or Space) to flip between the word and the
+translation. You can also swipe the card: right does what **I know this!** does, left what the
+other button does.
 
 - **I know this!** moves the word up a box; the card slides off to the right.
-- **I don't know…** flips the card to show the translation and the button becomes **Next**; tap it
-  or the card when you're ready to go on, and the card slides off to the left. The word comes
+- **I don't know…** flips the card to show the translation and the button becomes **Next**. Tap the
+  card to turn it back and forth as often as you like; press **Next** when you're ready to go on,
+  and the card slides off to the left. The word comes
   back after three other cards (or sooner, if fewer are left), the same as a missed word in the
   quiz.
 

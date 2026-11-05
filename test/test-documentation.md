@@ -48,6 +48,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | --- | --- |
 | Known word | up one box, due after that box's interval (1, 3, 7, 16, 35 days); box 5 stays 5 |
 | Word not known | box 1, due now |
+| A drag on a flashcard | sideways or up and down once it has moved 10 px; a swipe past 30% of the card's width, at most 100 px |
 | Missed flashcard | back in the deck behind the next 3 cards, or last when fewer are left |
 | Needs study | new words and words due; not words scheduled later |
 | Study queue | due words first, oldest day first, same-day ones shuffled; then new words; nothing not due |
@@ -99,10 +100,12 @@ With `npm run dev`, at http://127.0.0.1:5050:
 4. Study: quiz options are the collection's translations; untranslated words are left out of the
    quiz; flashcards flip to the translation ("No translation yet" when missing). Keyboard: Tab
    reaches the mode buttons, quiz options and the flashcard; Enter or Space answers or flips.
-   In Flash Mode, "I Don't Know" turns the card over and becomes a neutral "Next"; Next or a tap on
-   the card moves on, and the next card shows "I Don't Know" again. A known card slides off to
+   In Flash Mode, "I Don't Know" turns the card over and becomes a neutral "Next". A tap only turns
+   the card back and forth; only Next moves on, and the next card shows "I Don't Know" again. A known card slides off to
    the right, a missed one to the left, without widening the page; the next word fades in front
-   up, so its translation never shows.
+   up, so its translation never shows. Dragging the card follows the finger: past about 100 px
+   a swipe right counts as known, a swipe left as "I Don't Know" (or Next once the meaning has been
+   shown); a shorter drag springs back without turning the card, and dragging up and down scrolls.
 5. Answer a quiz question correctly, reload: the Learning count is kept. Reset Progress needs a
    second tap ("Tap again to reset these words"); after it, every word is due again, also after a
    reload. Delete in My Cards likewise needs a second tap ("Sure?"). These replace `confirm()`,

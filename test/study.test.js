@@ -9,6 +9,7 @@ import {
   RETRY_GAP,
   retryLater,
 } from "../public/src/features/study/progress.js";
+import { dragAxis, swipeDirection } from "../public/src/features/study/swipe.js";
 import {
   MAX_OPTIONS,
   distinctTranslations,
@@ -132,6 +133,25 @@ describe("saved progress", () => {
   it("ignores malformed stored entries", () => {
     const progress = new Progress({ srs: { a: { box: 9, due: 1 }, b: { box: 2 }, c: "x", d: { box: 2, due: NOW } } });
     assert.deepEqual(Object.keys(progress.srs), ["d"]);
+  });
+});
+
+describe("swiping a flashcard", () => {
+  it("reads a drag as sideways or up and down once it has moved far enough", () => {
+    assert.equal(dragAxis(4, 3), null);
+    assert.equal(dragAxis(12, 3), "horizontal");
+    assert.equal(dragAxis(-12, 3), "horizontal");
+    assert.equal(dragAxis(3, 12), "vertical");
+    assert.equal(dragAxis(12, -14), "vertical");
+  });
+
+  it("counts a swipe past 30% of the card's width, or 100 px on a wide card", () => {
+    assert.equal(swipeDirection(110, 340), "right");
+    assert.equal(swipeDirection(-110, 340), "left");
+    assert.equal(swipeDirection(95, 340), null, "short of 102 px, but the cap is 100");
+    assert.equal(swipeDirection(101, 560), "right", "the cap, on a wide card");
+    assert.equal(swipeDirection(-99, 560), null);
+    assert.equal(swipeDirection(0, 340), null);
   });
 });
 

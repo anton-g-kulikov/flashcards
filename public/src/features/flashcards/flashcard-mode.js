@@ -1,12 +1,13 @@
 // Flashcards: the word on the front, its translation on the back. The deck is the study queue
 // (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
-// "I don't know…" turns the card over and becomes "Next" (a tap on the card works too), and the
-// word comes back after three other cards, as a missed word does in the quiz. A card leaves to the
-// right when known and to the left when not.
+// "I don't know…" turns the card over and becomes "Next", and the word comes back after three
+// other cards, as a missed word does in the quiz. A tap only ever turns the card; a card leaves
+// through the buttons or a swipe, to the right when known and to the left when not.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
 import { retryLater } from "../study/progress.js";
+import { dragAxis, swipeDirection } from "../study/swipe.js";
 
 const SWIPE_MS = 280; // the .leaving-left/right transition in styles.css
 
@@ -19,17 +20,18 @@ export class FlashcardMode {
     this.actions = document.getElementById("cardActions");
     this.deck = [];
     this.flipped = false;
-    this.waitingForTap = false; // the back is showing after "I don't know"
+    this.waitingForNext = false; // "I don't know" was pressed: the button says Next
     this.showingMessage = false;
     this.busy = false; // turning over to the next word
     this.flipTimer = null;
 
     onActivate(this.card, () => this.tapCard());
+    this.initSwipe();
     document.getElementById("knowBtn").addEventListener("click", () => this.mark(true));
     this.dontKnowBtn = document.getElementById("dontKnowBtn");
     this.dontKnowBtn.addEventListener("click", () => {
       if (this.busy) return;
-      if (this.waitingForTap) this.leave("left");
+      if (this.waitingForNext) this.leave("left");
       else this.mark(false);
     });
   }
@@ -57,7 +59,7 @@ export class FlashcardMode {
     clearTimeout(this.flipTimer);
     this.busy = false;
     this.flipped = false;
-    this.waitingForTap = false;
+    this.waitingForNext = false;
     this.setNextButton(false);
     this.resetCard();
 
@@ -91,16 +93,66 @@ export class FlashcardMode {
     this.flipTimer = setTimeout(() => this.card.classList.add("flipped"), 2000);
   }
 
+  // The card follows a sideways drag. Past the threshold it does what the buttons do; short of
+  // it, it springs back. Up-and-down drags are left to the page, which scrolls.
+  initSwipe() {
+    let drag = null;
+    // The click that ends a drag isn't a tap
+    const ignoreClick = () => {
+      this.dragged = true;
+      setTimeout(() => (this.dragged = false), 300);
+    };
+
+    this.card.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || !event.isPrimary) return;
+      if (this.busy || this.showingMessage || !this.current) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0, active: false };
+    });
+
+    this.card.addEventListener("pointermove", (event) => {
+      if (!drag || drag.vertical || event.pointerId !== drag.id) return;
+      const dx = event.clientX - drag.x;
+      if (!drag.active) {
+        const axis = dragAxis(dx, event.clientY - drag.y);
+        drag.vertical = axis === "vertical";
+        if (axis !== "horizontal") return;
+        drag.active = true;
+        this.card.setPointerCapture(event.pointerId);
+        this.container.classList.remove("arriving", "snapping");
+      }
+      drag.dx = dx;
+      this.container.style.transform = `translateX(${dx}px) rotate(${dx * 0.03}deg)`;
+    });
+
+    const end = (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { active, vertical, dx } = drag;
+      drag = null;
+      if (active || vertical) ignoreClick();
+      if (!active) return;
+      this.container.classList.add("snapping");
+      this.container.style.transform = "";
+      const direction = event.type === "pointerup" ? swipeDirection(dx, this.card.offsetWidth) : null;
+      if (direction) this.swipe(direction);
+    };
+    this.card.addEventListener("pointerup", end);
+    this.card.addEventListener("pointercancel", end);
+  }
+
+  // A swipe does what the matching button does
+  swipe(direction) {
+    if (direction === "right") this.mark(true);
+    else if (this.waitingForNext) this.leave("left");
+    else this.mark(false);
+  }
+
   tapCard() {
+    if (this.dragged) return;
     if (this.showingMessage) {
       this.card.classList.toggle("flipped");
       return;
     }
     if (this.busy || !this.current) return;
-    if (this.flipped && this.waitingForTap) {
-      this.leave("left");
-      return;
-    }
     this.flipped = !this.flipped;
     this.card.classList.toggle("flipped", this.flipped);
   }
@@ -119,9 +171,9 @@ export class FlashcardMode {
     } else if (this.flipped) {
       this.leave("left");
     } else {
-      // Show the translation; the next word comes on the next tap
+      // Show the translation; the next word comes with the Next button
       this.flipped = true;
-      this.waitingForTap = true;
+      this.waitingForNext = true;
       this.setNextButton(true);
       this.card.classList.add("flipped");
     }
@@ -143,7 +195,7 @@ export class FlashcardMode {
   resetCard() {
     const { classList } = this.container;
     const left = classList.contains("leaving-left") || classList.contains("leaving-right");
-    classList.remove("leaving-left", "leaving-right", "arriving");
+    classList.remove("leaving-left", "leaving-right", "arriving", "snapping");
     this.card.classList.add("no-flip");
     this.card.classList.remove("flipped");
     void this.card.offsetWidth; // applies the change before the flip transition returns

@@ -1,7 +1,7 @@
 // Service Worker for the Flashcards App
 // Named after the app's version (src/core/version.js); test/app-shell.test.js checks they match
 // and that every file of the app is listed here.
-const CACHE_NAME = "flashcards-v1.14.6";
+const CACHE_NAME = "flashcards-v1.14.7";
 const urlsToCache = [
   // Pages
   "/",
@@ -35,6 +35,7 @@ const urlsToCache = [
   "/src/features/study/message-card.js",
   "/src/features/study/progress.js",
   "/src/features/study/quiz-logic.js",
+  "/src/features/study/swipe.js",
   "/src/features/vocabulary-manager/word-manager.js",
   "/src/features/vocabulary-manager/delete-account.js",
 

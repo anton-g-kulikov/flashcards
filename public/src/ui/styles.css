@@ -488,13 +488,18 @@ button.armed:hover {
   perspective: 1000px;
   width: 100%;
   margin: 0 auto;
+  transform-origin: 50% 100%;
+}
+
+/* Back into place after a drag too short to count as a swipe */
+.flashcard-container.snapping {
+  transition: transform 0.2s ease-out;
 }
 
 /* A card leaves to the right when known, to the left when not; the next one fades in */
 .flashcard-container.leaving-right,
 .flashcard-container.leaving-left {
   opacity: 0;
-  transform-origin: 50% 100%;
   transition: transform 0.28s ease-in, opacity 0.28s ease-in;
 }
 
@@ -533,6 +538,9 @@ button.armed:hover {
   cursor: pointer;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+  touch-action: pan-y; /* sideways drags are swipes; up and down still scrolls the page */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .flashcard.flipped {
