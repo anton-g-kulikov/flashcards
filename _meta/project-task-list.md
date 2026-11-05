@@ -113,7 +113,7 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Verification:** `crawl.test.js` (4 tests); full suite 105 passing; both files checked live
   after deploy.
 
-### TASK-007 — Reading words aloud (2026-11-05)
+### TASK-008 — Reading words aloud (2026-11-05)
 
 - **Goal:** a small button that says the word, in Flash Mode and Quiz Mode.
 - **Approach:** the browser's Web Speech API: free, no server, works on iOS, Android, macOS and
@@ -122,7 +122,30 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Decided:** collections optionally name a language pair (`es-en`); no pair or no voice means no
   button. Five languages: English, Spanish, Russian, French, German. Up to ten words. Online voices
   are allowed as a fallback, and the privacy page says so.
+- **Also fixed:** the start of the first word was cut off while the audio output woke up. The first
+  word after a page load now follows a silent sound, which delays only that word by about 0.6 s.
+  If the same happens after a long pause, repeat the warm-up after idle time.
 - **Not verified:** a real iPhone (silent switch, installed app), Android and Windows.
+
+### TASK-009 — Study and My Cards polish (2026-11-03 to 2026-11-05)
+
+- **Flash Mode:** after "I Don't Know" the button becomes a neutral Next. A tap only turns the
+  card. A known card slides off to the right and a missed one to the left, and the card can be
+  swiped (past about 100 px) to do the same as the buttons.
+- **Study mode:** remembered per device; a shortcut's `?mode=` wins for that visit.
+- **My Cards:** each word takes two rows; word and translation are edited in place and wrap, as do
+  the add form's fields. A word can't become empty or repeat one in its collection.
+- **Footer:** collapsible as in What's Next, collapsed on every load, and at the bottom of the
+  screen on short pages. The cookie note sits inside it, and stays visible on the sign-in screen.
+- **Verification:** tests, and the emulators at phone width with real mouse drags. Not verified:
+  swiping with a real finger.
+
+### TASK-010 — Local development fixes (2026-11-04 to 2026-11-05)
+
+- Sign-in on localhost always redirects: Claude's in-app browser opens popups in the app's own
+  tab, which failed with "No matching frame". The live site keeps the popup.
+- The Auth and Firestore emulators moved to 9199 and 8180, so `npm run dev` runs alongside other
+  projects' emulators (What's Next uses the defaults).
 
 ## Backlog
 

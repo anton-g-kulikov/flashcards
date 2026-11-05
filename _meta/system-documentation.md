@@ -19,10 +19,13 @@ format and the contribution guide are in [`../README.md`](../README.md); test in
 | Audit results | [`audit-2026-10-31.md`](audit-2026-10-31.md): every finding of the 31 October review, its outcome, and the follow-up re-check |
 | Interface texts in English, Russian and Spanish | `public/src/ui/i18n.js`: `data-i18n*` attributes in the HTML, `I18n.t()` in scripts |
 | Study page (modes, stats, saving progress) | `public/src/study.js`, the modes in `public/src/features/flashcards/` |
-| Study logic without the DOM (spaced repetition, quiz choices, random order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
-| Collections and words | `public/src/features/vocabulary-manager/word-manager.js` (page), `public/src/core/cloud.js` and `card-data.js` (storage) |
+| Study logic without the DOM (spaced repetition, quiz choices, swipes, opening mode, random order) | `public/src/features/study/progress.js`, `quiz-logic.js`, `swipe.js`, `mode.js`, `public/src/utils/shuffle-utils.js`, tested in `test/study.test.js` and `test/shuffle.test.js` |
+| Flash Mode gestures | `public/src/features/flashcards/flashcard-mode.js`: a tap only turns the card; pointer events drag it, and past the threshold in `swipe.js` a swipe does what the buttons do. `touch-action: pan-y` on the card keeps vertical scrolling. `html` and `body` both have `overflow-x: clip`, so a card leaving the screen can't widen the page |
+| Opening mode | The mode last chosen, per device (`flashcards-mode` in `localStorage`), set before the words load; a shortcut's `?mode=` wins for that visit and isn't saved |
+| Collections and words | `public/src/features/vocabulary-manager/word-manager.js` (page; words and translations are edited in place in fields that grow to fit), `public/src/core/cloud.js` and `card-data.js` (storage) |
 | CSV reading and writing | `public/src/utils/csv.js`, tested in `test/csv.test.js` |
-| Starter collections | `public/collections/` with `index.json` |
+| Starter collections | `public/collections/` with `index.json`. Each entry needs a `language` pair (`es-en`): an import carries it into the collection, and a test checks it's known. CSV files carry no language, so collections imported from a file or exported and re-imported set it in My Cards |
+| Search engines | `public/robots.txt` and `public/sitemap.xml`, tested in `test/crawl.test.js`; not precached |
 | App icon | `public/icons/icon-base.svg`; the PNGs in `icons/ios` and `icons/android` are rendered from it. Icon URLs carry `?v=N`: bump it everywhere (both pages, `manifest.json`, `sw.js`) when the icon changes, or phones keep the cached one |
 | Launch screens | iOS: `public/icons/splash/`, the icon on the light or dark page background per screen size, linked from both pages with `prefers-color-scheme` media queries. Rendered by `scripts/make-launch-images.sh` (ImageMagick) from the sizes in `scripts/launch-images.txt`; rerun it when the icon or the background colours change. iOS picks one by the device's light or dark mode (not the in-app switch) and stores it when the app is added to the home screen. Android uses the manifest's single `background_color` (light) |
 | Security rules | `firestore.rules`, tested in `test/firestore.rules.test.js` |

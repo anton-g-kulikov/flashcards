@@ -9,8 +9,8 @@ back online).
 
 ## Using it
 
-- **Study** (`index.html`): learn the words of every collection that's switched on, with
-  flashcards or a multiple-choice quiz. See [How studying works](#how-studying-works).
+- **Study** (`index.html`): learn the words of every collection that's switched on, in Flash Mode
+  or a multiple-choice Quiz Mode. See [How studying works](#how-studying-works).
 - **My Cards** (`vocabulary-manager.html`): one collapsible card per collection. Its header
   switches it on or off for study and has rename, export and delete; open it to add words one at
   a time (the translation is optional and can be added later). Tap a word or its translation in
@@ -78,7 +78,7 @@ other button does.
 
 The quiz asks "What does *word* mean?" about the next word due and offers up to four translations,
 taken from all the words in your switched-on collections. No two options read the same. Words
-without a translation can't be quizzed; study them as flashcards.
+without a translation can't be quizzed; study them in Flash Mode.
 
 - **Right on the first try:** the word moves up a box.
 - **Wrong answer:** that card turns over to show which word the translation actually belongs to,
@@ -117,6 +117,8 @@ hacer,"to do, to make"
   quote inside it.
 - The translation may be empty. Other columns are ignored, and repeated words are skipped.
 - Any language pair works: the app shows `word` first and quizzes you on `translation`.
+- A CSV file doesn't say which languages it's in. To hear the words read aloud, set them on the
+  collection in **My Cards** after importing.
 
 [`public/collections/example.csv`](public/collections/example.csv) is a small example to copy
 and edit.
@@ -146,7 +148,8 @@ Spanish → English, 100 words each, in [`public/collections/es-en/`](public/col
 | A1 | [a1-nouns.csv](public/collections/es-en/a1-nouns.csv) | [a1-verbs.csv](public/collections/es-en/a1-verbs.csv) | [a1-adjectives.csv](public/collections/es-en/a1-adjectives.csv) | [a1-adverbs.csv](public/collections/es-en/a1-adverbs.csv) |
 | A2 | [a2-nouns.csv](public/collections/es-en/a2-nouns.csv) | [a2-verbs.csv](public/collections/es-en/a2-verbs.csv) | [a2-adjectives.csv](public/collections/es-en/a2-adjectives.csv) | [a2-adverbs.csv](public/collections/es-en/a2-adverbs.csv) |
 
-Nouns carry their article (`la casa`), verbs are infinitives (`comer` → `to eat`) and adjectives
+Importing one from **My Cards** also sets its languages, so its words can be read aloud. Nouns carry
+their article (`la casa`), verbs are infinitives (`comer` → `to eat`) and adjectives
 are masculine singular. No Spanish word appears in more than one of these eight collections.
 
 ## Contributing a collection
