@@ -100,7 +100,9 @@ With `npm run dev`, at http://127.0.0.1:5050:
    quiz; flashcards flip to the translation ("No translation yet" when missing). Keyboard: Tab
    reaches the mode buttons, quiz options and the flashcard; Enter or Space answers or flips.
    In Flash Mode, "I Don't Know" turns the card over and becomes a neutral "Next"; Next or a tap on
-   the card moves on, and the next card shows "I Don't Know" again.
+   the card moves on, and the next card shows "I Don't Know" again. A known card slides off to
+   the right, a missed one to the left, without widening the page; the next word fades in front
+   up, so its translation never shows.
 5. Answer a quiz question correctly, reload: the Learning count is kept. Reset Progress needs a
    second tap ("Tap again to reset these words"); after it, every word is due again, also after a
    reload. Delete in My Cards likewise needs a second tap ("Sure?"). These replace `confirm()`,

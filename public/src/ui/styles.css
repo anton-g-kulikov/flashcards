@@ -115,6 +115,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip; /* with body's: otherwise body's is handed to the viewport and doesn't clip */
 }
 
 body {
@@ -125,6 +126,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: clip; /* a flashcard leaving the screen must not widen the page */
 }
 
 h1,
@@ -488,6 +490,39 @@ button.armed:hover {
   margin: 0 auto;
 }
 
+/* A card leaves to the right when known, to the left when not; the next one fades in */
+.flashcard-container.leaving-right,
+.flashcard-container.leaving-left {
+  opacity: 0;
+  transform-origin: 50% 100%;
+  transition: transform 0.28s ease-in, opacity 0.28s ease-in;
+}
+
+.flashcard-container.leaving-right {
+  transform: translateX(115%) rotate(8deg);
+}
+
+.flashcard-container.leaving-left {
+  transform: translateX(-115%) rotate(-8deg);
+}
+
+.flashcard-container.arriving {
+  animation: card-arrive 0.2s ease-out;
+}
+
+@keyframes card-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard-container.arriving {
+    animation: none;
+  }
+}
+
 .flashcard {
   position: relative;
   width: 100%;
@@ -502,6 +537,10 @@ button.armed:hover {
 
 .flashcard.flipped {
   transform: rotateY(180deg);
+}
+
+.flashcard.no-flip {
+  transition: none;
 }
 
 .card-face {

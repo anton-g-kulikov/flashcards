@@ -62,10 +62,11 @@ on average, from all new to all mastered.
 
 The card shows the word; tap it (or press Enter or Space) to flip to the translation.
 
-- **I know this!** moves the word up a box and on to the next.
+- **I know this!** moves the word up a box; the card slides off to the right.
 - **I don't know…** flips the card to show the translation and the button becomes **Next**; tap it
-  or the card when you're ready to go on. The word comes back after three other cards (or sooner, if fewer are left), the same as a
-  missed word in the quiz.
+  or the card when you're ready to go on, and the card slides off to the left. The word comes
+  back after three other cards (or sooner, if fewer are left), the same as a missed word in the
+  quiz.
 
 ### Quiz
 

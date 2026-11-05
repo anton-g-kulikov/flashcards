@@ -1,19 +1,21 @@
 // Flashcards: the word on the front, its translation on the back. The deck is the study queue
 // (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
 // "I don't know…" turns the card over and becomes "Next" (a tap on the card works too), and the
-// word comes back after three other cards, as a missed word does in the quiz.
+// word comes back after three other cards, as a missed word does in the quiz. A card leaves to the
+// right when known and to the left when not.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
 import { retryLater } from "../study/progress.js";
 
-const FLIP_MS = 600; // the .flashcard transform transition in styles.css
+const SWIPE_MS = 280; // the .leaving-left/right transition in styles.css
 
 export class FlashcardMode {
   // study: { cards, progress, changed(), caughtUpMessage() }
   constructor(study) {
     this.study = study;
     this.card = document.getElementById("flashcard");
+    this.container = this.card.parentElement;
     this.actions = document.getElementById("cardActions");
     this.deck = [];
     this.flipped = false;
@@ -27,7 +29,7 @@ export class FlashcardMode {
     this.dontKnowBtn = document.getElementById("dontKnowBtn");
     this.dontKnowBtn.addEventListener("click", () => {
       if (this.busy) return;
-      if (this.waitingForTap) this.advance();
+      if (this.waitingForTap) this.leave("left");
       else this.mark(false);
     });
   }
@@ -57,7 +59,7 @@ export class FlashcardMode {
     this.flipped = false;
     this.waitingForTap = false;
     this.setNextButton(false);
-    this.card.classList.remove("flipped");
+    this.resetCard();
 
     const card = this.current;
     if (!card) {
@@ -96,7 +98,7 @@ export class FlashcardMode {
     }
     if (this.busy || !this.current) return;
     if (this.flipped && this.waitingForTap) {
-      this.advance();
+      this.leave("left");
       return;
     }
     this.flipped = !this.flipped;
@@ -112,10 +114,10 @@ export class FlashcardMode {
     Analytics.cardMarked(known);
     this.study.changed();
 
-    if (this.flipped) {
-      this.advance();
-    } else if (known) {
-      this.next();
+    if (known) {
+      this.leave("right");
+    } else if (this.flipped) {
+      this.leave("left");
     } else {
       // Show the translation; the next word comes on the next tap
       this.flipped = true;
@@ -125,17 +127,28 @@ export class FlashcardMode {
     }
   }
 
-  // Turns the card face down with its text cleared, so the next word's translation never shows
-  // during the flip, then shows the next word.
-  advance() {
+  // Sends the card off the screen, then brings in the next word
+  leave(direction) {
     this.busy = true;
-    this.card.querySelectorAll(".spanish-word, .translation").forEach((text) => {
-      text.textContent = "";
-    });
-    this.flipped = false;
-    this.waitingForTap = false;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.next();
+      return;
+    }
+    this.container.classList.add(`leaving-${direction}`);
+    this.flipTimer = setTimeout(() => this.next(), SWIPE_MS);
+  }
+
+  // Front up at once, with no flip to watch: a card that left the screen comes back as the next
+  // word, which fades in, and its translation must never show on the way
+  resetCard() {
+    const { classList } = this.container;
+    const left = classList.contains("leaving-left") || classList.contains("leaving-right");
+    classList.remove("leaving-left", "leaving-right", "arriving");
+    this.card.classList.add("no-flip");
     this.card.classList.remove("flipped");
-    this.flipTimer = setTimeout(() => this.next(), FLIP_MS);
+    void this.card.offsetWidth; // applies the change before the flip transition returns
+    this.card.classList.remove("no-flip");
+    if (left) classList.add("arriving");
   }
 
   // A word still due (not known this time) comes back after a few cards; a known one leaves
