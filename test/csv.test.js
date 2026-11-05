@@ -78,12 +78,52 @@ describe("fromCards", () => {
   });
 });
 
+describe("languages in the header", () => {
+  it("reads language codes as the column names, in any case", () => {
+    const { cards, language } = readCards("ES,en\nhola,hi\n");
+    assert.deepEqual(cards, [{ word: "hola", translation: "hi" }]);
+    assert.equal(language, "es-en");
+  });
+
+  it("takes a code for one side only", () => {
+    assert.equal(readCards("es,translation\nhola,hi\n").language, "es-");
+    assert.equal(readCards("word,en\nhola,hi\n").language, "-en");
+  });
+
+  it("has no language with plain column names or no header", () => {
+    assert.equal(readCards("word,translation\nhola,hi\n").language, "");
+    assert.equal(readCards("hola,hi\n").language, "");
+  });
+
+  it("treats a first row that doesn't name both columns as a word", () => {
+    const { cards, language } = readCards("es,yes\nhola,hi\n");
+    assert.equal(cards.length, 2);
+    assert.equal(language, "");
+  });
+
+  it("writes the languages on export and reads them back", () => {
+    const cards = [{ word: "hola", translation: "hi" }];
+    assert.ok(fromCards(cards, "es-en").includes("es,en\n"));
+    assert.ok(fromCards(cards, "es-").includes("es,translation\n"));
+    assert.ok(fromCards(cards).includes("word,translation\n"));
+    for (const language of ["es-en", "es-", "-en", ""]) {
+      const result = readCards(fromCards(cards, language));
+      assert.deepEqual(result.cards, cards);
+      assert.equal(result.language, language);
+    }
+  });
+});
+
 describe("example.csv", () => {
   it("is a valid collection that shows the format, including a quoted comma", () => {
     const cards = toCards(readFileSync("public/collections/example.csv", "utf8"));
     assert.ok(cards.length >= 5);
     assert.ok(cards.every((c) => c.word && c.translation));
     assert.ok(cards.some((c) => c.translation.includes(",")));
+  });
+
+  it("shows the header with language codes", () => {
+    assert.equal(readCards(readFileSync("public/collections/example.csv", "utf8")).language, "es-en");
   });
 });
 
@@ -97,8 +137,9 @@ describe("starter collections", () => {
       .flatMap((d) => readdirSync(`${dir}/${d.name}`).filter((f) => f.endsWith(".csv")).map((f) => `${d.name}/${f}`));
     assert.deepEqual(index.collections.map((c) => c.file).sort(), files.sort());
     for (const entry of index.collections) {
-      const cards = toCards(readFileSync(`${dir}/${entry.file}`, "utf8"));
+      const { cards, language } = readCards(readFileSync(`${dir}/${entry.file}`, "utf8"));
       assert.equal(cards.length, entry.words, entry.file);
+      assert.equal(language, entry.language, `${entry.file} has a different language in its header`);
       assert.ok(cards.every((c) => c.word && c.translation), `${entry.file} has an empty field`);
       assert.ok(entry.name && entry.language && entry.level, `${entry.file} is missing name, language or level`);
       assert.equal(entry.file.split("/")[0], entry.language, `${entry.file} is not in its language folder`);

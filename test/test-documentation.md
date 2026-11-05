@@ -29,7 +29,9 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Empty and repeated words | skipped, and counted (`readCards`) so the import can report them |
 | More than 5,000 words | the first 5,000 imported, the rest counted as left out |
 | Word over 200 or translation over 500 characters | counted as shortened, so the import can say so |
-| Export then import | round-trips exactly |
+| Export then import | round-trips exactly, languages included |
+| Header of language codes (`es,en`, `es,translation`) | read as a header; sets `language`, either side may be missing |
+| First row with only one column name or code (`es,yes`) | read as a word, no language |
 | Every file in `public/collections/` | listed in `index.json` with the right word count, no empty fields |
 | Spanish words across starter collections | never repeated |
 
@@ -164,3 +166,6 @@ With `npm run dev`, at http://127.0.0.1:5050:
    is the translation and the options are the original words. A word with no translation still
    shows the word. With a normal collection also on, a reversed question's options stay in one
    language while enough words allow it. Tap the arrow again to go back.
+17. CSV languages: import a file with the header `es,en`: the collection arrives with Spanish and
+   English set. Export it: the first line is `es,en`. A `word,translation` file imports with no
+   languages, and its export keeps that header.

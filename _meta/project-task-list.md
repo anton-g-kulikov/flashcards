@@ -164,6 +164,13 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   by both directions. The quiz offers options from cards facing the same way first.
 - **Note:** a word with no translation stays word-first, since its face would otherwise be empty.
 
+### TASK-013 — Languages in CSV files (2026-11-05)
+
+- **Goal:** a collection keeps its languages when it moves through a CSV file.
+- **Done:** a header can use language codes (`es,en`) in place of `word,translation`. An import sets
+  the collection's languages from them and an export writes them. The example and starter files use
+  the new header. Old `word,translation` files work as before.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for sharing! Attach your collection as a CSV file with the columns `word,translation`
-        (see [the format](https://github.com/anton-g-kulikov/flashcards#collections-and-csv)).
+        Thanks for sharing! Attach your collection as a CSV file with the columns `word,translation`,
+        or language codes like `es,en` (see [the format](https://github.com/anton-g-kulikov/flashcards#collections-and-csv)).
         The easiest way to get one: build the collection in the app and export it with the download
         icon in its header.
 

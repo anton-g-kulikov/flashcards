@@ -113,20 +113,22 @@ A collection is a list of words with their translations. Collections move in and
 as CSV files:
 
 ```csv
-word,translation
+es,en
 la casa,house
 comer,to eat
 hacer,"to do, to make"
 ```
 
-- UTF-8, first line `word,translation`, one word per line.
+- UTF-8, one word per line. The first line names the two columns: the word's language, then the
+  translation's.
+- Language codes are `en`, `es`, `ru`, `fr` and `de`. On import they set the collection's languages,
+  so its words can be read aloud, and an export writes them back. For any other language, or if you
+  don't want to say, use `word` or `translation` instead of a code (`word,translation`, `es,translation`).
 - Quote a field that contains a comma or a double quote (`"to do, to make"`), and double any
   quote inside it.
 - The translation may be empty. Other columns are ignored, and repeated words are skipped.
-- Any language pair works: the app shows `word` first and quizzes you on `translation`, unless you
-  swap the collection's direction in **My Cards**.
-- A CSV file doesn't say which languages it's in. To hear the words read aloud, set them on the
-  collection in **My Cards** after importing.
+- Any language pair works: the app shows the first column on the card's face and quizzes you on the
+  second, unless you swap the collection's direction in **My Cards**. The file doesn't store a swap.
 
 [`public/collections/example.csv`](public/collections/example.csv) is a small example to copy
 and edit.

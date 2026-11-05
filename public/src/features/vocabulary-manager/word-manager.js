@@ -253,7 +253,7 @@ class WordManager {
       this.showMessage(I18n.t("collections.exportEmpty"), "info");
       return;
     }
-    const blob = new Blob([fromCards(cards)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([fromCards(cards, collection.language)], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = fileName(collection.name);
@@ -315,7 +315,8 @@ class WordManager {
     this.fileInput.value = "";
     if (!file) return;
     try {
-      await this.importCards(file.name.replace(/\.csv$/i, ""), readCards(await file.text()));
+      const result = readCards(await file.text());
+      await this.importCards(file.name.replace(/\.csv$/i, ""), result, result.language);
     } catch (error) {
       this.showMessage(I18n.t("collections.importFailed", { error: failure(error) }), "error");
     }
