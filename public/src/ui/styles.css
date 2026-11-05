@@ -622,6 +622,20 @@ button.armed:hover {
   background: var(--color-warning-hover);
 }
 
+/* "I don't know" once the translation is showing: moving on is neutral, not a verdict */
+.action-btn.next-btn {
+  background: var(--color-card-1);
+  color: var(--color-text);
+}
+
+.action-btn.next-btn:hover {
+  background: var(--color-card-2);
+}
+
+.next-btn .icon {
+  display: none;
+}
+
 /* --- Quiz --- */
 .quiz-question {
   font-family: var(--serif);

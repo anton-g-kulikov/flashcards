@@ -1,7 +1,7 @@
 // Flashcards: the word on the front, its translation on the back. The deck is the study queue
 // (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
-// "I don't know…" turns the card over, waits for a tap, and the word comes back after three
-// other cards, as a missed word does in the quiz.
+// "I don't know…" turns the card over and becomes "Next" (a tap on the card works too), and the
+// word comes back after three other cards, as a missed word does in the quiz.
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
@@ -24,7 +24,12 @@ export class FlashcardMode {
 
     onActivate(this.card, () => this.tapCard());
     document.getElementById("knowBtn").addEventListener("click", () => this.mark(true));
-    document.getElementById("dontKnowBtn").addEventListener("click", () => this.mark(false));
+    this.dontKnowBtn = document.getElementById("dontKnowBtn");
+    this.dontKnowBtn.addEventListener("click", () => {
+      if (this.busy) return;
+      if (this.waitingForTap) this.advance();
+      else this.mark(false);
+    });
   }
 
   get current() {
@@ -36,12 +41,22 @@ export class FlashcardMode {
     this.show();
   }
 
+  // After "I don't know" the translation is showing and the only step left is moving on, so the
+  // button says that. The label follows data-i18n through language switches.
+  setNextButton(on) {
+    const key = on ? "card.next" : "card.dontKnow";
+    this.dontKnowBtn.dataset.i18n = key;
+    this.dontKnowBtn.querySelector("span").textContent = I18n.t(key);
+    this.dontKnowBtn.classList.toggle("next-btn", on);
+  }
+
   // Shows the current word, front up. Also redraws it after a language switch.
   show() {
     clearTimeout(this.flipTimer);
     this.busy = false;
     this.flipped = false;
     this.waitingForTap = false;
+    this.setNextButton(false);
     this.card.classList.remove("flipped");
 
     const card = this.current;
@@ -105,6 +120,7 @@ export class FlashcardMode {
       // Show the translation; the next word comes on the next tap
       this.flipped = true;
       this.waitingForTap = true;
+      this.setNextButton(true);
       this.card.classList.add("flipped");
     }
   }
