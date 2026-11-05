@@ -143,3 +143,43 @@ describe("footer", () => {
   }
 });
 
+describe("translations", () => {
+  const source = readFileSync("public/src/ui/i18n.js", "utf8");
+  const block = (from, to) => source.slice(source.indexOf(from), source.indexOf(to));
+  const keys = (text) => new Set([...text.matchAll(/^ {4}"([\w.]+)":/gm)].map(([, key]) => key));
+  const languages = {
+    en: keys(block("  en: {", "  ru: {")),
+    ru: keys(block("  ru: {", "  es: {")),
+    es: keys(block("  es: {", "const LANGUAGES")),
+  };
+
+  it("has the same keys in every language", () => {
+    assert.deepEqual([...languages.ru].sort(), [...languages.en].sort());
+    assert.deepEqual([...languages.es].sort(), [...languages.en].sort());
+  });
+
+  for (const page of ["index.html", "vocabulary-manager.html"]) {
+    it(`${page} only uses keys that exist`, () => {
+      const html = readFileSync(join("public", page), "utf8");
+      const used = [...html.matchAll(/data-i18n(?:-html|-label|-placeholder)?="([\w.]+)"/g)].map(([, key]) => key);
+      assert.ok(used.length > 0);
+      assert.deepEqual(used.filter((key) => !languages.en.has(key)), []);
+    });
+  }
+});
+
+describe("landing page", () => {
+  const html = readFileSync("public/index.html", "utf8");
+
+  it("has its feature cards reachable by keyboard, and sign-in at both ends", () => {
+    assert.equal(html.match(/class="flashcard landing-card" role="button" tabindex="0"/g).length, 7);
+    assert.equal(html.match(/class="google-signin-btn"/g).length, 2);
+  });
+
+  it("keeps its text in the page, for search engines", () => {
+    for (const word of ["Spaced repetition", "Flash Mode", "CSV", "A1 and A2"]) {
+      assert.ok(html.includes(word), word);
+    }
+  });
+});
+

@@ -1306,6 +1306,145 @@ body.auth-pending .auth-gate .auth-loading {
   padding: var(--spacing-6) var(--spacing-5);
 }
 
+/* --- Landing page (the signed-out study page) --- */
+.auth-gate.landing {
+  align-items: flex-start;
+  padding: 0;
+}
+
+.landing .auth-card {
+  max-width: 760px;
+  padding: var(--spacing-6) var(--spacing-4) calc(var(--spacing-6) + env(safe-area-inset-bottom));
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.landing-hero {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.landing .auth-card h1 {
+  font-size: 2.75rem;
+}
+
+.landing .subtitle {
+  font-size: 1.0625rem;
+}
+
+.landing-section {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+}
+
+.landing-section h2 {
+  margin-bottom: var(--spacing-4);
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.landing-section > p {
+  max-width: 34em;
+  margin: 0 auto var(--spacing-4);
+  color: var(--color-text-light);
+}
+
+.landing-grid {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+/* Feature cards: the app's flashcard, smaller; the title in front, the explanation behind */
+.flashcard.landing-card {
+  height: 190px;
+  min-height: 0;
+}
+
+.landing-card .spanish-word {
+  font-size: 1.625rem;
+  font-weight: 400;
+}
+
+.landing-card .card-back {
+  padding: var(--spacing-3);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.landing-turn {
+  position: absolute;
+  bottom: var(--spacing-3);
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard.landing-card {
+    transition: none;
+  }
+}
+
+/* Spaced repetition: the growing gaps between reviews */
+.landing-steps {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+  list-style: none;
+}
+
+.landing-steps li {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-strong);
+  color: white;
+  font-weight: 600;
+}
+
+.landing-steps li:nth-child(1) { width: 40px; height: 40px; opacity: 0.6; }
+.landing-steps li:nth-child(2) { width: 46px; height: 50px; opacity: 0.7; }
+.landing-steps li:nth-child(3) { width: 52px; height: 62px; opacity: 0.8; }
+.landing-steps li:nth-child(4) { width: 58px; height: 76px; opacity: 0.9; }
+.landing-steps li:nth-child(5) { width: 64px; height: 92px; }
+
+.landing-caption {
+  margin-top: var(--spacing-2);
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.landing-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-3) var(--spacing-5);
+  font-weight: 600;
+}
+
+.landing-cta .google-signin-btn {
+  max-width: 440px;
+}
+
+.landing-foot {
+  margin-top: var(--spacing-5);
+}
+
+@media (min-width: 640px) {
+  .landing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .landing .auth-card h1 {
+    font-size: 3.5rem;
+  }
+}
+
 .auth-card h1 {
   font-size: 2.25rem;
   margin-bottom: var(--spacing-3);

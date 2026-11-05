@@ -147,6 +147,15 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - The Auth and Firestore emulators moved to 9199 and 8180, so `npm run dev` runs alongside other
   projects' emulators (What's Next uses the defaults).
 
+### TASK-011 — Landing page (2026-11-05)
+
+- **Goal:** the signed-out page explains the app instead of showing only a sign-in card.
+- **Done:** sections on the two modes, spaced repetition, collections, languages and voice-over,
+  and sharing collections through the public repository. The feature blocks are flip cards, using
+  the app's own card animation. All text in English, Russian and Spanish.
+- **Note:** the repository has no licence file, so the page says the code is public, not open
+  source.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

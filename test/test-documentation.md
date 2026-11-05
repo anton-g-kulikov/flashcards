@@ -89,6 +89,8 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Every `innerHTML` / `outerHTML` assignment in `public/src` | an empty string, a template whose parts are translation text, or one of the reviewed sinks listed in the test; `insertAdjacentHTML` and `document.write` not used; a planted `innerHTML = card.word` fails |
 | Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
 | Footer, on both pages | starts collapsed and inert, and holds the appearance switch and the cookie note |
+| Translations | same keys in English, Russian and Spanish; every key used in the pages exists |
+| Landing page | 7 feature cards reachable by keyboard, sign-in at both ends, its text in the HTML |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Automated: search engines (`crawl.test.js`)
@@ -151,3 +153,7 @@ With `npm run dev`, at http://127.0.0.1:5050:
    including with the silent switch on and in the installed app.
 14. Study mode: choose Flash Mode and reload: it opens in Flash Mode, with no flash of the quiz.
    `/?mode=quiz` opens the quiz for that visit without changing the remembered mode.
+15. Landing page: signed out, the study page explains the app. Cards turn with a tap, Enter or Space
+   and their text fits in all three languages, at phone and desktop width and in dark mode (Russian
+   on the narrow three-across cards is the tightest). Both sign-in buttons work. My Cards signed out
+   still shows the plain sign-in card.

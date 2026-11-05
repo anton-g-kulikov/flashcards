@@ -6,6 +6,7 @@ import { languagePair } from "./core/card-data.js";
 import { Cloud } from "./core/cloud.js";
 import { I18n } from "./ui/i18n.js";
 import { AuthGate } from "./ui/auth-gate.js";
+import "./ui/landing.js";
 import { confirmOnSecondTap } from "./ui/confirm-button.js";
 import { Analytics } from "./utils/analytics.js";
 import { initInstallPrompt } from "./utils/pwa-installer.js";

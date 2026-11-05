@@ -26,10 +26,9 @@ export class AuthGate {
       if (AuthGate.signedInUser) AuthGate.renderUserChip(AuthGate.signedInUser);
     });
 
-    const signInBtn = document.getElementById("googleSignInBtn");
-    if (signInBtn) {
-      signInBtn.addEventListener("click", () => AuthGate.signIn());
-    }
+    document.querySelectorAll(".google-signin-btn").forEach((button) => {
+      button.addEventListener("click", () => AuthGate.signIn());
+    });
   }
 
   static handleUser(user) {
@@ -103,8 +102,9 @@ export class AuthGate {
   }
 
   static async signIn() {
-    const errorEl = document.getElementById("authError");
-    if (errorEl) errorEl.textContent = "";
+    // The landing page has a sign-in button at each end, each with its own message line
+    const errors = document.querySelectorAll(".auth-error");
+    errors.forEach((error) => (error.textContent = ""));
     try {
       await Cloud.signIn();
     } catch (error) {
@@ -113,7 +113,7 @@ export class AuthGate {
         return;
       }
       console.error("Sign-in failed:", error);
-      if (errorEl) errorEl.textContent = I18n.t("auth.signInFailed", { error: error.message });
+      errors.forEach((line) => (line.textContent = I18n.t("auth.signInFailed", { error: error.message })));
     }
   }
 
