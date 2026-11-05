@@ -85,6 +85,14 @@ without a translation can't be quizzed; study them as flashcards.
   sooner, if fewer words are left), so you have to remember it rather than recall it from a
   moment ago.
 
+### Hearing a word
+
+Set a collection's word and translation languages in **My Cards** (English, Spanish, Russian, French
+or German; starter collections come with theirs). A speaker button then appears on the card and
+next to the quiz question, for anything up to ten words. It uses your device's own voices, so how
+it sounds depends on the device, and the button only shows when the device has a voice for that
+language. If one is missing, you can usually add it in your device's language or speech settings.
+
 ### Starting over
 
 **Reset Progress** (below the cards) makes the words you're studying new again. Other collections

@@ -7,6 +7,7 @@ import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, onActivate, renderMessage } from "../study/message-card.js";
 import { retryLater } from "../study/progress.js";
+import { speakButton, stopSpeaking } from "../study/speech.js";
 import { dragAxis, swipeDirection } from "../study/swipe.js";
 
 const SWIPE_MS = 280; // the .leaving-left/right transition in styles.css
@@ -56,6 +57,7 @@ export class FlashcardMode {
 
   // Shows the current word, front up. Also redraws it after a language switch.
   show() {
+    stopSpeaking();
     clearTimeout(this.flipTimer);
     this.busy = false;
     this.flipped = false;
@@ -71,11 +73,17 @@ export class FlashcardMode {
     this.showingMessage = false;
     this.actions.classList.remove("hidden");
 
+    const label = I18n.t("card.speak");
     const front = el("div", "card-face card-front");
     front.append(el("div", "spanish-word", card.word));
+    const speakWord = speakButton(card.word, card.languages.word, label);
+    if (speakWord) front.append(speakWord);
     const back = el("div", "card-face card-back");
     back.append(el("div", "translation", card.translation || I18n.t("card.noTranslation")));
+    const speakTranslation = speakButton(card.translation, card.languages.translation, label);
+    if (speakTranslation) back.append(speakTranslation);
     this.card.replaceChildren(front, back);
+    this.syncFaces();
   }
 
   // Nothing left to study now, or nothing to study at all
@@ -155,6 +163,14 @@ export class FlashcardMode {
     if (this.busy || !this.current) return;
     this.flipped = !this.flipped;
     this.card.classList.toggle("flipped", this.flipped);
+    this.syncFaces();
+  }
+
+  // The face turned away can't be reached, so its speaker button isn't in the keyboard order
+  syncFaces() {
+    const [front, back] = this.card.children;
+    front.inert = this.flipped;
+    back.inert = !this.flipped;
   }
 
   mark(known) {
@@ -176,6 +192,7 @@ export class FlashcardMode {
       this.waitingForNext = true;
       this.setNextButton(true);
       this.card.classList.add("flipped");
+      this.syncFaces();
     }
   }
 

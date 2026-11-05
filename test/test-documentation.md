@@ -16,6 +16,7 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Spaced-repetition entries merged in one card at a time, forgotten with `deleteField` | allowed, and merged correctly |
 | Progress with the old `known` or `history` fields | denied |
 | More than 20,000 `srs` entries | denied |
+| A collection's `language`: a string of up to 5 characters | allowed; longer, or not a string, denied |
 | `updatedAt` other than the server's clock, on progress or a collection | denied |
 | User document, or any other `meta/*` document | denied |
 
@@ -67,6 +68,15 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | `data-theme` | none for "system", the choice otherwise |
 | `theme-init.js` | same storage key and colours as `theme.js`; dark page background matches the dark browser-chrome colour |
 | Every page | loads `theme-init.js` before its stylesheet, after a `theme-color` tag per scheme |
+
+## Automated: reading aloud (`speech.test.js`, `card-data.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| Finding a voice | by language, whatever the region or spelling (`es-ES`, `es_MX`); on-device preferred, online as fallback; none for a missing language; `est` isn't `es` |
+| What can be spoken | one to ten words |
+| Language pair | `es-en` read and written, either side optional; unknown codes count as not set |
+| Starter collections | each names a known language pair |
 
 ## Automated: app shell (`app-shell.test.js`) and XSS guard (`xss.test.js`)
 
@@ -131,3 +141,9 @@ With `npm run dev`, at http://127.0.0.1:5050:
    the divider showing, at the bottom of the screen on a short page and after the content on a
    long one. The tab opens it (the arrow turns, the page scrolls it into view) and
    closes it; while closed, nothing in it can be reached with the keyboard.
+13. Reading aloud: in My Cards set a collection's languages (it survives a reload; importing a
+   starter collection sets them by itself). In Flash Mode each face gets a speaker button, which
+   speaks in that side's language without turning the card, and isn't reachable while its face is
+   turned away. In Quiz Mode it follows the question. No language, more than ten words, or no voice
+   on the device: no button, and My Cards says which voice is missing. Try it on a real iPhone,
+   including with the silent switch on and in the installed app.

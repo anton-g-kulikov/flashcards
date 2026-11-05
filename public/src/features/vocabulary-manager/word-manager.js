@@ -3,11 +3,12 @@
 // words one at a time and lets you fix a translation or delete a word. Collections can also be
 // created and imported from CSV (a file or a starter collection).
 import { Cloud } from "../../core/cloud.js";
-import { MAX_CARDS } from "../../core/card-data.js";
+import { LANGUAGES, MAX_CARDS, languagePair, languageValue } from "../../core/card-data.js";
 import { I18n } from "../../ui/i18n.js";
 import { AuthGate } from "../../ui/auth-gate.js";
 import { confirmOnSecondTap } from "../../ui/confirm-button.js";
 import { MAX_ROWS, fileName, fromCards, readCards } from "../../utils/csv.js";
+import { hasVoice, onVoicesChanged } from "../study/speech.js";
 
 const ICONS = {
   chevron: '<polyline points="9 6 15 12 9 18"/>',
@@ -23,6 +24,12 @@ const ICONS = {
 function icon(name) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+}
+
+// A language's name in the interface language, as a list entry would start
+function languageName(code) {
+  const name = new Intl.DisplayNames([I18n.lang], { type: "language" }).of(code);
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 // A failed save, in words: the collection limits get a translated reason
@@ -79,6 +86,7 @@ class WordManager {
     this.fileInput = $("importFileInput");
 
     document.addEventListener("i18n-changed", () => this.render());
+    onVoicesChanged(() => this.updateVoiceHints());
 
     $("newCollectionBtn").addEventListener("click", () => this.openNameForm());
     $("collectionNameCancel").addEventListener("click", () => this.closeNameForm());
@@ -294,7 +302,7 @@ class WordManager {
     try {
       const response = await fetch(`collections/${entry.file}`);
       if (!response.ok) throw new Error(response.statusText);
-      await this.importCards(entry.name, readCards(await response.text()));
+      await this.importCards(entry.name, readCards(await response.text()), entry.language);
     } catch (error) {
       this.showMessage(I18n.t("collections.importFailed", { error: failure(error) }), "error");
     } finally {
@@ -316,15 +324,15 @@ class WordManager {
   // An import always becomes a new collection, so nothing already there is touched. The counts
   // from readCards (rows skipped, left out, or with text too long) tell the user when the file
   // wasn't taken in whole.
-  async importCards(name, { cards, skipped, truncated, shortened }) {
+  async importCards(name, { cards, skipped, truncated, shortened }, language = "") {
     if (cards.length === 0) {
       this.showMessage(I18n.t("collections.importEmpty"), "error");
       return;
     }
     // Saving waits for the server, so say something straight away
     this.showMessage(I18n.t("collections.importing", { name, count: cards.length }), "info", 0);
-    const { id, cards: added } = await Cloud.createCollection(name, cards);
-    this.collections.push({ id, name, active: true });
+    const { id, cards: added } = await Cloud.createCollection(name, cards, language);
+    this.collections.push({ id, name, active: true, language });
     this.cards.push(...added.map((card) => ({ ...card, collectionId: id })));
     this.sortCards();
     this.sortCollections();
@@ -503,7 +511,11 @@ class WordManager {
     if (isOpen) {
       const body = document.createElement("div");
       body.className = "collection-body";
-      body.append(this.buildAddForm(collection), this.buildWordList(cards));
+      body.append(
+        this.buildLanguagePicker(collection),
+        this.buildAddForm(collection),
+        this.buildWordList(cards)
+      );
       section.append(body);
     }
     return section;
@@ -547,6 +559,67 @@ class WordManager {
       this.renameCollection(collection, input.value);
     });
     return form;
+  }
+
+  // Optional: which languages the words and translations are in, so they can be read aloud
+  buildLanguagePicker(collection) {
+    const picker = document.createElement("div");
+    picker.className = "collection-language";
+
+    const field = (side, labelKey) => {
+      const label = document.createElement("label");
+      label.className = "collection-language-field";
+      label.append(I18n.t(labelKey));
+      const select = document.createElement("select");
+      select.className = "lang-select";
+      select.add(new Option("—", ""));
+      LANGUAGES.forEach((code) => select.add(new Option(languageName(code), code)));
+      select.value = languagePair(collection.language)[side];
+      select.addEventListener("change", () => {
+        this.setLanguage(collection, { ...languagePair(collection.language), [side]: select.value });
+      });
+      label.append(select);
+      return label;
+    };
+
+    const hint = document.createElement("p");
+    hint.className = "hint voice-hint";
+    hint.dataset.collection = collection.id;
+    picker.append(
+      field("word", "collections.wordLanguage"),
+      field("translation", "collections.translationLanguage"),
+      hint
+    );
+    this.updateVoiceHint(hint, collection);
+    return picker;
+  }
+
+  async setLanguage(collection, pair) {
+    const previous = collection.language;
+    collection.language = languageValue(pair);
+    this.updateVoiceHints();
+    try {
+      await Cloud.setCollectionLanguage(collection.id, collection.language);
+    } catch (error) {
+      collection.language = previous;
+      this.renderCollection(collection);
+      this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
+    }
+  }
+
+  // Says so when this device can't read a chosen language: the speaker button won't appear here
+  updateVoiceHint(hint, collection) {
+    const { word, translation } = languagePair(collection.language);
+    const missing = [...new Set([word, translation])].filter((code) => code && !hasVoice(code));
+    hint.hidden = missing.length === 0;
+    hint.textContent = I18n.t("collections.noVoice", { languages: missing.map(languageName).join(", ") });
+  }
+
+  updateVoiceHints() {
+    this.collectionList.querySelectorAll(".voice-hint").forEach((hint) => {
+      const collection = this.collections.find((c) => c.id === hint.dataset.collection);
+      if (collection) this.updateVoiceHint(hint, collection);
+    });
   }
 
   buildAddForm(collection) {

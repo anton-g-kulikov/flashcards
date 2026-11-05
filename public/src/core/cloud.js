@@ -36,6 +36,8 @@ import {
   MAX_CARDS_BYTES,
   cardFields,
   cardsSize,
+  languagePair,
+  languageValue,
   collectionName,
   storedCards,
 } from "./card-data.js";
@@ -162,6 +164,7 @@ export const Cloud = {
       id: c.id,
       name: collectionName(c.data().name),
       active: c.data().active !== false,
+      language: languageValue(languagePair(c.data().language)),
       cards: storedCards(c.data().cards),
     }));
 
@@ -187,7 +190,7 @@ export const Cloud = {
 
   // A new collection, empty or with the given cards (an import) in a single write, so an import
   // either arrives whole or not at all. Returns its id and the cards with their new ids.
-  async createCollection(name, cards = []) {
+  async createCollection(name, cards = [], language = "") {
     if (cards.length > MAX_CARDS) throw collectionFull();
     const id = newId();
     const stored = checkSize(cards.map((card) => ({ id: newId(), ...cardFields(card) })));
@@ -196,6 +199,7 @@ export const Cloud = {
       name: collectionName(name),
       active: true,
       cards: stored,
+      ...(language ? { language: languageValue(languagePair(language)) } : {}),
       createdAt: now,
       updatedAt: now,
     });
@@ -205,6 +209,11 @@ export const Cloud = {
   // Active collections are the ones the study page uses.
   setCollectionActive(id, active) {
     return updateDoc(collectionRef(id), { active: !!active, updatedAt: serverTimestamp() });
+  },
+
+  // Which languages the words and translations are in ("es-en"), for reading them aloud
+  setCollectionLanguage(id, language) {
+    return updateDoc(collectionRef(id), { language, updatedAt: serverTimestamp() });
   },
 
   renameCollection(id, name) {

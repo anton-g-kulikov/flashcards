@@ -90,6 +90,14 @@ describe("collections", () => {
     await assertFails(updateDoc(ref, { active: "no" }));
   });
 
+  it("can name its language pair, as a short string", async () => {
+    const ref = doc(as("alice"), "users/alice/collections/k1");
+    await assertSucceeds(setDoc(ref, collection({ language: "es-en" })));
+    await assertSucceeds(updateDoc(ref, { language: "", updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { language: "spanish-english" }));
+    await assertFails(updateDoc(ref, { language: 7 }));
+  });
+
   it("holds its cards as a list of up to 5,000", async () => {
     const db = as("alice");
     const cards = (n) => Array.from({ length: n }, (_, i) => ({ id: `c${i}`, word: `w${i}`, translation: "" }));

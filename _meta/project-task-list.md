@@ -113,6 +113,17 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Verification:** `crawl.test.js` (4 tests); full suite 105 passing; both files checked live
   after deploy.
 
+### TASK-007 — Reading words aloud (2026-11-05)
+
+- **Goal:** a small button that says the word, in Flash Mode and Quiz Mode.
+- **Approach:** the browser's Web Speech API: free, no server, works on iOS, Android, macOS and
+  Windows with each device's voices. A cloud voice would sound the same everywhere but needs a
+  server, costs money and sends the words away; revisit only if device voices disappoint.
+- **Decided:** collections optionally name a language pair (`es-en`); no pair or no voice means no
+  button. Five languages: English, Spanish, Russian, French, German. Up to ten words. Online voices
+  are allowed as a fallback, and the privacy page says so.
+- **Not verified:** a real iPhone (silent switch, installed app), Android and Windows.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

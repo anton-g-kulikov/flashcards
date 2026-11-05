@@ -35,6 +35,22 @@ export function storedCards(list) {
     .filter((card) => card.id && card.word);
 }
 
+// Languages a collection's words and translations can be set to, for reading them aloud
+export const LANGUAGES = ["en", "es", "ru", "fr", "de"];
+
+// A collection's stored language pair ("es-en", as in collections/index.json; either side may be
+// empty) as { word, translation }. Anything unknown counts as not set.
+export function languagePair(value) {
+  const [word, translation] = String(value ?? "").split("-");
+  const known = (code) => (LANGUAGES.includes(code) ? code : "");
+  return { word: known(word), translation: known(translation) };
+}
+
+// The stored form; an empty string when neither side is set
+export function languageValue({ word, translation }) {
+  return word || translation ? `${word}-${translation}` : "";
+}
+
 const utf8Length = (text) => new TextEncoder().encode(text).length;
 
 // The size Firestore counts for a cards list: every string (field names included) is its UTF-8

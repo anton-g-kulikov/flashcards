@@ -6,6 +6,7 @@
 import { I18n } from "../../ui/i18n.js";
 import { Analytics } from "../../utils/analytics.js";
 import { el, showMessageCard } from "../study/message-card.js";
+import { speakButton, stopSpeaking } from "../study/speech.js";
 import { RETRY_GAP } from "../study/progress.js";
 import {
   distinctTranslations,
@@ -56,6 +57,7 @@ export class QuizMode {
   }
 
   ask() {
+    stopSpeaking();
     const { cards, progress } = this.study;
     const translations = distinctTranslations(cards);
     if (translations < 2) {
@@ -101,6 +103,8 @@ export class QuizMode {
     const [before, after = ""] = I18n.t("quiz.question").split("{word}");
     const word = el("span", "spanish-word spanish-highlight", this.current.word);
     this.questionEl.replaceChildren(before, word, after);
+    const speak = speakButton(this.current.word, this.current.languages.word, I18n.t("card.speak"));
+    if (speak) this.questionEl.append(speak);
   }
 
   // An option is a button that turns over to show the answer. Card text is user data (typed or

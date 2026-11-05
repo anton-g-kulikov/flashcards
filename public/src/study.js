@@ -2,6 +2,7 @@
 // My Cards, with spaced repetition: what is due comes first, then new words. Progress (each
 // word's box and due date) is saved to the account.
 import "./core/page.js";
+import { languagePair } from "./core/card-data.js";
 import { Cloud } from "./core/cloud.js";
 import { I18n } from "./ui/i18n.js";
 import { AuthGate } from "./ui/auth-gate.js";
@@ -151,9 +152,15 @@ AuthGate.onSignedIn(async () => {
   // Every word in the collections switched on (cards whose collection is gone count as on, so
   // nothing silently disappears)
   const inactive = new Set(collections.filter((c) => !c.active).map((c) => c.id));
+  const languages = new Map(collections.map((c) => [c.id, languagePair(c.language)]));
   const cards = allCards
     .filter((card) => !inactive.has(card.collectionId))
-    .map(({ id, word, translation }) => ({ id, word, translation }));
+    .map(({ id, word, translation, collectionId }) => ({
+      id,
+      word,
+      translation,
+      languages: languages.get(collectionId) ?? {},
+    }));
 
   const progress = new Progress(saved);
   const page = new StudyPage(cards, progress);

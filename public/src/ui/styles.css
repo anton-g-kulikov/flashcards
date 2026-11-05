@@ -556,6 +556,48 @@ button.armed:hover {
   transition: none;
 }
 
+/* Reads the word aloud: in the corner of a card face, after the quiz question */
+.speak-btn {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.speak-btn:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  opacity: 1;
+}
+
+.speak-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.quiz-question .speak-btn {
+  position: static;
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  margin-left: var(--spacing-1);
+  color: var(--color-muted);
+  vertical-align: middle;
+}
+
+.speak-btn[hidden] {
+  display: none;
+}
+
 .card-face {
   position: absolute;
   inset: 0;
@@ -1577,6 +1619,32 @@ body.auth-pending .auth-gate .auth-loading {
   font-size: 0.875rem;
   color: var(--color-text-light);
   margin-bottom: var(--spacing-3);
+}
+
+/* --- Language pair of a collection (My Cards) --- */
+.collection-language {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--spacing-2) var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.collection-language-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-light);
+}
+
+.collection-language-field .lang-select {
+  width: 100%;
+}
+
+.voice-hint {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
 }
 
 /* --- Account (My Cards): deleting it --- */
