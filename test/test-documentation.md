@@ -128,5 +128,6 @@ With `npm run dev`, at http://127.0.0.1:5050:
    collection, progress record or Auth user is left for that account. With a sign-in older than 4
    minutes, Google's popup asks to confirm first; closing it deletes nothing.
 12. Footer: on Study and My Cards it starts collapsed, also after a reload, with only the tab on
-   the divider showing. The tab opens it (the arrow turns, the page scrolls it into view) and
+   the divider showing, at the bottom of the screen on a short page and after the content on a
+   long one. The tab opens it (the arrow turns, the page scrolls it into view) and
    closes it; while closed, nothing in it can be reached with the keyboard.
