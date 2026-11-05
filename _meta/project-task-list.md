@@ -156,6 +156,14 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Note:** the repository has no licence file, so the page says the code is public, not open
   source.
 
+### TASK-012 — Language order (2026-11-05)
+
+- **Goal:** study a collection either way round, for example Spanish → English or English → Spanish.
+- **Done:** an arrow between the two languages in My Cards sets which side the card's face shows.
+  Flash Mode, the quiz and speech all follow it; stored words don't change and progress is shared
+  by both directions. The quiz offers options from cards facing the same way first.
+- **Note:** a word with no translation stays word-first, since its face would otherwise be empty.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

@@ -24,11 +24,12 @@ service cloud.firestore {
     // cards well under Firestore's 1 MiB document limit; long ones could pass it, so cloud.js
     // checks the size before writing (MAX_CARDS_BYTES in card-data.js).
     function isCollection(d) {
-      return d.keys().hasOnly(['name', 'active', 'language', 'cards', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['name', 'active', 'language', 'reversed', 'cards', 'createdAt', 'updatedAt'])
         && d.keys().hasAll(['name'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && (!('active' in d) || d.active is bool)
         && (!('language' in d) || (d.language is string && d.language.size() <= 5))
+        && (!('reversed' in d) || d.reversed is bool)
         && (!('cards' in d) || (d.cards is list && d.cards.size() <= 5000))
         && (!('createdAt' in d) || d.createdAt is timestamp)
         && stamped(d);

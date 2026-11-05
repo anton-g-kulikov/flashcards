@@ -1819,22 +1819,20 @@ body.auth-pending .auth-gate .auth-loading {
 /* --- Language pair of a collection (My Cards) --- */
 .collection-language {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--spacing-2) var(--spacing-3);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--spacing-2);
   margin-bottom: var(--spacing-3);
 }
 
-.collection-language-field {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: var(--spacing-1);
-  font-size: 0.8125rem;
-  color: var(--color-text-light);
+.collection-language .lang-select {
+  width: 100%;
 }
 
-.collection-language-field .lang-select {
-  width: 100%;
+.direction-btn {
+  width: 38px;
+  min-height: 38px;
+  padding: 0;
+  font-size: 1rem;
 }
 
 .voice-hint {

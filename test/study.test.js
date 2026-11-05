@@ -238,6 +238,20 @@ describe("quiz", () => {
     assert.equal(positions.size, 4);
   });
 
+  it("offers cards facing the same way, so the right answer doesn't stand out", () => {
+    const reversed = (id) => ({ ...card(id, `es-${id}`), reversed: true });
+    const cards = [reversed("a"), reversed("b"), reversed("c"), reversed("d"), card("e", "en-e"), card("f", "en-f")];
+    for (let run = 0; run < 50; run++) {
+      assert.ok(pickOptions(cards[0], cards).every((option) => option.reversed));
+      assert.ok(pickOptions(cards[4], [...cards, card("g", "en-g"), card("h", "en-h")]).every((o) => !o.reversed));
+    }
+  });
+
+  it("fills up with cards facing the other way when too few face the same way", () => {
+    const cards = [{ ...card("a", "es-a"), reversed: true }, card("b", "en-b"), card("c", "en-c"), card("d", "en-d")];
+    assert.equal(pickOptions(cards[0], cards).length, 4);
+  });
+
   it("counts different translations", () => {
     assert.equal(distinctTranslations([card("a", "x"), card("b", " X"), card("c", ""), card("d", "y")]), 2);
   });

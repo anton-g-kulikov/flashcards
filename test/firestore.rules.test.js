@@ -98,6 +98,13 @@ describe("collections", () => {
     await assertFails(updateDoc(ref, { language: 7 }));
   });
 
+  it("can be reversed, with a true/false flag only", async () => {
+    const ref = doc(as("alice"), "users/alice/collections/k1");
+    await assertSucceeds(setDoc(ref, collection({ reversed: true })));
+    await assertSucceeds(updateDoc(ref, { reversed: false, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { reversed: "yes" }));
+  });
+
   it("holds its cards as a list of up to 5,000", async () => {
     const db = as("alice");
     const cards = (n) => Array.from({ length: n }, (_, i) => ({ id: `c${i}`, word: `w${i}`, translation: "" }));

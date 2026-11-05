@@ -158,3 +158,9 @@ With `npm run dev`, at http://127.0.0.1:5050:
    view. They turn with a tap, Enter or Space and their text fits in all three languages, at phone and desktop width and in dark mode (Russian
    on the narrow three-across cards is the tightest). Both sign-in buttons work. My Cards signed out
    still shows the plain sign-in card.
+16. Language order: in My Cards the arrow between the languages points away from the side shown
+   first, and its hover text names that side. Tap it and reload: it stays swapped. In Flash Mode the
+   face shows the translation and the speaker uses that side's language; in Quiz Mode the question
+   is the translation and the options are the original words. A word with no translation still
+   shows the word. With a normal collection also on, a reversed question's options stay in one
+   language while enough words allow it. Tap the arrow again to go back.

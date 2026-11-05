@@ -31,11 +31,14 @@ export function pickQuestion(pool, recent = []) {
 
 // The right card plus up to MAX_OPTIONS - 1 others, from any word with a translation, in random
 // order. Every option reads differently: a translation that matches one already offered would
-// be a second right answer, so it is left out.
+// be a second right answer, so it is left out. Cards facing the same way come first: among
+// options in another language, the right answer would stand out. The rest only fill any gap.
 export function pickOptions(correct, cards, random = Math.random) {
   const options = [correct];
   const offered = new Set([normalize(correct.translation)]);
-  for (const card of shuffle(cards.filter(hasTranslation), random)) {
+  const shuffled = shuffle(cards.filter(hasTranslation), random);
+  const sameWay = (card) => !card.reversed === !correct.reversed;
+  for (const card of [...shuffled.filter(sameWay), ...shuffled.filter((card) => !sameWay(card))]) {
     if (options.length >= MAX_OPTIONS) break;
     const text = normalize(card.translation);
     if (card.id === correct.id || offered.has(text)) continue;

@@ -566,38 +566,76 @@ class WordManager {
     const picker = document.createElement("div");
     picker.className = "collection-language";
 
-    const field = (side, labelKey) => {
-      const label = document.createElement("label");
-      label.className = "collection-language-field";
-      label.append(I18n.t(labelKey));
+    // No visible labels: an unset select names its side, and the arrow shows how they relate
+    const field = (side, labelKey, emptyKey) => {
       const select = document.createElement("select");
       select.className = "lang-select";
-      select.add(new Option("—", ""));
+      select.setAttribute("aria-label", I18n.t(labelKey));
+      select.add(new Option(I18n.t(emptyKey), ""));
       LANGUAGES.forEach((code) => select.add(new Option(languageName(code), code)));
       select.value = languagePair(collection.language)[side];
       select.addEventListener("change", () => {
         this.setLanguage(collection, { ...languagePair(collection.language), [side]: select.value });
       });
-      label.append(select);
-      return label;
+      return select;
     };
+
+    // Between the two languages, pointing away from the side the card's face shows
+    const swap = document.createElement("button");
+    swap.type = "button";
+    swap.className = "chip-btn direction-btn";
+    swap.dataset.collection = collection.id;
+    swap.addEventListener("click", () => this.swapDirection(collection));
+    this.updateDirection(swap, collection);
 
     const hint = document.createElement("p");
     hint.className = "hint voice-hint";
     hint.dataset.collection = collection.id;
     picker.append(
-      field("word", "collections.wordLanguage"),
-      field("translation", "collections.translationLanguage"),
+      field("word", "collections.wordLanguage", "words.wordPlaceholder"),
+      swap,
+      field("translation", "collections.translationLanguage", "words.translationPlaceholder"),
       hint
     );
     this.updateVoiceHint(hint, collection);
     return picker;
   }
 
+  // An arrow for the eye; the side shown first, by name, for hover and screen readers
+  updateDirection(button, collection) {
+    const { word, translation } = languagePair(collection.language);
+    const first = collection.reversed
+      ? (translation && languageName(translation)) || I18n.t("words.translationPlaceholder")
+      : (word && languageName(word)) || I18n.t("words.wordPlaceholder");
+    button.textContent = collection.reversed ? "←" : "→";
+    button.title = I18n.t("collections.swapDirection", { first });
+    button.setAttribute("aria-label", button.title);
+  }
+
+  updateDirections() {
+    this.collectionList.querySelectorAll(".direction-btn").forEach((button) => {
+      const collection = this.collections.find((c) => c.id === button.dataset.collection);
+      if (collection) this.updateDirection(button, collection);
+    });
+  }
+
+  async swapDirection(collection) {
+    collection.reversed = !collection.reversed;
+    this.updateDirections();
+    try {
+      await Cloud.setCollectionReversed(collection.id, collection.reversed);
+    } catch (error) {
+      collection.reversed = !collection.reversed;
+      this.updateDirections();
+      this.showMessage(I18n.t("collections.saveFailed", { error: error.message }), "error");
+    }
+  }
+
   async setLanguage(collection, pair) {
     const previous = collection.language;
     collection.language = languageValue(pair);
     this.updateVoiceHints();
+    this.updateDirections();
     try {
       await Cloud.setCollectionLanguage(collection.id, collection.language);
     } catch (error) {

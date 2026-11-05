@@ -165,6 +165,7 @@ export const Cloud = {
       name: collectionName(c.data().name),
       active: c.data().active !== false,
       language: languageValue(languagePair(c.data().language)),
+      reversed: c.data().reversed === true,
       cards: storedCards(c.data().cards),
     }));
 
@@ -214,6 +215,11 @@ export const Cloud = {
   // Which languages the words and translations are in ("es-en"), for reading them aloud
   setCollectionLanguage(id, language) {
     return updateDoc(collectionRef(id), { language, updatedAt: serverTimestamp() });
+  },
+
+  // Reversed collections show the translation on the card's face
+  setCollectionReversed(id, reversed) {
+    return updateDoc(collectionRef(id), { reversed: !!reversed, updatedAt: serverTimestamp() });
   },
 
   renameCollection(id, name) {

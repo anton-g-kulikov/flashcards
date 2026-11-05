@@ -97,6 +97,10 @@ next to the quiz question, for anything up to ten words. It uses your device's o
 it sounds depends on the device, and the button only shows when the device has a voice for that
 language. If one is missing, you can usually add it in your device's language or speech settings.
 
+The arrow between the two languages sets which side the card shows first: tap it to study Spanish →
+English as English → Spanish. The words stay the same and so does your progress, which both
+directions share. A word with no translation still shows the word first.
+
 ### Starting over
 
 **Reset Progress** (below the cards) makes the words you're studying new again. Other collections
@@ -119,7 +123,8 @@ hacer,"to do, to make"
 - Quote a field that contains a comma or a double quote (`"to do, to make"`), and double any
   quote inside it.
 - The translation may be empty. Other columns are ignored, and repeated words are skipped.
-- Any language pair works: the app shows `word` first and quizzes you on `translation`.
+- Any language pair works: the app shows `word` first and quizzes you on `translation`, unless you
+  swap the collection's direction in **My Cards**.
 - A CSV file doesn't say which languages it's in. To hear the words read aloud, set them on the
   collection in **My Cards** after importing.
 

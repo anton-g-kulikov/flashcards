@@ -51,6 +51,23 @@ export function languageValue({ word, translation }) {
   return word || translation ? `${word}-${translation}` : "";
 }
 
+// A card as studied. A reversed collection shows the translation on the face and the word behind
+// it, with their languages swapped to match, so the study modes need to know nothing about it. A
+// word without a translation has nothing to put on the face, so it stays the right way round.
+export function studyCard({ id, word, translation }, { language, reversed } = {}) {
+  const languages = languagePair(language);
+  if (reversed && translation) {
+    return {
+      id,
+      word: translation,
+      translation: word,
+      languages: { word: languages.translation, translation: languages.word },
+      reversed: true,
+    };
+  }
+  return { id, word, translation, languages };
+}
+
 const utf8Length = (text) => new TextEncoder().encode(text).length;
 
 // The size Firestore counts for a cards list: every string (field names included) is its UTF-8

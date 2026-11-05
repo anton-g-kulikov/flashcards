@@ -11,6 +11,7 @@ import {
   languagePair,
   languageValue,
   storedCards,
+  studyCard,
 } from "../public/src/core/card-data.js";
 
 describe("cardFields and storedCards", () => {
@@ -73,6 +74,43 @@ describe("language pairs", () => {
       const { word, translation } = languagePair(entry.language);
       assert.ok(LANGUAGES.includes(word) && LANGUAGES.includes(translation), entry.file);
     }
+  });
+});
+
+describe("studyCard", () => {
+  const card = { id: "c1", word: "la casa", translation: "house", collectionId: "k1", extra: 1 };
+
+  it("shows the word first by default, with its languages", () => {
+    assert.deepEqual(studyCard(card, { language: "es-en" }), {
+      id: "c1",
+      word: "la casa",
+      translation: "house",
+      languages: { word: "es", translation: "en" },
+    });
+  });
+
+  it("swaps the sides and their languages in a reversed collection", () => {
+    assert.deepEqual(studyCard(card, { language: "es-en", reversed: true }), {
+      id: "c1",
+      word: "house",
+      translation: "la casa",
+      languages: { word: "en", translation: "es" },
+      reversed: true,
+    });
+  });
+
+  it("keeps the same id, so progress is shared by both directions", () => {
+    assert.equal(studyCard(card, { reversed: true }).id, studyCard(card, {}).id);
+  });
+
+  it("leaves a word without a translation the right way round", () => {
+    const bare = studyCard({ id: "c2", word: "hola", translation: "" }, { language: "es-en", reversed: true });
+    assert.equal(bare.word, "hola");
+    assert.deepEqual(bare.languages, { word: "es", translation: "en" });
+  });
+
+  it("works without a collection", () => {
+    assert.deepEqual(studyCard(card).languages, { word: "", translation: "" });
   });
 });
 
