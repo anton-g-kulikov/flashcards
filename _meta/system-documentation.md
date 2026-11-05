@@ -84,8 +84,10 @@ npm test
 ```
 
 Runs the Firestore rules tests against a throwaway emulator, plus the CSV, starter-collection,
-study-logic, shuffle, app-shell and XSS checks. (If `npm run dev` is already using port 8080, run
-`FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node --test test/*.test.js` instead.)
+study-logic, shuffle, app-shell and XSS checks. (If `npm run dev` is already using port 8180, run
+`FIRESTORE_EMULATOR_HOST=127.0.0.1:8180 node --test test/*.test.js` instead.) The Auth and
+Firestore emulators use 9199 and 8180, not the defaults, so they can run alongside another
+project's emulators; `test/app-shell.test.js` keeps `cloud.js` in step with `firebase.json`.
 
 ## Deploying
 

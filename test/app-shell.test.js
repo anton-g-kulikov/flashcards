@@ -54,9 +54,18 @@ describe("content security policy", () => {
     for (const [, value] of policies) {
       assert.doesNotMatch(value, /127\.0\.0\.1|localhost/);
       const dev = withEmulators(value);
-      assert.match(dev, /connect-src [^;]*http:\/\/127\.0\.0\.1:8080 http:\/\/127\.0\.0\.1:9099/);
-      assert.match(dev, /frame-src [^;]*http:\/\/127\.0\.0\.1:9099/);
+      assert.match(dev, /connect-src [^;]*http:\/\/127\.0\.0\.1:8180 http:\/\/127\.0\.0\.1:9199/);
+      assert.match(dev, /frame-src [^;]*http:\/\/127\.0\.0\.1:9199/);
     }
+  });
+
+  it("uses the emulator ports from firebase.json in the app and the dev policy", () => {
+    const { auth, firestore } = JSON.parse(readFileSync("firebase.json", "utf8")).emulators;
+    const cloud = readFileSync("public/src/core/cloud.js", "utf8");
+    assert.ok(cloud.includes(`"http://127.0.0.1:${auth.port}"`));
+    assert.ok(cloud.includes(`"127.0.0.1", ${firestore.port}`));
+    const dev = withEmulators(policies[0][1]);
+    assert.ok(dev.includes(`127.0.0.1:${auth.port}`) && dev.includes(`127.0.0.1:${firestore.port}`));
   });
 
   it("covers every page, with no inline scripts allowed", () => {

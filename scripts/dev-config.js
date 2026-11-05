@@ -1,13 +1,13 @@
 // Writes firebase.dev.json for `npm run dev`: firebase.json with the local emulators' addresses
 // added to the Content-Security-Policy, so the deployed policy never carries them. The hosting
-// emulator serves firebase.json's headers, and the app on 127.0.0.1 talks to the Auth (9099) and
-// Firestore (8080) emulators, which the strict policy would block. firebase.dev.json is
+// emulator serves firebase.json's headers, and the app on 127.0.0.1 talks to the Auth (9199) and
+// Firestore (8180) emulators, which the strict policy would block. firebase.dev.json is
 // git-ignored and rewritten on every `npm run dev`.
 import { readFileSync, writeFileSync } from "node:fs";
 
 const EMULATORS = {
-  "connect-src": ["http://127.0.0.1:8080", "http://127.0.0.1:9099"],
-  "frame-src": ["http://127.0.0.1:9099"],
+  "connect-src": ["http://127.0.0.1:8180", "http://127.0.0.1:9199"],
+  "frame-src": ["http://127.0.0.1:9199"],
 };
 
 export function withEmulators(policy) {

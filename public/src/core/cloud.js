@@ -72,8 +72,9 @@ const db = initializeFirestore(app, { localCache: memoryLocalCache() });
 // Local development runs against the Emulator Suite (`npm run dev`).
 const usesEmulators = ["localhost", "127.0.0.1"].includes(location.hostname);
 if (usesEmulators) {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  // Not the default ports, so other projects' emulators can run alongside; match firebase.json
+  connectAuthEmulator(auth, "http://127.0.0.1:9199", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8180);
 }
 
 function uid() {
