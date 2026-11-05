@@ -9,6 +9,7 @@ import {
   RETRY_GAP,
   retryLater,
 } from "../public/src/features/study/progress.js";
+import { initialMode } from "../public/src/features/study/mode.js";
 import { dragAxis, swipeDirection } from "../public/src/features/study/swipe.js";
 import {
   MAX_OPTIONS,
@@ -133,6 +134,27 @@ describe("saved progress", () => {
   it("ignores malformed stored entries", () => {
     const progress = new Progress({ srs: { a: { box: 9, due: 1 }, b: { box: 2 }, c: "x", d: { box: 2, due: NOW } } });
     assert.deepEqual(Object.keys(progress.srs), ["d"]);
+  });
+});
+
+describe("the mode the page opens in", () => {
+  it("is quiz until one has been chosen", () => {
+    assert.equal(initialMode(null, null), "quiz");
+  });
+
+  it("is the mode last chosen on this device", () => {
+    assert.equal(initialMode(null, "flashcard"), "flashcard");
+    assert.equal(initialMode(null, "quiz"), "quiz");
+  });
+
+  it("gives way to a home-screen shortcut", () => {
+    assert.equal(initialMode("quiz", "flashcard"), "quiz");
+    assert.equal(initialMode("flashcard", "quiz"), "flashcard");
+  });
+
+  it("ignores anything it doesn't know", () => {
+    assert.equal(initialMode("bogus", "flashcard"), "flashcard");
+    assert.equal(initialMode("bogus", "old"), "quiz");
   });
 });
 

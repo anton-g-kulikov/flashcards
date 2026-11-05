@@ -49,6 +49,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | --- | --- |
 | Known word | up one box, due after that box's interval (1, 3, 7, 16, 35 days); box 5 stays 5 |
 | Word not known | box 1, due now |
+| Mode the page opens in | a shortcut's `?mode=` first, then the mode last chosen on the device, else quiz; unknown values ignored |
 | A drag on a flashcard | sideways or up and down once it has moved 10 px; a swipe past 30% of the card's width, at most 100 px |
 | Missed flashcard | back in the deck behind the next 3 cards, or last when fewer are left |
 | Needs study | new words and words due; not words scheduled later |
@@ -147,3 +148,5 @@ With `npm run dev`, at http://127.0.0.1:5050:
    turned away. In Quiz Mode it follows the question. No language, more than ten words, or no voice
    on the device: no button, and My Cards says which voice is missing. Try it on a real iPhone,
    including with the silent switch on and in the installed app.
+14. Study mode: choose Flash Mode and reload: it opens in Flash Mode, with no flash of the quiz.
+   `/?mode=quiz` opens the quiz for that visit without changing the remembered mode.

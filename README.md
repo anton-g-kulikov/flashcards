@@ -18,6 +18,7 @@ back online).
   and **Import** at the top create collections. **Delete my account** at the bottom deletes your
   collections, progress and sign-in.
 - **Interface language**: English, Russian or Spanish, from the header or the sign-in screen.
+- **Study mode**: the page opens in the mode you last chose on that device.
 - **Footer**: the tab on the line at the bottom of Study and My Cards opens it. It starts folded
   away each time.
 - **Appearance**: light, dark, or matching the device (the default), from the switch in the

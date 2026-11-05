@@ -9,18 +9,46 @@ import { AuthGate } from "./ui/auth-gate.js";
 import { confirmOnSecondTap } from "./ui/confirm-button.js";
 import { Analytics } from "./utils/analytics.js";
 import { initInstallPrompt } from "./utils/pwa-installer.js";
+import { initialMode } from "./features/study/mode.js";
 import { Progress } from "./features/study/progress.js";
 import { FlashcardMode } from "./features/flashcards/flashcard-mode.js";
 import { QuizMode } from "./features/flashcards/quiz-mode.js";
 
 const SAVE_DELAY_MS = 2000;
+const MODE_KEY = "flashcards-mode"; // the mode last chosen, per device
+
+function savedMode() {
+  try {
+    return localStorage.getItem(MODE_KEY);
+  } catch (error) {
+    return null; // Storage blocked: the default is fine
+  }
+}
+
+function saveMode(mode) {
+  try {
+    localStorage.setItem(MODE_KEY, mode);
+  } catch (error) {
+    // Not remembered, but the choice still applies now
+  }
+}
+
+// Marks the mode's button and shows its section
+function showMode(mode) {
+  document.querySelectorAll(".mode-btn").forEach((button) => {
+    const active = button.dataset.mode === mode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  document.getElementById("flashcardMode").classList.toggle("hidden", mode !== "flashcard");
+  document.getElementById("quizMode").classList.toggle("hidden", mode !== "quiz");
+}
 
 class StudyPage {
-  constructor(cards, progress) {
+  constructor(cards, progress, mode) {
     this.cards = cards;
     this.progress = progress;
-    // Quiz by default; the home-screen shortcuts (manifest.json) open /?mode=flashcard or quiz
-    this.mode = new URLSearchParams(location.search).get("mode") === "flashcard" ? "flashcard" : "quiz";
+    this.mode = mode;
     this.saveTimer = null;
 
     this.flashcards = new FlashcardMode(this);
@@ -52,19 +80,16 @@ class StudyPage {
     this.setMode(this.mode);
   }
 
-  // Quiz is the default
   setMode(mode, { byUser = false } = {}) {
     this.mode = mode;
-    document.querySelectorAll(".mode-btn").forEach((button) => {
-      const active = button.dataset.mode === mode;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-    document.getElementById("flashcardMode").classList.toggle("hidden", mode !== "flashcard");
-    document.getElementById("quizMode").classList.toggle("hidden", mode !== "quiz");
+    showMode(mode);
 
-    if (byUser) Analytics.modeSwitch(mode);
-    else Analytics.modeStarted(mode);
+    if (byUser) {
+      saveMode(mode);
+      Analytics.modeSwitch(mode);
+    } else {
+      Analytics.modeStarted(mode);
+    }
 
     if (mode === "flashcard") {
       this.quiz.stop();
@@ -143,6 +168,10 @@ function whenText(time) {
 
 initInstallPrompt();
 
+// Right away, so the page doesn't show the default mode first while the words load
+const startMode = initialMode(new URLSearchParams(location.search).get("mode"), savedMode());
+showMode(startMode);
+
 AuthGate.onSignedIn(async () => {
   const [{ collections, cards: allCards }, saved] = await Promise.all([
     Cloud.loadAll(I18n.t("collections.default")),
@@ -163,7 +192,7 @@ AuthGate.onSignedIn(async () => {
     }));
 
   const progress = new Progress(saved);
-  const page = new StudyPage(cards, progress);
+  const page = new StudyPage(cards, progress, startMode);
   // Progress of cards deleted since (in any collection) is dropped from the saved record
   if (progress.prune(new Set(allCards.map((card) => card.id)))) page.save();
   page.start();
