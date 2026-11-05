@@ -26,18 +26,36 @@ export function hasVoice(language) {
   return !!findVoice(available(), language);
 }
 
+// Only when something is playing: cancelling right before speaking can clip the start
 export function stopSpeaking() {
-  if (typeof speechSynthesis !== "undefined") speechSynthesis.cancel();
+  if (typeof speechSynthesis === "undefined") return;
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 }
 
-function speak(text, language) {
+function utterance(text, voice) {
+  const spoken = new SpeechSynthesisUtterance(text);
+  spoken.voice = voice;
+  spoken.lang = voice.lang;
+  return spoken;
+}
+
+// The audio output is asleep until something plays, and the first half second of the first word
+// gets lost while it wakes. So the first word after the page loads is preceded by a silent sound:
+// it has to be a real one, as "." or " " end too fast to wake anything (about 30 ms, against
+// 600 ms). That delays only this first word.
+let audioAwake = false;
+
+export function speak(text, language) {
   const voice = findVoice(available(), language);
   if (!voice) return;
   stopSpeaking();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voice;
-  utterance.lang = voice.lang;
-  speechSynthesis.speak(utterance);
+  if (!audioAwake) {
+    audioAwake = true;
+    const silent = utterance("a", voice);
+    silent.volume = 0;
+    speechSynthesis.speak(silent);
+  }
+  speechSynthesis.speak(utterance(text, voice));
 }
 
 // A speaker button for this text, or null when it can't be spoken: no language set, or too long.

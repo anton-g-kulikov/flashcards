@@ -76,6 +76,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | --- | --- |
 | Finding a voice | by language, whatever the region or spelling (`es-ES`, `es_MX`); on-device preferred, online as fallback; none for a missing language; `est` isn't `es` |
 | What can be spoken | one to ten words |
+| First word after a page load | a silent sound plays first to wake the audio; later words go straight out; only what's playing gets cancelled |
 | Language pair | `es-en` read and written, either side optional; unknown codes count as not set |
 | Starter collections | each names a known language pair |
 

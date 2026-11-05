@@ -1,7 +1,7 @@
 // Reading words aloud: which voice, and what is short enough to speak.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { MAX_SPOKEN_WORDS, findVoice, speakable } from "../public/src/features/study/speech.js";
+import { MAX_SPOKEN_WORDS, findVoice, speak, speakable } from "../public/src/features/study/speech.js";
 
 const voice = (lang, localService = true) => ({ lang, localService });
 
@@ -42,3 +42,45 @@ describe("speakable", () => {
     assert.ok(!speakable(Array(MAX_SPOKEN_WORDS + 1).fill("w").join(" ")));
   });
 });
+
+describe("speak", () => {
+  const spoken = [];
+  let cancelled = 0;
+  globalThis.SpeechSynthesisUtterance = class {
+    volume = 1;
+    constructor(text) {
+      this.text = text;
+    }
+  };
+  globalThis.speechSynthesis = {
+    speaking: false,
+    pending: false,
+    getVoices: () => [voice("es-ES")],
+    cancel: () => cancelled++,
+    speak: (utterance) => spoken.push(utterance),
+  };
+
+  it("wakes the audio with a silent sound before the first word, and only then", () => {
+    speak("hola", "es");
+    assert.deepEqual(spoken.map((u) => [u.text, u.volume]), [["a", 0], ["hola", 1]]);
+    assert.equal(spoken[0].lang, "es-ES");
+
+    spoken.length = 0;
+    speak("adiós", "es");
+    assert.deepEqual(spoken.map((u) => [u.text, u.volume]), [["adiós", 1]]);
+  });
+
+  it("cancels only what is actually playing", () => {
+    assert.equal(cancelled, 0);
+    speechSynthesis.speaking = true;
+    speak("otra", "es");
+    assert.equal(cancelled, 1);
+  });
+
+  it("says nothing without a voice for the language", () => {
+    spoken.length = 0;
+    speak("привет", "ru");
+    assert.deepEqual(spoken, []);
+  });
+});
+
