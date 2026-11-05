@@ -154,7 +154,7 @@ With `npm run dev`, at http://127.0.0.1:5050:
 14. Study mode: choose Flash Mode and reload: it opens in Flash Mode, with no flash of the quiz.
    `/?mode=quiz` opens the quiz for that visit without changing the remembered mode.
 15. Landing page: signed out, the study page explains the app. Cards are plain in front and coloured
-   behind, say "Tap to turn" only on hover or keyboard focus, and wiggle once as they scroll into
+   behind, say "Tap to turn" only on hover or keyboard focus, and wiggle once when fully in
    view. They turn with a tap, Enter or Space and their text fits in all three languages, at phone and desktop width and in dark mode (Russian
    on the narrow three-across cards is the tightest). Both sign-in buttons work. My Cards signed out
    still shows the plain sign-in card.
