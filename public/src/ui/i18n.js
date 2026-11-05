@@ -24,6 +24,7 @@ const TRANSLATIONS = {
     "mode.flashcards": "Flash Mode",
     "mode.quiz": "Quiz Mode",
     "progress.reset": "Reset Progress",
+    "study.swapDirection": "Swap which side the cards show first, for every collection switched on",
     "progress.resetConfirm": "Tap again to reset these words",
     "card.dontKnow": "I Don't Know...",
     "card.next": "Next",
@@ -166,6 +167,7 @@ const TRANSLATIONS = {
     "mode.flashcards": "Карточки",
     "mode.quiz": "Тест",
     "progress.reset": "Сбросить прогресс",
+    "study.swapDirection": "Поменять стороны карточек местами во всех включённых коллекциях",
     "progress.resetConfirm": "Нажмите ещё раз, чтобы сбросить эти слова",
     "card.dontKnow": "Не знаю...",
     "card.next": "Далее",
@@ -308,6 +310,7 @@ const TRANSLATIONS = {
     "mode.flashcards": "Tarjetas",
     "mode.quiz": "Test",
     "progress.reset": "Reiniciar progreso",
+    "study.swapDirection": "Cambiar qué lado se muestra primero en todas las colecciones activas",
     "progress.resetConfirm": "Pulsa otra vez para reiniciar estas palabras",
     "card.dontKnow": "No la sé...",
     "card.next": "Siguiente",
@@ -461,6 +464,12 @@ export class I18n {
     return text.replace(/\{(\w+)\}/g, (match, name) =>
       name in vars ? String(vars[name]) : match
     );
+  }
+
+  // A language's name in the interface language, as a list entry would start
+  static languageName(code) {
+    const name = new Intl.DisplayNames([I18n.lang], { type: "language" }).of(code);
+    return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
   static escape(value) {

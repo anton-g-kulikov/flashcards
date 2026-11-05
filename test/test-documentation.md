@@ -176,3 +176,8 @@ With `npm run dev`, at http://127.0.0.1:5050:
    `.txt` from My Cards. The words and translations are clean, with one card per note, and the
    collection is named after the file. Try the file picker on an iPhone: `.txt` files must be
    selectable.
+19. Direction while studying: below the cards in both modes, the button shows "Spanish → English",
+   or "Word → Translation" when the collections have different languages or none. Tap it: the cards
+   and quiz turn round straight away, every collection switched on follows, and it stays after a
+   reload. With only some collections reversed it shows ⇄, and one tap reverses them all. With no
+   translations at all there is no button.

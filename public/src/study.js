@@ -10,6 +10,7 @@ import "./ui/landing.js";
 import { confirmOnSecondTap } from "./ui/confirm-button.js";
 import { Analytics } from "./utils/analytics.js";
 import { initInstallPrompt } from "./utils/pwa-installer.js";
+import { studyDirection } from "./features/study/direction.js";
 import { initialMode } from "./features/study/mode.js";
 import { Progress } from "./features/study/progress.js";
 import { FlashcardMode } from "./features/flashcards/flashcard-mode.js";
@@ -46,8 +47,11 @@ function showMode(mode) {
 }
 
 class StudyPage {
-  constructor(cards, progress, mode) {
-    this.cards = cards;
+  // collections: all of them; words: the stored cards of those switched on
+  constructor(collections, words, progress, mode) {
+    this.collections = collections;
+    this.words = words;
+    this.cards = this.studyCards();
     this.progress = progress;
     this.mode = mode;
     this.saveTimer = null;
@@ -60,9 +64,12 @@ class StudyPage {
     });
     const resetButton = document.getElementById("resetProgressBtn");
     resetButton.addEventListener("click", () => this.reset(resetButton));
+    this.directionButton = document.getElementById("directionBtn");
+    this.directionButton.addEventListener("click", () => this.swapDirection());
 
     document.addEventListener("i18n-changed", () => {
       this.showCounts();
+      this.showDirection();
       if (this.mode === "flashcard") this.flashcards.show();
       else this.quiz.refresh();
     });
@@ -74,8 +81,55 @@ class StudyPage {
     window.addEventListener("pagehide", () => this.save());
   }
 
+  studyCards() {
+    const byId = new Map(this.collections.map((c) => [c.id, c]));
+    return this.words.map((word) => studyCard(word, byId.get(word.collectionId)));
+  }
+
+  // The collections being studied: the ones the direction switch acts on
+  get studied() {
+    const ids = new Set(this.words.map((word) => word.collectionId));
+    return this.collections.filter((c) => ids.has(c.id));
+  }
+
+  // "Spanish → English", or "Word → Translation" unless all the collections share a language pair
+  showDirection() {
+    const { first, second, mixed } = studyDirection(this.studied);
+    const name = ({ side, language }) =>
+      language ? I18n.languageName(language) : I18n.t(side === "word" ? "words.wordPlaceholder" : "words.translationPlaceholder");
+    this.directionButton.textContent = `${name(first)} ${mixed ? "⇄" : "→"} ${name(second)}`;
+    this.directionButton.title = I18n.t("study.swapDirection");
+    this.directionButton.classList.toggle("hidden", !this.words.some((word) => word.translation));
+  }
+
+  // The same setting as the arrow in My Cards, for every collection being studied at once. A mix
+  // of directions all goes the other way round. If saving fails, the cards turn back.
+  async swapDirection() {
+    const reversed = !studyDirection(this.studied).reversed;
+    const changing = this.studied.filter((c) => !c.reversed === reversed);
+    const apply = (value) => {
+      changing.forEach((c) => (c.reversed = value));
+      this.cards = this.studyCards();
+      this.showDirection();
+      this.restart();
+    };
+    apply(reversed);
+    try {
+      await Promise.all(changing.map((c) => Cloud.setCollectionReversed(c.id, reversed)));
+    } catch (error) {
+      console.error("Error saving the direction:", error);
+      apply(!reversed);
+    }
+  }
+
+  restart() {
+    if (this.mode === "flashcard") this.flashcards.start();
+    else this.quiz.start();
+  }
+
   start() {
     this.showCounts();
+    this.showDirection();
     this.renderStats();
     Analytics.studyStart(this.mode, this.cards.length, this.progress.stats(this.cards).due);
     this.setMode(this.mode);
@@ -126,8 +180,7 @@ class StudyPage {
     this.changed();
     this.save();
     Analytics.progressReset();
-    if (this.mode === "flashcard") this.flashcards.start();
-    else this.quiz.start();
+    this.restart();
   }
 
   // Due (to study now, new words included) · Learning · Mastered; the bar is the average box
@@ -182,13 +235,10 @@ AuthGate.onSignedIn(async () => {
   // Every word in the collections switched on (cards whose collection is gone count as on, so
   // nothing silently disappears)
   const inactive = new Set(collections.filter((c) => !c.active).map((c) => c.id));
-  const byId = new Map(collections.map((c) => [c.id, c]));
-  const cards = allCards
-    .filter((card) => !inactive.has(card.collectionId))
-    .map((card) => studyCard(card, byId.get(card.collectionId)));
+  const words = allCards.filter((card) => !inactive.has(card.collectionId));
 
   const progress = new Progress(saved);
-  const page = new StudyPage(cards, progress, startMode);
+  const page = new StudyPage(collections, words, progress, startMode);
   // Progress of cards deleted since (in any collection) is dropped from the saved record
   if (progress.prune(new Set(allCards.map((card) => card.id)))) page.save();
   page.start();

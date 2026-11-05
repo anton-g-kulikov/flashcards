@@ -9,6 +9,7 @@ import {
   RETRY_GAP,
   retryLater,
 } from "../public/src/features/study/progress.js";
+import { studyDirection } from "../public/src/features/study/direction.js";
 import { initialMode } from "../public/src/features/study/mode.js";
 import { dragAxis, swipeDirection } from "../public/src/features/study/swipe.js";
 import {
@@ -256,3 +257,31 @@ describe("quiz", () => {
     assert.equal(distinctTranslations([card("a", "x"), card("b", " X"), card("c", ""), card("d", "y")]), 2);
   });
 });
+
+describe("studyDirection", () => {
+  const es = (reversed = false) => ({ language: "es-en", reversed });
+
+  it("names the languages in the order the cards show them", () => {
+    const forward = studyDirection([es(), es()]);
+    assert.deepEqual([forward.first.language, forward.second.language, forward.reversed], ["es", "en", false]);
+    const back = studyDirection([es(true), es(true)]);
+    assert.deepEqual([back.first.language, back.second.language, back.reversed], ["en", "es", true]);
+    assert.equal(back.first.side, "translation");
+  });
+
+  it("calls a mix of directions mixed, not reversed", () => {
+    const { mixed, reversed, first } = studyDirection([es(true), es()]);
+    assert.deepEqual([mixed, reversed, first.side], [true, false, "word"]);
+  });
+
+  it("names no languages when the collections don't share a pair", () => {
+    const { first, second } = studyDirection([es(), { language: "fr-en" }]);
+    assert.deepEqual([first.language, second.language], ["", ""]);
+  });
+
+  it("copes with no languages and no collections", () => {
+    assert.equal(studyDirection([{}]).first.language, "");
+    assert.deepEqual([studyDirection([]).reversed, studyDirection([]).mixed], [false, false]);
+  });
+});
+

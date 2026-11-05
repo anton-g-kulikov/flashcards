@@ -180,6 +180,13 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Note:** no `.apkg`, review history, images or audio. Checked against Anki's documented format
   with a sample file, not yet with a real export from Anki.
 
+### TASK-015 — Direction switch while studying (2026-11-05)
+
+- **Goal:** change direction from the study page, as a user asked, without going to My Cards.
+- **Done:** a button below the cards shows the direction ("Spanish → English") in both modes. It
+  saves the same setting as My Cards, for every collection switched on.
+- **Note:** direction stays per collection, so a tap here overrides any mix set in My Cards.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

@@ -99,7 +99,8 @@ language. If one is missing, you can usually add it in your device's language or
 
 The arrow between the two languages sets which side the card shows first: tap it to study Spanish →
 English as English → Spanish. The words stay the same and so does your progress, which both
-directions share. A word with no translation still shows the word first.
+directions share. A word with no translation still shows the word first. The button below the
+cards does the same while you study, for every collection switched on at once.
 
 ### Starting over
 

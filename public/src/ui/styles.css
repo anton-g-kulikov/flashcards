@@ -484,7 +484,9 @@ button.armed:hover {
 
 .study-footer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
   margin-top: var(--spacing-5);
 }
 

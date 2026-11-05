@@ -26,12 +26,6 @@ function icon(name) {
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
 }
 
-// A language's name in the interface language, as a list entry would start
-function languageName(code) {
-  const name = new Intl.DisplayNames([I18n.lang], { type: "language" }).of(code);
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
-
 // A failed save, in words: the collection limits get a translated reason
 function failure(error) {
   if (error.code === "collection-full") return I18n.t("words.collectionFull", { max: MAX_CARDS });
@@ -573,7 +567,7 @@ class WordManager {
       select.className = "lang-select";
       select.setAttribute("aria-label", I18n.t(labelKey));
       select.add(new Option(I18n.t(emptyKey), ""));
-      LANGUAGES.forEach((code) => select.add(new Option(languageName(code), code)));
+      LANGUAGES.forEach((code) => select.add(new Option(I18n.languageName(code), code)));
       select.value = languagePair(collection.language)[side];
       select.addEventListener("change", () => {
         this.setLanguage(collection, { ...languagePair(collection.language), [side]: select.value });
@@ -606,8 +600,8 @@ class WordManager {
   updateDirection(button, collection) {
     const { word, translation } = languagePair(collection.language);
     const first = collection.reversed
-      ? (translation && languageName(translation)) || I18n.t("words.translationPlaceholder")
-      : (word && languageName(word)) || I18n.t("words.wordPlaceholder");
+      ? (translation && I18n.languageName(translation)) || I18n.t("words.translationPlaceholder")
+      : (word && I18n.languageName(word)) || I18n.t("words.wordPlaceholder");
     button.textContent = collection.reversed ? "←" : "→";
     button.title = I18n.t("collections.swapDirection", { first });
     button.setAttribute("aria-label", button.title);
