@@ -187,6 +187,12 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   saves the same setting as My Cards, for every collection switched on.
 - **Note:** direction stays per collection, so a tap here overrides any mix set in My Cards.
 
+### TASK-016 — Starter collections on the landing page (2026-11-06)
+
+- **Goal:** show what's ready to study before signing in.
+- **Done:** a table of the starter collections (name, languages, word count) with its own sign-in
+  button. Collection names stay as they are in the app, so they aren't translated.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

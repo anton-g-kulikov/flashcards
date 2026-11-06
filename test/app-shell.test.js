@@ -171,9 +171,24 @@ describe("translations", () => {
 describe("landing page", () => {
   const html = readFileSync("public/index.html", "utf8");
 
-  it("has its feature cards reachable by keyboard, and sign-in at both ends", () => {
+  it("has its feature cards reachable by keyboard, and sign-in at both ends and by the collections", () => {
     assert.equal(html.match(/class="flashcard landing-card" role="button" tabindex="0"/g).length, 7);
-    assert.equal(html.match(/class="google-signin-btn"/g).length, 2);
+    assert.equal(html.match(/class="google-signin-btn"/g).length, 3);
+    assert.equal(html.match(/class="auth-error"/g).length, 3);
+  });
+
+  it("lists every starter collection, as index.json has it", () => {
+    const { collections } = JSON.parse(readFileSync("public/collections/index.json", "utf8"));
+    const table = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+    const rows = [...table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(([, row]) =>
+      [...row.matchAll(/<td>(.*?)<\/td>/g)].map(([, cell]) => cell)
+    );
+    const expected = collections.map(({ name, language, words }) => [
+      name,
+      language.toUpperCase().replace("-", " → "),
+      String(words),
+    ]);
+    assert.deepEqual(rows, expected);
   });
 
   it("keeps its text in the page, for search engines", () => {

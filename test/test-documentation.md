@@ -181,3 +181,5 @@ With `npm run dev`, at http://127.0.0.1:5050:
    and quiz turn round straight away, every collection switched on follows, and it stays after a
    reload. With only some collections reversed it shows ⇄, and one tap reverses them all. With no
    translations at all there is no button.
+20. Landing table: signed out, "Ready-made collections" lists every starter collection and fits at phone
+   width in all three languages and in dark mode. Its button starts Google sign-in.
