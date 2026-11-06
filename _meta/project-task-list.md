@@ -234,6 +234,13 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   the app. It ends on a card with a sign-in button. Nothing is saved or counted in analytics.
 - **Note:** Spanish speakers get English words, since Spanish words would teach them nothing.
 
+### TASK-021 — Collection cards on the landing page (2026-11-06)
+
+- **Goal:** the table of 32 rows looked out of place and showed more than anyone needs.
+- **Done:** tabs for the four languages and eight small cards for the one chosen, each with its
+  level, type and sample words, linking to its word list. Russian speakers open on English. Word
+  types are now translated. My Cards keeps its dropdown.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

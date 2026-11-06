@@ -2,7 +2,8 @@
 // verbs" can find the site: the full word list as plain HTML, in the language of the people who
 // would search for it (the translation's language). The page's text also comes in every interface
 // language, for src/ui/word-list-language.js to show someone who uses the app in another one. It
-// also lists the pages in sitemap.xml and links them from the landing page's table.
+// also lists the pages in sitemap.xml and writes the landing page's collection cards, which link
+// to them.
 // test/crawl.test.js fails if any of this is out of date.
 // Run from the repository root after changing public/collections/:
 //   node scripts/make-word-lists.js
@@ -191,12 +192,17 @@ ${links}
 `;
 }
 
-// Every page, keyed by file name. A collection whose CSV isn't there yet has no page.
-export function wordListPages() {
+// The collections with their words. A collection whose CSV isn't there yet is left out.
+function wordLists() {
   const { collections } = JSON.parse(readFileSync("public/collections/index.json", "utf8"));
-  const lists = collections
+  return collections
     .filter((entry) => existsSync(join("public/collections", entry.file)))
     .map((entry) => ({ entry, cards: readCards(readFileSync(join("public/collections", entry.file), "utf8")).cards }));
+}
+
+// Every page, keyed by file name
+export function wordListPages() {
+  const lists = wordLists();
   return Object.fromEntries(
     lists.map(({ entry, cards }) => {
       const siblings = lists.filter((other) => other.entry.language === entry.language && other.entry !== entry);
@@ -211,14 +217,29 @@ export function sitemap(names) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-// The landing table's name cells, plain or already linked, become links to the pages
-function linkLandingTable(html, collections, names) {
-  return collections.reduce((page, entry) => {
-    if (!names.includes(pageName(entry))) return page;
-    const cell = new RegExp(`<td>(?:<a [^>]*>)?${entry.name}(?:</a>)?</td>`);
-    return page.replace(cell, `<td><a href="words/${pageName(entry)}">${entry.name}</a></td>`);
-  }, html);
+// One card per collection, grouped by language pair for the tabs above them (landing.js). Every
+// group stays in the HTML, for search engines; the first shows until the tabs take over.
+export function starterCards() {
+  const lists = wordLists();
+  const pairs = [...new Set(lists.map(({ entry }) => entry.language))];
+  const card = ({ entry, cards }) => {
+    const { word, level, kind, examples } = describeCollection(entry, cards);
+    return `            <a class="starter-card" href="words/${pageName(entry)}">
+              <span class="starter-level">${level}</span>
+              <span class="starter-kind" data-i18n="landing.starters.${kind.toLowerCase()}">${kind}</span>
+              <span class="starter-sample" lang="${word}">${escapeHtml(examples.slice(0, 2).join(", "))}…</span>
+            </a>`;
+  };
+  const groups = pairs.map(
+    (pair, index) => `          <div class="starter-group" data-language="${pair}"${index ? " hidden" : ""}>
+${lists.filter(({ entry }) => entry.language === pair).map(card).join("\n")}
+          </div>`
+  );
+  return `<!-- starter-cards: written by scripts/make-word-lists.js -->\n${groups.join("\n")}\n          <!-- /starter-cards -->`;
 }
+
+const writeStarterCards = (html) =>
+  html.replace(/<!-- starter-cards:[\s\S]*?<!-- \/starter-cards -->/, () => starterCards());
 
 if (process.argv[1]?.endsWith("make-word-lists.js")) {
   const pages = wordListPages();
@@ -229,6 +250,6 @@ if (process.argv[1]?.endsWith("make-word-lists.js")) {
   writeFileSync("public/sitemap.xml", sitemap(names));
   const { collections } = JSON.parse(readFileSync("public/collections/index.json", "utf8"));
   const landing = readFileSync("public/index.html", "utf8");
-  writeFileSync("public/index.html", linkLandingTable(landing, collections, names));
+  writeFileSync("public/index.html", writeStarterCards(landing));
   console.log(`${readdirSync(DIR).length} pages of ${collections.length} collections`);
 }

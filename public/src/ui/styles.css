@@ -1528,39 +1528,81 @@ body.auth-pending .auth-gate .auth-loading {
   margin-bottom: var(--spacing-3);
 }
 
-.landing-starters .starter-filter {
-  margin-inline: auto;
+.starter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
 }
 
-.landing-table {
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto var(--spacing-5);
-  border-collapse: collapse;
-  font-size: 0.875rem;
-  text-align: left;
+.starter-tabs .chip-btn.active {
+  background: var(--color-accent-strong);
+  border-color: transparent;
+  color: white;
 }
 
-.landing-table th,
-.landing-table td {
-  padding: var(--spacing-2) var(--spacing-2);
-  border-bottom: 1px solid var(--color-border);
+/* Small relatives of the landing page's cards: two across on a phone, four where they fit */
+.starter-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-5);
 }
 
-.landing-table th {
+.starter-group[hidden] {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .starter-group {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.starter-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-3) var(--spacing-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary);
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+@media (hover: hover) {
+  .starter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.starter-level {
+  padding: 0 var(--spacing-2);
+  background: var(--color-card-2);
+  border-radius: 999px;
+  color: var(--color-text-light);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text-light);
 }
 
-.landing-table th:last-child,
-.landing-table td:last-child {
-  text-align: right;
+.starter-kind {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.landing-table td:nth-child(2) {
-  white-space: nowrap;
-  color: var(--color-text-light);
+.starter-sample {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.3;
 }
 
 .landing-foot {

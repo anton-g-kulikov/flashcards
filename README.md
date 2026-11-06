@@ -179,7 +179,8 @@ adverbs. Every pair covers the same words, as far as the languages allow.
 Importing one from **My Cards** also sets its languages, so its words can be read aloud. Nouns carry
 their article where the language has one (`la casa`), verbs are infinitives (`comer` → `to eat`) and
 adjectives are masculine singular. Within a pair, no word appears in more than one of the eight
-collections. Both the landing page and the list in **My Cards** can be narrowed to one pair.
+collections. The landing page shows them one language at a time, and the list in **My Cards** can be narrowed
+to one pair.
 
 ## Contributing a collection
 

@@ -96,7 +96,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
 | Footer, on both pages | starts collapsed and inert, and holds the appearance switch and the cookie note |
 | Translations | same keys in English, Russian and Spanish; every key used in the pages exists |
-| Landing page | 7 feature cards reachable by keyboard, sign-in at both ends, its text in the HTML, a language filter here and in My Cards |
+| Landing page | 5 feature cards reachable by keyboard, sign-in at both ends and by the collections, its text in the HTML, a card for every starter collection, a language filter in My Cards |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Automated: search engines (`crawl.test.js`)
@@ -199,11 +199,12 @@ With `npm run dev`, at http://127.0.0.1:5050:
    and quiz turn round straight away, every collection switched on follows, and it stays after a
    reload. With only some collections reversed it shows ⇄, and one tap reverses them all. With no
    translations at all there is no button.
-20. Landing table: signed out, "Ready-made collections" lists every starter collection and fits at phone
-   width in all three languages and in dark mode. Its button starts Google sign-in.
-21. Language filter: the dropdown above the landing table and the one under Import in My Cards list
-   every language pair in the interface language. Choosing one leaves only its collections, and
-   switching the interface language keeps the choice.
+20. Landing collections: signed out, "Ready-made collections" has a tab per language and eight cards for
+   the chosen one, which fit at phone width in all three languages and in dark mode. In Russian it
+   opens on English. Each card opens its word list. The button starts Google sign-in.
+21. Language filter: the dropdown under Import in My Cards lists every language pair in the interface
+   language. Choosing one leaves only its collections, and switching the interface language keeps
+   the choice.
 22. Landing demo: signed out, tap, swipe and both buttons work in Flash Mode as they do in the app,
    and a missed word comes back after the others. In Quiz Mode a wrong pick turns over. Both end on
    a card whose button starts sign-in. Switching mode or language starts over. Spanish shows English

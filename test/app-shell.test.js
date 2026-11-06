@@ -185,24 +185,21 @@ describe("landing page", () => {
     assert.doesNotMatch(study, /querySelectorAll\("\.mode-btn"\)/);
   });
 
-  it("lists every starter collection, as index.json has it", () => {
+  it("has a card for every starter collection, with tabs named after the language taught", () => {
     const { collections } = JSON.parse(readFileSync("public/collections/index.json", "utf8"));
-    const table = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
-    const rows = [...table.matchAll(/<tr data-language="(.*?)">([\s\S]*?)<\/tr>/g)].map(([, language, row]) => [
-      language,
-      ...[...row.matchAll(/<td>(.*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, "")),
-    ]);
-    const expected = collections.map(({ name, language, words }) => [
-      language,
-      name,
-      language.toUpperCase().replace("-", " → "),
-      String(words),
-    ]);
-    assert.deepEqual(rows, expected);
+    assert.equal(html.match(/class="starter-card"/g).length, collections.length);
+    assert.ok(html.includes('class="starter-tabs"'));
+    const pairs = new Set(collections.map((entry) => entry.language));
+    assert.equal(new Set([...pairs].map((pair) => pair.split("-")[0])).size, pairs.size, "two tabs would read the same");
   });
 
-  it("can narrow the starter collections to a language pair, here and in My Cards", () => {
-    assert.ok(html.includes('id="starterFilter"'));
+  it("says each collection has 100 words, which has to stay true", () => {
+    const { collections } = JSON.parse(readFileSync("public/collections/index.json", "utf8"));
+    assert.ok(html.includes("100 words in each"));
+    assert.ok(collections.every((entry) => entry.words === 100));
+  });
+
+  it("can narrow the starter collections to a language pair in My Cards", () => {
     assert.ok(readFileSync("public/vocabulary-manager.html", "utf8").includes('id="libraryFilter"'));
   });
 

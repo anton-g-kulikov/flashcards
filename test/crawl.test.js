@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { runInNewContext } from "node:vm";
 import assert from "node:assert/strict";
-import { pageName, sitemap as writtenSitemap, wordListPages } from "../scripts/make-word-lists.js";
+import { pageName, sitemap as writtenSitemap, starterCards, wordListPages } from "../scripts/make-word-lists.js";
 
 const ORIGIN = "https://yourflashcards.app";
 
@@ -172,10 +172,11 @@ describe("word list pages", () => {
     });
   });
 
-  it("are linked from the landing page's table", () => {
+  it("are linked from the landing page's cards: run node scripts/make-word-lists.js if not", () => {
     const html = readFileSync("public/index.html", "utf8");
+    assert.ok(html.includes(starterCards()));
     for (const entry of collections) {
-      assert.ok(html.includes(`<td><a href="words/${pageName(entry)}">${entry.name}</a></td>`), entry.name);
+      assert.ok(html.includes(`href="words/${pageName(entry)}"`), entry.name);
     }
   });
 });
