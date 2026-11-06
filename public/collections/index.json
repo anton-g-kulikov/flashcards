@@ -55,6 +55,174 @@
       "language": "es-en",
       "level": "A2",
       "words": 100
+    },
+    {
+      "file": "en-ru/a1-nouns.csv",
+      "name": "English A1 · Nouns",
+      "language": "en-ru",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a1-verbs.csv",
+      "name": "English A1 · Verbs",
+      "language": "en-ru",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a1-adjectives.csv",
+      "name": "English A1 · Adjectives",
+      "language": "en-ru",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a1-adverbs.csv",
+      "name": "English A1 · Adverbs",
+      "language": "en-ru",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a2-nouns.csv",
+      "name": "English A2 · Nouns",
+      "language": "en-ru",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a2-verbs.csv",
+      "name": "English A2 · Verbs",
+      "language": "en-ru",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a2-adjectives.csv",
+      "name": "English A2 · Adjectives",
+      "language": "en-ru",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "en-ru/a2-adverbs.csv",
+      "name": "English A2 · Adverbs",
+      "language": "en-ru",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a1-nouns.csv",
+      "name": "French A1 · Nouns",
+      "language": "fr-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a1-verbs.csv",
+      "name": "French A1 · Verbs",
+      "language": "fr-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a1-adjectives.csv",
+      "name": "French A1 · Adjectives",
+      "language": "fr-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a1-adverbs.csv",
+      "name": "French A1 · Adverbs",
+      "language": "fr-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a2-nouns.csv",
+      "name": "French A2 · Nouns",
+      "language": "fr-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a2-verbs.csv",
+      "name": "French A2 · Verbs",
+      "language": "fr-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a2-adjectives.csv",
+      "name": "French A2 · Adjectives",
+      "language": "fr-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "fr-en/a2-adverbs.csv",
+      "name": "French A2 · Adverbs",
+      "language": "fr-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "it-en/a1-nouns.csv",
+      "name": "Italian A1 · Nouns",
+      "language": "it-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "it-en/a1-verbs.csv",
+      "name": "Italian A1 · Verbs",
+      "language": "it-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "it-en/a1-adjectives.csv",
+      "name": "Italian A1 · Adjectives",
+      "language": "it-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "it-en/a1-adverbs.csv",
+      "name": "Italian A1 · Adverbs",
+      "language": "it-en",
+      "level": "A1",
+      "words": 100
+    },
+    {
+      "file": "it-en/a2-nouns.csv",
+      "name": "Italian A2 · Nouns",
+      "language": "it-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "it-en/a2-verbs.csv",
+      "name": "Italian A2 · Verbs",
+      "language": "it-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "it-en/a2-adjectives.csv",
+      "name": "Italian A2 · Adjectives",
+      "language": "it-en",
+      "level": "A2",
+      "words": 100
+    },
+    {
+      "file": "it-en/a2-adverbs.csv",
+      "name": "Italian A2 · Adverbs",
+      "language": "it-en",
+      "level": "A2",
+      "words": 100
     }
   ]
 }

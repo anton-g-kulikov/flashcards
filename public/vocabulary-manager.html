@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Cards - YourFlashCards</title>
+    <!-- Signed out, this page is only a sign-in screen. Not blocked in robots.txt: a crawler has
+         to fetch the page to read this. -->
+    <meta name="robots" content="noindex" />
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json" />
@@ -174,6 +177,7 @@
           </button>
           <input type="file" id="importFileInput" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden />
           <h3 class="import-library-title" data-i18n="collections.library">Starter collections</h3>
+          <select id="libraryFilter" class="lang-select starter-filter" data-i18n-label="auth.language"></select>
           <ul id="libraryList" class="library-list"></ul>
         </div>
       </section>

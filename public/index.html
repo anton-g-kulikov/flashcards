@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YourFlashCards</title>
+    <title>YourFlashCards: Vocabulary Flashcards with Spaced Repetition</title>
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json" />
@@ -18,6 +18,33 @@
       name="description"
       content="Learn the words you need: your own flashcard collections with quizzes, spaced repetition and words read aloud, on any device."
     />
+
+    <!-- Search engines and link previews. The site also answers on web.app and at /index.html;
+         the canonical link makes this address the one that counts. -->
+    <link rel="canonical" href="https://yourflashcards.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="YourFlashCards" />
+    <meta property="og:url" content="https://yourflashcards.app/" />
+    <meta property="og:title" content="YourFlashCards: Vocabulary Flashcards with Spaced Repetition" />
+    <meta
+      property="og:description"
+      content="Learn the words you need: your own flashcard collections with quizzes, spaced repetition and words read aloud, on any device."
+    />
+    <meta property="og:image" content="https://yourflashcards.app/icons/share.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The YourFlashCards icon and name" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Data, not code: the browser never runs it, so the Content-Security-Policy still holds -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "YourFlashCards",
+        "alternateName": "YourCards",
+        "url": "https://yourflashcards.app/"
+      }
+    </script>
 
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="icons/ios/180.png?v=2" />
@@ -180,7 +207,7 @@
                   <span class="landing-turn" data-i18n="landing.turn">Tap to turn</span>
                 </div>
                 <div class="card-face card-back">
-                  <p data-i18n="landing.starter.text">Eight ready-made Spanish collections, levels A1 and A2, with 100 words each.</p>
+                  <p data-i18n="landing.starter.text">Ready-made collections in Spanish, English, French and Italian, levels A1 and A2, with 100 words each.</p>
                 </div>
               </div>
             </div>
@@ -201,6 +228,7 @@
         <section class="landing-section landing-starters">
           <h2 data-i18n="landing.starters.title">Ready-made collections</h2>
           <p data-i18n="landing.starters.text">Once you're in, add any of these in one tap from My Cards.</p>
+          <select id="starterFilter" class="lang-select starter-filter" data-i18n-label="auth.language"></select>
           <table class="landing-table">
             <thead>
               <tr>
@@ -210,44 +238,164 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Spanish A1 · Nouns</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a1-nouns.html">Spanish A1 · Nouns</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A1 · Verbs</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a1-verbs.html">Spanish A1 · Verbs</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A1 · Adjectives</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a1-adjectives.html">Spanish A1 · Adjectives</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A1 · Adverbs</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a1-adverbs.html">Spanish A1 · Adverbs</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A2 · Nouns</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a2-nouns.html">Spanish A2 · Nouns</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A2 · Verbs</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a2-verbs.html">Spanish A2 · Verbs</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A2 · Adjectives</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a2-adjectives.html">Spanish A2 · Adjectives</a></td>
                 <td>ES → EN</td>
                 <td>100</td>
               </tr>
-              <tr>
-                <td>Spanish A2 · Adverbs</td>
+              <tr data-language="es-en">
+                <td><a href="words/spanish-a2-adverbs.html">Spanish A2 · Adverbs</a></td>
                 <td>ES → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a1-nouns.html">English A1 · Nouns</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a1-verbs.html">English A1 · Verbs</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a1-adjectives.html">English A1 · Adjectives</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a1-adverbs.html">English A1 · Adverbs</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a2-nouns.html">English A2 · Nouns</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a2-verbs.html">English A2 · Verbs</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a2-adjectives.html">English A2 · Adjectives</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="en-ru">
+                <td><a href="words/english-a2-adverbs.html">English A2 · Adverbs</a></td>
+                <td>EN → RU</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a1-nouns.html">French A1 · Nouns</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a1-verbs.html">French A1 · Verbs</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a1-adjectives.html">French A1 · Adjectives</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a1-adverbs.html">French A1 · Adverbs</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a2-nouns.html">French A2 · Nouns</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a2-verbs.html">French A2 · Verbs</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a2-adjectives.html">French A2 · Adjectives</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="fr-en">
+                <td><a href="words/french-a2-adverbs.html">French A2 · Adverbs</a></td>
+                <td>FR → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a1-nouns.html">Italian A1 · Nouns</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a1-verbs.html">Italian A1 · Verbs</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a1-adjectives.html">Italian A1 · Adjectives</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a1-adverbs.html">Italian A1 · Adverbs</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a2-nouns.html">Italian A2 · Nouns</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a2-verbs.html">Italian A2 · Verbs</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a2-adjectives.html">Italian A2 · Adjectives</a></td>
+                <td>IT → EN</td>
+                <td>100</td>
+              </tr>
+              <tr data-language="it-en">
+                <td><a href="words/italian-a2-adverbs.html">Italian A2 · Adverbs</a></td>
+                <td>IT → EN</td>
                 <td>100</td>
               </tr>
             </tbody>
@@ -285,7 +433,7 @@
                   <span class="landing-turn" data-i18n="landing.turn">Tap to turn</span>
                 </div>
                 <div class="card-face card-back">
-                  <p data-i18n="landing.voice.text">Tap the speaker on a card to hear it, in English, Spanish, Russian, French or German, with your device's own voices.</p>
+                  <p data-i18n="landing.voice.text">Tap the speaker on a card to hear it, in English, Spanish, Russian, French, German or Italian, with your device's own voices.</p>
                 </div>
               </div>
             </div>

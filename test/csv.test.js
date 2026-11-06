@@ -198,15 +198,25 @@ describe("starter collections", () => {
   });
 
   // The A1/A2 series is designed to have no overlap; other collections (topics, contributions)
-  // may share words with it and with each other.
-  it("never repeats a Spanish word across the A1/A2 core series", () => {
-    const seen = new Map();
-    for (const entry of index.collections.filter((c) => /^es-en\/a[12]-/.test(c.file))) {
-      for (const { word } of toCards(readFileSync(`${dir}/${entry.file}`, "utf8"))) {
-        const key = word.toLowerCase();
-        assert.ok(!seen.has(key), `"${word}" is in ${seen.get(key)} and ${entry.file}`);
-        seen.set(key, entry.file);
+  // may share words with it and with each other. Each language pair has its own series.
+  const series = index.collections.filter((c) => /^[a-z]{2}-[a-z]{2}\/a[12]-/.test(c.file));
+  const pairs = [...new Set(series.map((c) => c.language))];
+
+  it("never repeats a word across a language pair's A1/A2 core series", () => {
+    for (const pair of pairs) {
+      const seen = new Map();
+      for (const entry of series.filter((c) => c.language === pair)) {
+        for (const { word } of toCards(readFileSync(`${dir}/${entry.file}`, "utf8"))) {
+          const key = word.toLowerCase();
+          assert.ok(!seen.has(key), `"${word}" is in ${seen.get(key)} and ${entry.file}`);
+          seen.set(key, entry.file);
+        }
       }
     }
+  });
+
+  it("has the same eight collections for every language pair", () => {
+    const names = (pair) => series.filter((c) => c.language === pair).map((c) => c.file.split("/")[1]);
+    for (const pair of pairs) assert.deepEqual(names(pair), names("es-en"), pair);
   });
 });

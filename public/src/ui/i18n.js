@@ -9,6 +9,7 @@ const TRANSLATIONS = {
   en: {
     "app.title": "YourCards",
     "app.titleLong": "YourFlashCards",
+    "app.pageTitle": "YourFlashCards: Vocabulary Flashcards with Spaced Repetition",
     "auth.tagline":
       "Your personal vocabulary collection. Add your own words, then learn them with flashcards and quizzes on any device.",
     "auth.signIn": "Sign in with Google",
@@ -77,7 +78,7 @@ const TRANSLATIONS = {
     "landing.own.title": "Build your own",
     "landing.own.text": "Add words one at a time or import a CSV file, then switch collections on and off to choose what you study.",
     "landing.starter.title": "Or start right away",
-    "landing.starter.text": "Eight ready-made Spanish collections, levels A1 and A2, with 100 words each.",
+    "landing.starter.text": "Ready-made collections in Spanish, English, French and Italian, levels A1 and A2, with 100 words each.",
     "landing.sync.title": "On every device",
     "landing.sync.text": "Sign in with Google and your words and progress follow you. Add it to your home screen and it opens like an app.",
     "landing.starters.title": "Ready-made collections",
@@ -90,7 +91,7 @@ const TRANSLATIONS = {
     "landing.interface.title": "Learn in any language",
     "landing.interface.text": "Your words can be in any language. The app itself comes in English, Russian and Spanish.",
     "landing.voice.title": "Hear every word",
-    "landing.voice.text": "Tap the speaker on a card to hear it, in English, Spanish, Russian, French or German, with your device's own voices.",
+    "landing.voice.text": "Tap the speaker on a card to hear it, in English, Spanish, Russian, French, German or Italian, with your device's own voices.",
     "landing.share.title": "Share your collections",
     "landing.share.text": "Made a word list others could use? Send it in as a CSV file and it can become a starter collection for everyone. The code is public on GitHub.",
     "landing.share.submit": "Submit a collection",
@@ -138,6 +139,7 @@ const TRANSLATIONS = {
     "collections.importHint": "A CSV file with the columns word,translation becomes a new collection. Language codes as column names, like es,en, also set its languages. Anki's plain text export works too.",
     "collections.importFile": "Choose a file",
     "collections.library": "Starter collections",
+    "collections.allLanguages": "All languages",
     "collections.wordCount": "{count} words",
     "collections.imported": "Imported “{name}”: {count} words",
     "collections.importing": "Importing “{name}” ({count} words)…",
@@ -158,6 +160,7 @@ const TRANSLATIONS = {
   ru: {
     "app.title": "YourCards",
     "app.titleLong": "YourFlashCards",
+    "app.pageTitle": "YourFlashCards: карточки для изучения слов с интервальным повторением",
     "auth.tagline":
       "Ваша личная коллекция слов. Добавляйте свои слова и учите их с помощью карточек и тестов на любом устройстве.",
     "auth.signIn": "Войти через Google",
@@ -226,7 +229,7 @@ const TRANSLATIONS = {
     "landing.own.title": "Создайте свою",
     "landing.own.text": "Добавляйте слова по одному или импортируйте CSV-файл, а потом включайте и выключайте коллекции, чтобы выбрать, что учить.",
     "landing.starter.title": "Или начните сразу",
-    "landing.starter.text": "Восемь готовых испанских коллекций, уровни A1 и A2, по 100 слов в каждой.",
+    "landing.starter.text": "Готовые коллекции на испанском, английском, французском и итальянском, уровни A1 и A2, по 100 слов в каждой.",
     "landing.sync.title": "На любом устройстве",
     "landing.sync.text": "Войдите через Google, и ваши слова и прогресс будут с вами везде. Добавьте на главный экран, и приложение откроется как обычное.",
     "landing.starters.title": "Готовые коллекции",
@@ -239,7 +242,7 @@ const TRANSLATIONS = {
     "landing.interface.title": "Учите любой язык",
     "landing.interface.text": "Слова могут быть на любом языке. Само приложение работает на английском, русском и испанском.",
     "landing.voice.title": "Слушайте слова",
-    "landing.voice.text": "Нажмите на значок динамика на карточке, чтобы услышать слово: на английском, испанском, русском, французском или немецком, голосами вашего устройства.",
+    "landing.voice.text": "Нажмите на значок динамика на карточке, чтобы услышать слово: на английском, испанском, русском, французском, немецком или итальянском, голосами вашего устройства.",
     "landing.share.title": "Делитесь коллекциями",
     "landing.share.text": "Составили список слов, который пригодится другим? Пришлите его CSV-файлом, и он может стать готовой коллекцией для всех. Код доступен на GitHub.",
     "landing.share.submit": "Отправить коллекцию",
@@ -287,6 +290,7 @@ const TRANSLATIONS = {
     "collections.importHint": "CSV-файл со столбцами word,translation станет новой коллекцией. Коды языков вместо названий столбцов, например es,en, сразу зададут её языки. Подойдёт и экспорт Anki в виде простого текста.",
     "collections.importFile": "Выбрать файл",
     "collections.library": "Готовые коллекции",
+    "collections.allLanguages": "Все языки",
     "collections.wordCount": "Слов: {count}",
     "collections.imported": "Импортировано «{name}», слов: {count}",
     "collections.importing": "Импортируем «{name}» (слов: {count})…",
@@ -307,6 +311,7 @@ const TRANSLATIONS = {
   es: {
     "app.title": "YourCards",
     "app.titleLong": "YourFlashCards",
+    "app.pageTitle": "YourFlashCards: tarjetas de vocabulario con repetición espaciada",
     "auth.tagline":
       "Tu colección personal de vocabulario. Añade tus propias palabras y apréndelas con tarjetas y tests en cualquier dispositivo.",
     "auth.signIn": "Iniciar sesión con Google",
@@ -375,7 +380,7 @@ const TRANSLATIONS = {
     "landing.own.title": "Crea la tuya",
     "landing.own.text": "Añade palabras una a una o importa un archivo CSV, y activa o desactiva colecciones para elegir qué estudiar.",
     "landing.starter.title": "O empieza ya",
-    "landing.starter.text": "Ocho colecciones de español listas para usar, niveles A1 y A2, con 100 palabras cada una.",
+    "landing.starter.text": "Colecciones listas para usar en español, inglés, francés e italiano, niveles A1 y A2, con 100 palabras cada una.",
     "landing.sync.title": "En todos tus dispositivos",
     "landing.sync.text": "Entra con Google y tus palabras y tu progreso te acompañan. Añádela a tu pantalla de inicio y se abre como una app.",
     "landing.starters.title": "Colecciones listas para usar",
@@ -388,7 +393,7 @@ const TRANSLATIONS = {
     "landing.interface.title": "Aprende cualquier idioma",
     "landing.interface.text": "Tus palabras pueden estar en cualquier idioma. La app está en inglés, ruso y español.",
     "landing.voice.title": "Escucha cada palabra",
-    "landing.voice.text": "Toca el altavoz de una tarjeta para oírla, en inglés, español, ruso, francés o alemán, con las voces de tu dispositivo.",
+    "landing.voice.text": "Toca el altavoz de una tarjeta para oírla, en inglés, español, ruso, francés, alemán o italiano, con las voces de tu dispositivo.",
     "landing.share.title": "Comparte tus colecciones",
     "landing.share.text": "¿Has hecho una lista de palabras útil para otros? Envíala como archivo CSV y puede convertirse en una colección para todos. El código es público en GitHub.",
     "landing.share.submit": "Enviar una colección",
@@ -436,6 +441,7 @@ const TRANSLATIONS = {
     "collections.importHint": "Un archivo CSV con las columnas word,translation se convierte en una colección nueva. Los códigos de idioma como nombres de columna, por ejemplo es,en, también fijan sus idiomas. También sirve la exportación de Anki en texto plano.",
     "collections.importFile": "Elegir un archivo",
     "collections.library": "Colecciones iniciales",
+    "collections.allLanguages": "Todos los idiomas",
     "collections.wordCount": "{count} palabras",
     "collections.imported": "Importada «{name}»: {count} palabras",
     "collections.importing": "Importando «{name}» ({count} palabras)…",
@@ -512,7 +518,7 @@ export class I18n {
 
   static apply(root = document) {
     document.documentElement.lang = I18n.lang;
-    document.title = I18n.t(document.body?.classList.contains("vocab-manager-page") ? "words.title" : "app.titleLong");
+    document.title = I18n.t(document.body?.classList.contains("vocab-manager-page") ? "words.title" : "app.pageTitle");
 
     root.querySelectorAll("[data-i18n]").forEach((el) => {
       // Buttons with an icon keep it; their label sits in the inner span

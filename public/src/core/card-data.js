@@ -36,7 +36,7 @@ export function storedCards(list) {
 }
 
 // Languages a collection's words and translations can be set to, for reading them aloud
-export const LANGUAGES = ["en", "es", "ru", "fr", "de"];
+export const LANGUAGES = ["en", "es", "ru", "fr", "de", "it"];
 
 // A collection's stored language pair ("es-en", as in collections/index.json; either side may be
 // empty) as { word, translation }. Anything unknown counts as not set.

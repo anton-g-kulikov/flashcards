@@ -1490,6 +1490,15 @@ body.auth-pending .auth-gate .auth-loading {
   max-width: 440px;
 }
 
+.starter-filter {
+  display: block;
+  margin-bottom: var(--spacing-3);
+}
+
+.landing-starters .starter-filter {
+  margin-inline: auto;
+}
+
 .landing-table {
   width: 100%;
   max-width: 560px;
@@ -1978,6 +1987,41 @@ body.auth-pending .auth-gate .auth-loading {
 .prose-meta {
   font-size: 0.875rem;
   color: var(--color-muted);
+}
+
+/* === Word list pages (public/words/, written by scripts/make-word-lists.js) === */
+.word-list h1 {
+  font-size: 1.75rem;
+  margin-bottom: var(--spacing-3);
+}
+
+.word-list-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  margin-bottom: var(--spacing-5);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
+.word-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.word-table th,
+.word-table td {
+  padding: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.word-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-light);
 }
 
 .auth-legal {

@@ -91,8 +91,8 @@ without a translation can't be quizzed; study them in Flash Mode.
 
 ### Hearing a word
 
-Set a collection's word and translation languages in **My Cards** (English, Spanish, Russian, French
-or German; starter collections come with theirs). A speaker button then appears on the card and
+Set a collection's word and translation languages in **My Cards** (English, Spanish, Russian, French,
+German or Italian; starter collections come with theirs). A speaker button then appears on the card and
 next to the quiz question, for anything up to ten words. It uses your device's own voices, so how
 it sounds depends on the device, and the button only shows when the device has a voice for that
 language. If one is missing, you can usually add it in your device's language or speech settings.
@@ -166,16 +166,20 @@ Any tab-separated file works the same way.
 
 ### Starter collections
 
-Spanish → English, 100 words each, in [`public/collections/es-en/`](public/collections/es-en/):
+Eight collections for each language pair, 100 words each: A1 and A2 nouns, verbs, adjectives and
+adverbs. Every pair covers the same words, as far as the languages allow.
 
-| Level | Nouns | Verbs | Adjectives | Adverbs |
-| --- | --- | --- | --- | --- |
-| A1 | [a1-nouns.csv](public/collections/es-en/a1-nouns.csv) | [a1-verbs.csv](public/collections/es-en/a1-verbs.csv) | [a1-adjectives.csv](public/collections/es-en/a1-adjectives.csv) | [a1-adverbs.csv](public/collections/es-en/a1-adverbs.csv) |
-| A2 | [a2-nouns.csv](public/collections/es-en/a2-nouns.csv) | [a2-verbs.csv](public/collections/es-en/a2-verbs.csv) | [a2-adjectives.csv](public/collections/es-en/a2-adjectives.csv) | [a2-adverbs.csv](public/collections/es-en/a2-adverbs.csv) |
+| Pair | Folder |
+| --- | --- |
+| Spanish → English | [`public/collections/es-en/`](public/collections/es-en/) |
+| English → Russian | [`public/collections/en-ru/`](public/collections/en-ru/) |
+| French → English | [`public/collections/fr-en/`](public/collections/fr-en/) |
+| Italian → English | [`public/collections/it-en/`](public/collections/it-en/) |
 
 Importing one from **My Cards** also sets its languages, so its words can be read aloud. Nouns carry
-their article (`la casa`), verbs are infinitives (`comer` → `to eat`) and adjectives
-are masculine singular. No Spanish word appears in more than one of these eight collections.
+their article where the language has one (`la casa`), verbs are infinitives (`comer` → `to eat`) and
+adjectives are masculine singular. Within a pair, no word appears in more than one of the eight
+collections. Both the landing page and the list in **My Cards** can be narrowed to one pair.
 
 ## Contributing a collection
 

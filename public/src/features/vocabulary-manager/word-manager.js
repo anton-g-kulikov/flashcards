@@ -7,6 +7,7 @@ import { LANGUAGES, MAX_CARDS, languagePair, languageValue } from "../../core/ca
 import { I18n } from "../../ui/i18n.js";
 import { AuthGate } from "../../ui/auth-gate.js";
 import { confirmOnSecondTap } from "../../ui/confirm-button.js";
+import { fillLanguageFilter } from "../../ui/language-filter.js";
 import { MAX_ROWS, fileName, fromCards, readCards } from "../../utils/csv.js";
 import { hasVoice, onVoicesChanged } from "../study/speech.js";
 
@@ -78,10 +79,15 @@ class WordManager {
     this.nameInput = $("collectionNameInput");
     this.importPanel = $("importPanel");
     this.fileInput = $("importFileInput");
+    this.libraryFilter = $("libraryFilter");
 
-    document.addEventListener("i18n-changed", () => this.render());
+    document.addEventListener("i18n-changed", () => {
+      this.render();
+      if (this.library) this.renderLibrary();
+    });
     onVoicesChanged(() => this.updateVoiceHints());
 
+    this.libraryFilter.addEventListener("change", () => this.renderLibrary());
     $("newCollectionBtn").addEventListener("click", () => this.openNameForm());
     $("collectionNameCancel").addEventListener("click", () => this.closeNameForm());
     this.nameForm.addEventListener("submit", (event) => {
@@ -266,15 +272,22 @@ class WordManager {
   }
 
   async loadLibrary() {
-    const list = document.getElementById("libraryList");
     try {
       const response = await fetch("collections/index.json");
       this.library = (await response.json()).collections;
     } catch (error) {
       this.library = [];
     }
+    this.renderLibrary();
+  }
+
+  // The starter collections, narrowed to the language pair chosen above them
+  renderLibrary() {
+    fillLanguageFilter(this.libraryFilter, this.library.map((entry) => entry.language));
+    const chosen = this.libraryFilter.value;
+    const list = document.getElementById("libraryList");
     list.innerHTML = "";
-    this.library.forEach((entry) => {
+    this.library.filter((entry) => !chosen || entry.language === chosen).forEach((entry) => {
       const item = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";

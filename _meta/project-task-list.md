@@ -193,6 +193,31 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Done:** a table of the starter collections (name, languages, word count) with its own sign-in
   button. Collection names stay as they are in the app, so they aren't translated.
 
+### TASK-017 — Search engine basics (2026-11-06)
+
+- **Goal:** one address per page in search results, a title that says what the site is, and a proper
+  preview when a link is shared.
+- **Done:** a descriptive title, translated (the old code replaced the one in the HTML at runtime);
+  canonical links on the study page and Privacy; My Cards marked `noindex`; Open Graph tags with a
+  new share image; JSON-LD naming the site.
+
+### TASK-019 — More starter languages, with a language filter (2026-11-06)
+
+- **Goal:** starter collections beyond Spanish, and a way to find one pair among them.
+- **Done:** English → Russian, French → English and Italian → English, each the same eight A1/A2
+  collections as Spanish. A dropdown of language pairs on the landing page and under Import in
+  My Cards. Italian is now a language a collection can be set to.
+- **Decided:** rows follow the Spanish files, except where a pair of Spanish words is one word in
+  the other language (ser/estar); those use a near synonym or another word of the same level.
+
+### TASK-018 — Word list pages (2026-11-06)
+
+- **Goal:** give search engines something to rank beyond the site's own name.
+- **Done:** a public page for each starter collection at `/words/`, with the whole list, a link to
+  sign in and links to the same language's other lists. Generated from the collections, listed in
+  the sitemap and linked from the landing table. English-to-Russian pages are written in Russian.
+- **Note:** no analytics on these pages; Search Console shows how they do.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

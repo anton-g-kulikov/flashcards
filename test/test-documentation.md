@@ -36,7 +36,8 @@ Run with `npm test` (Firestore emulator, Node's built-in test runner).
 | Tab in the first line, no Anki lines | read as tab-separated |
 | Ordinary CSV starting with `#` | not mistaken for Anki |
 | Every file in `public/collections/` | listed in `index.json` with the right word count, no empty fields |
-| Spanish words across starter collections | never repeated |
+| Words across a language pair's A1/A2 series | never repeated |
+| Language pairs | each has the same eight collections |
 
 Collection documents and a card's `collectionId` / a collection's `active` flag are covered in
 `firestore.rules.test.js`.
@@ -95,7 +96,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Deployed security policy | no `127.0.0.1` or `localhost`; the dev config adds the emulator addresses |
 | Footer, on both pages | starts collapsed and inert, and holds the appearance switch and the cookie note |
 | Translations | same keys in English, Russian and Spanish; every key used in the pages exists |
-| Landing page | 7 feature cards reachable by keyboard, sign-in at both ends, its text in the HTML |
+| Landing page | 7 feature cards reachable by keyboard, sign-in at both ends, its text in the HTML, a language filter here and in My Cards |
 | iOS launch screens | every size in `scripts/launch-images.txt` has a light and a dark image, linked from both pages with matching media queries; no unlisted image |
 
 ## Automated: search engines (`crawl.test.js`)
@@ -103,7 +104,13 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Case | Expectation |
 | --- | --- |
 | `robots.txt` | allows every crawler; names `https://yourflashcards.app/sitemap.xml` |
-| `sitemap.xml` | lists exactly `/` and `/privacy.html` on `https://yourflashcards.app`; every listed URL is a file in `public` |
+| `sitemap.xml` | lists `/`, `/privacy.html` and every word list page on `https://yourflashcards.app`; every listed URL is a file in `public` |
+| Canonical addresses | the study page and Privacy each name theirs on `https://yourflashcards.app` |
+| My Cards | `noindex`, and not blocked in `robots.txt`, so crawlers can read that |
+| Study page title | the same in the HTML, `og:title` and the English `app.pageTitle`; translated in all three languages; at most 60 characters |
+| Link previews | `og:description` matches the page's description; `og:image` is on the site and exists |
+| JSON-LD | parses, and names the site as a `WebSite` at the canonical address |
+| Word list pages | one per starter collection and none extra; the same as a fresh `scripts/make-word-lists.js` run; every word shown; unique titles (at most 60 characters) and descriptions (at most 160); a canonical address; links only to pages that exist; nothing inline; linked from the landing table; all in the sitemap |
 
 ## Manual: end-to-end on the emulators
 
@@ -183,3 +190,6 @@ With `npm run dev`, at http://127.0.0.1:5050:
    translations at all there is no button.
 20. Landing table: signed out, "Ready-made collections" lists every starter collection and fits at phone
    width in all three languages and in dark mode. Its button starts Google sign-in.
+21. Language filter: the dropdown above the landing table and the one under Import in My Cards list
+   every language pair in the interface language. Choosing one leaves only its collections, and
+   switching the interface language keeps the choice.
