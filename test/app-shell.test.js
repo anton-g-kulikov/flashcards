@@ -172,10 +172,10 @@ describe("translations", () => {
 describe("landing page", () => {
   const html = readFileSync("public/index.html", "utf8");
 
-  it("has its feature cards reachable by keyboard, and sign-in at both ends and by the collections", () => {
+  it("has its feature cards reachable by keyboard, and sign-in at both ends", () => {
     assert.equal(html.match(/class="flashcard landing-card" role="button" tabindex="0"/g).length, 5);
-    assert.equal(html.match(/class="google-signin-btn"/g).length, 3);
-    assert.equal(html.match(/class="auth-error"/g).length, 3);
+    assert.equal(html.match(/class="google-signin-btn"/g).length, 2);
+    assert.equal(html.match(/class="auth-error"/g).length, 2);
   });
 
   it("has a demo the study page's mode buttons leave alone", () => {

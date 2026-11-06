@@ -1518,8 +1518,7 @@ body.auth-pending .auth-gate .auth-loading {
   font-weight: 600;
 }
 
-.landing-cta .google-signin-btn,
-.landing-starters .google-signin-btn {
+.landing-cta .google-signin-btn {
   max-width: 440px;
 }
 
@@ -1547,7 +1546,6 @@ body.auth-pending .auth-gate .auth-loading {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-3);
-  margin-bottom: var(--spacing-5);
 }
 
 .starter-group[hidden] {
