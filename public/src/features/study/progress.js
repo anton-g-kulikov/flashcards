@@ -15,8 +15,9 @@ export const DAY = 24 * 60 * 60 * 1000;
 export const INTERVAL_DAYS = [0, 1, 3, 7, 16, 35];
 export const MASTERED = INTERVAL_DAYS.length - 1;
 // A missed word comes back after this many other words, in both modes: late enough that getting
-// it right means remembering it, not having seen it a moment ago
-export const RETRY_GAP = 3;
+// it right means remembering it, not having seen it a moment ago. With fewer words left, it comes
+// back after all of them.
+export const RETRY_GAP = 10;
 
 // Flashcards: puts a missed card back into the deck behind the next RETRY_GAP cards (or last,
 // if fewer are left)

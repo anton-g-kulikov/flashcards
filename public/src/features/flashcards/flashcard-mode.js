@@ -1,6 +1,6 @@
 // Flashcards: the word on the front, its translation on the back. The deck is the study queue
 // (due words, then new ones). "I know this!" moves the word up a box and it leaves the deck;
-// "I don't know…" turns the card over and becomes "Next", and the word comes back after three
+// "I don't know…" turns the card over and becomes "Next", and the word comes back after ten
 // other cards, as a missed word does in the quiz. A tap only ever turns the card; a card leaves
 // through the buttons or a swipe, to the right when known and to the left when not.
 import { I18n } from "../../ui/i18n.js";

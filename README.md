@@ -74,7 +74,7 @@ other button does.
 - **I don't know…** flips the card to show the translation and the button becomes **Next**. Tap the
   card to turn it back and forth as often as you like; press **Next** when you're ready to go on,
   and the card slides off to the left. The word comes
-  back after three other cards (or sooner, if fewer are left), the same as a missed word in the
+  back after ten other cards (or sooner, if fewer are left), the same as a missed word in the
   quiz.
 
 ### Quiz
@@ -85,7 +85,7 @@ without a translation can't be quizzed; study them in Flash Mode.
 
 - **Right on the first try:** the word moves up a box.
 - **Wrong answer:** that card turns over to show which word the translation actually belongs to,
-  and you pick again. The word drops to box 1 and comes back after three other questions (or
+  and you pick again. The word drops to box 1 and comes back after ten other questions (or
   sooner, if fewer words are left), so you have to remember it rather than recall it from a
   moment ago.
 

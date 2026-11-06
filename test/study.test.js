@@ -179,10 +179,12 @@ describe("swiping a flashcard", () => {
 });
 
 describe("flashcards", () => {
-  it("put a missed card back behind the next three cards, or last when fewer are left", () => {
+  it("put a missed card back behind the next ten cards, or last when fewer are left", () => {
     const ids = (deck) => deck.map((c) => c.id);
-    assert.equal(RETRY_GAP, 3);
-    assert.deepEqual(ids(retryLater([card("b"), card("c"), card("d"), card("e")], card("m"))), ["b", "c", "d", "m", "e"]);
+    assert.equal(RETRY_GAP, 10);
+    const deck = Array.from({ length: 15 }, (_, index) => card(`w${index}`));
+    assert.equal(ids(retryLater(deck, card("m"))).indexOf("m"), 10);
+    assert.deepEqual(ids(retryLater([card("b"), card("c")], card("m"))), ["b", "c", "m"]);
     assert.deepEqual(ids(retryLater([card("b")], card("m"))), ["b", "m"]);
     assert.deepEqual(ids(retryLater([], card("m"))), ["m"]);
   });
@@ -195,26 +197,41 @@ describe("quiz", () => {
     assert.deepEqual(pool.map((c) => c.id), ["a"]);
   });
 
-  it("asks the first word in the queue not asked in the last three questions", () => {
-    const pool = [card("a"), card("b"), card("c"), card("d"), card("e")];
+  it("asks the first word in the queue not asked in the last ten questions", () => {
+    const others = Array.from({ length: RETRY_GAP }, (_, index) => `w${index}`);
+    const pool = ["a", ...others, "z"].map((id) => card(id));
     assert.equal(pickQuestion(pool).id, "a");
-    assert.equal(pickQuestion(pool, ["a"]).id, "b");
-    assert.equal(pickQuestion(pool, ["c", "b", "a"]).id, "d");
-    assert.equal(pickQuestion(pool, ["d", "c", "b", "a"]).id, "a", "a waited three questions");
+    assert.equal(pickQuestion(pool, ["a"]).id, "w0");
+    assert.equal(pickQuestion(pool, [...others.slice(0, RETRY_GAP - 1).reverse(), "a"]).id, "w9");
+    assert.equal(pickQuestion(pool, [...[...others].reverse(), "a"]).id, "a", "a waited ten questions");
   });
 
-  it("brings a missed word back after three other questions", () => {
+  it("brings a missed word back after ten other questions, ahead of the words behind them", () => {
     // "m" was missed: it stays due at the front of the queue, the others are answered and leave
-    let pool = ["m", "b", "c", "d", "e"].map((id) => card(id));
+    const others = Array.from({ length: RETRY_GAP + 3 }, (_, index) => `w${index}`);
+    let pool = ["m", ...others].map((id) => card(id));
     let recent = [];
     const asked = [];
-    for (let turn = 0; turn < 5; turn++) {
+    for (let turn = 0; turn < RETRY_GAP + 2; turn++) {
       const next = pickQuestion(pool, recent);
       asked.push(next.id);
       recent = [next.id, ...recent.filter((id) => id !== next.id)].slice(0, RETRY_GAP);
       if (next.id !== "m" || turn > 0) pool = pool.filter((c) => c.id !== next.id);
     }
-    assert.deepEqual(asked, ["m", "b", "c", "d", "m"]);
+    assert.deepEqual(asked, ["m", ...others.slice(0, RETRY_GAP), "m"]);
+  });
+
+  it("brings a missed word back after all the others when fewer than ten are left", () => {
+    let pool = ["m", "b", "c"].map((id) => card(id));
+    let recent = [];
+    const asked = [];
+    for (let turn = 0; turn < 4; turn++) {
+      const next = pickQuestion(pool, recent);
+      asked.push(next.id);
+      recent = [next.id, ...recent.filter((id) => id !== next.id)].slice(0, RETRY_GAP);
+      if (next.id !== "m" || turn > 0) pool = pool.filter((c) => c.id !== next.id);
+    }
+    assert.deepEqual(asked, ["m", "b", "c", "m"]);
   });
 
   it("asks the word asked longest ago when every word left was asked recently", () => {
