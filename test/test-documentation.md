@@ -113,6 +113,16 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Word list pages | one per starter collection and none extra; the same as a fresh `scripts/make-word-lists.js` run; every word shown; unique titles (at most 60 characters) and descriptions (at most 160); a canonical address; links only to pages that exist; nothing inline; linked from the landing table; all in the sitemap |
 | Word list page language | all text comes in English, Russian and Spanish; `word-list-language.js` leaves a page as written with nothing saved, never reads the browser's language, shows a saved language and ignores an unknown one; it reads the app's storage key, and app pages save the language in use |
 
+## Automated: plural forms (`plurals.test.js`)
+
+| Case | Expectation |
+| --- | --- |
+| Word counts | 0, 1, 2, 5, 21 and a million read correctly in English and Spanish |
+| Verbs | agree with the count in English and Spanish, and in Russian for 1, 2, 5, 21 and 22 |
+| Russian forms | `{count\|one\|few\|many}` picks the form for 1, 2, 5, 11, 21 and 22 |
+| Every plural in the table | has two forms in English and Spanish and three in Russian, and names a number the callers pass |
+| Plain `{count}` | still fills in, and a missing variable stays as written |
+
 ## Manual: end-to-end on the emulators
 
 With `npm run dev`, at http://127.0.0.1:5050:

@@ -69,7 +69,7 @@ const READERS = {
     description: ({ word, translation, level, kind, count, examples }) =>
       `${count} ${ES_KINDS[kind].toLowerCase()} en ${languageName(word, "es")} ${level} con traducción al ` +
       `${languageName(translation, "es")}: ${examples.join(", ")} y más. Estúdialas con tarjetas y repetición espaciada.`,
-    pitch: "Estudia estas palabras con tarjetas y cuestionarios, con repetición espaciada. Inicia sesión y añade esta lista desde Mis tarjetas con un toque.",
+    pitch: "Estudia estas palabras con tarjetas y tests, con repetición espaciada. Inicia sesión y añade esta lista desde Mis tarjetas con un toque.",
     action: "Estudiar estas palabras",
     back: "Volver a YourFlashCards",
     more: ({ word }) => `Más listas de palabras en ${languageName(word, "es")}`,

@@ -2,6 +2,8 @@
 //
 // Static text is marked in the HTML with data-i18n (text), data-i18n-html (trusted markup from
 // this file) and data-i18n-placeholder. Scripts call I18n.t(key, vars) for the text they build.
+// {count|word|words} picks the form that goes with a number: singular then plural, and for Russian
+// the forms for 1, 2 and 5.
 // Switching language re-applies the static text and fires "i18n-changed" so pages can re-render.
 // The choice is remembered on this device; the first visit follows the browser's language.
 
@@ -98,7 +100,7 @@ const TRANSLATIONS = {
     "landing.share.repo": "See it on GitHub",
     "landing.cta.title": "Ready to start?",
     "footer.version": "Version: {version}",
-    "footer.words": "Vocabulary: {count} words",
+    "footer.words": "Vocabulary: {count} {count|word|words}",
     "footer.coffee": "Find this useful? Buy me a coffee! ☕️ :)",
     "footer.privacy": "Privacy",
     "pwa.install": "Install App",
@@ -140,9 +142,9 @@ const TRANSLATIONS = {
     "collections.importFile": "Choose a file",
     "collections.library": "Starter collections",
     "collections.allLanguages": "All languages",
-    "collections.wordCount": "{count} words",
-    "collections.imported": "Imported “{name}”: {count} words",
-    "collections.importing": "Importing “{name}” ({count} words)…",
+    "collections.wordCount": "{count} {count|word|words}",
+    "collections.imported": "Imported “{name}”: {count} {count|word|words}.",
+    "collections.importing": "Importing “{name}” ({count} {count|word|words})…",
     "collections.importFailed": "Could not import: {error}",
     "collections.importEmpty": "No words found in that file",
     "collections.wordLanguage": "Word language",
@@ -150,10 +152,10 @@ const TRANSLATIONS = {
     "collections.translationLanguage": "Translation language",
     "collections.noVoice": "This device has no voice for {languages}, so the speaker button won't show here.",
     "collections.tooBig": "the words are too long to store in one collection (about 1 MB at most); split them into smaller collections",
-    "collections.importShortened": "{count} words or translations were too long and were cut short (200 characters for a word, 500 for a translation).",
+    "collections.importShortened": "{count} {count|word or translation was|words or translations were} too long and cut short (200 characters for a word, 500 for a translation).",
     "words.collectionFull": "this collection is full ({max} words); start a new one for more",
-    "collections.importSkipped": "Skipped {count} rows with no word or a repeated word.",
-    "collections.importTruncated": "Only the first {max} words fit; {count} more were left out.",
+    "collections.importSkipped": "Skipped {count} {count|row|rows} with no word or a repeated word.",
+    "collections.importTruncated": "Only the first {max} words fit; {count} more {count|was|were} left out.",
     "collections.exportEmpty": "This collection is empty — nothing to export",
   },
 
@@ -292,7 +294,7 @@ const TRANSLATIONS = {
     "collections.library": "Готовые коллекции",
     "collections.allLanguages": "Все языки",
     "collections.wordCount": "Слов: {count}",
-    "collections.imported": "Импортировано «{name}», слов: {count}",
+    "collections.imported": "Импортировано «{name}», слов: {count}.",
     "collections.importing": "Импортируем «{name}» (слов: {count})…",
     "collections.importFailed": "Не удалось импортировать: {error}",
     "collections.importEmpty": "В файле не найдено слов",
@@ -304,7 +306,7 @@ const TRANSLATIONS = {
     "collections.importShortened": "Слишком длинные слова или переводы обрезаны: {count} (до 200 символов для слова, 500 для перевода).",
     "words.collectionFull": "коллекция заполнена ({max} слов), создайте новую",
     "collections.importSkipped": "Пропущено строк без слова или с повтором: {count}.",
-    "collections.importTruncated": "Поместились только первые {max} слов; ещё {count} не вошли.",
+    "collections.importTruncated": "Поместились только первые {max} слов; ещё {count} {count|не вошло|не вошли|не вошли}.",
     "collections.exportEmpty": "Коллекция пуста — нечего экспортировать",
   },
 
@@ -328,7 +330,7 @@ const TRANSLATIONS = {
     "mode.quiz": "Test",
     "progress.reset": "Reiniciar progreso",
     "study.swapDirection": "Cambiar qué lado se muestra primero en todas las colecciones activas",
-    "progress.resetConfirm": "Pulsa otra vez para reiniciar estas palabras",
+    "progress.resetConfirm": "Toca otra vez para reiniciar estas palabras",
     "card.dontKnow": "No la sé...",
     "card.next": "Siguiente",
     "card.speak": "Leer en voz alta",
@@ -359,22 +361,22 @@ const TRANSLATIONS = {
     "cookies.off": "La analítica está desactivada en este dispositivo.",
     "cookies.turnOn": "Volver a activarla",
     "account.title": "Cuenta",
-    "account.deleteHint": "Elimina tus colecciones, tu progreso y tu inicio de sesión. No se puede deshacer, así que exporta antes las colecciones que quieras conservar.",
+    "account.deleteHint": "Se eliminarán tus colecciones, tu progreso y tu acceso. No se puede deshacer, así que exporta antes las colecciones que quieras conservar.",
     "account.delete": "Eliminar mi cuenta",
     "account.deleteConfirm": "Toca otra vez para eliminarlo todo",
     "account.deleting": "Eliminando tu cuenta…",
     "account.deleteFailed": "No se pudo eliminar tu cuenta: {error}",
-    "account.signInAgain": "cierra sesión, vuelve a entrar y elimínala en unos minutos",
-    "account.deleted": "Tu cuenta y todas tus palabras se han eliminado.",
+    "account.signInAgain": "cierra sesión, vuelve a entrar y elimínala en los próximos minutos",
+    "account.deleted": "Tu cuenta y todas tus palabras se eliminaron.",
     "footer.expand": "Mostrar ajustes e información",
     "footer.collapse": "Ocultar ajustes e información",
     "landing.tagline": "Aprende las palabras que de verdad necesitas. Crea tus propias colecciones y estúdialas con tarjetas, tests y repetición espaciada, en cualquier dispositivo.",
-    "landing.turn": "Toca para girar",
+    "landing.turn": "Toca para dar la vuelta",
     "landing.modes.title": "Dos formas de estudiar",
-    "landing.flash.text": "Mira la palabra y toca la tarjeta para girarla. Desliza a la derecha si la sabes y a la izquierda si no.",
+    "landing.flash.text": "Mira la palabra y toca la tarjeta para darle la vuelta. Desliza a la derecha si la sabes y a la izquierda si no.",
     "landing.quiz.text": "Elige la traducción correcta entre hasta cuatro opciones. Si aciertas a la primera, la palabra sube de nivel.",
     "landing.srs.title": "Las palabras vuelven cuando importa",
-    "landing.srs.text": "La repetición espaciada decide qué estudiar hoy. Cada vez que sabes una palabra, tarda más en volver. Si fallas, regresa unas tarjetas después.",
+    "landing.srs.text": "La repetición espaciada decide qué estudiar hoy. Cada vez que sabes una palabra, tarda más en volver. Si fallas, vuelve unas tarjetas después.",
     "landing.srs.caption": "Días hasta el próximo repaso",
     "landing.collections.title": "Tus palabras, tus colecciones",
     "landing.own.title": "Crea la tuya",
@@ -382,7 +384,7 @@ const TRANSLATIONS = {
     "landing.starter.title": "O empieza ya",
     "landing.starter.text": "Colecciones listas para usar en español, inglés, francés e italiano, niveles A1 y A2, con 100 palabras cada una.",
     "landing.sync.title": "En todos tus dispositivos",
-    "landing.sync.text": "Entra con Google y tus palabras y tu progreso te acompañan. Añádela a tu pantalla de inicio y se abre como una app.",
+    "landing.sync.text": "Entra con Google y tus palabras y tu progreso te acompañan. Añade YourFlashCards a tu pantalla de inicio y se abrirá como una app.",
     "landing.starters.title": "Colecciones listas para usar",
     "landing.starters.text": "Una vez dentro, añade cualquiera de ellas con un toque desde Mis tarjetas.",
     "landing.starters.collection": "Colección",
@@ -398,9 +400,9 @@ const TRANSLATIONS = {
     "landing.share.text": "¿Has hecho una lista de palabras útil para otros? Envíala como archivo CSV y puede convertirse en una colección para todos. El código es público en GitHub.",
     "landing.share.submit": "Enviar una colección",
     "landing.share.repo": "Verlo en GitHub",
-    "landing.cta.title": "¿Listo para empezar?",
+    "landing.cta.title": "¿Empezamos?",
     "footer.version": "Versión: {version}",
-    "footer.words": "Vocabulario: {count} palabras",
+    "footer.words": "Vocabulario: {count} {count|palabra|palabras}",
     "footer.coffee": "¿Te resulta útil? ¡Invítame a un café! ☕️ :)",
     "footer.privacy": "Privacidad",
     "pwa.install": "Instalar la app",
@@ -442,9 +444,9 @@ const TRANSLATIONS = {
     "collections.importFile": "Elegir un archivo",
     "collections.library": "Colecciones iniciales",
     "collections.allLanguages": "Todos los idiomas",
-    "collections.wordCount": "{count} palabras",
-    "collections.imported": "Importada «{name}»: {count} palabras",
-    "collections.importing": "Importando «{name}» ({count} palabras)…",
+    "collections.wordCount": "{count} {count|palabra|palabras}",
+    "collections.imported": "Importada «{name}»: {count} {count|palabra|palabras}.",
+    "collections.importing": "Importando «{name}» ({count} {count|palabra|palabras})…",
     "collections.importFailed": "No se pudo importar: {error}",
     "collections.importEmpty": "No se encontraron palabras en el archivo",
     "collections.wordLanguage": "Idioma de las palabras",
@@ -452,10 +454,10 @@ const TRANSLATIONS = {
     "collections.translationLanguage": "Idioma de las traducciones",
     "collections.noVoice": "Este dispositivo no tiene voz para: {languages}, así que aquí no aparecerá el botón de audio.",
     "collections.tooBig": "las palabras son demasiado largas para guardarlas en una colección (como mucho ~1 MB); divídelas en colecciones más pequeñas",
-    "collections.importShortened": "Se recortaron {count} palabras o traducciones demasiado largas (200 caracteres por palabra, 500 por traducción).",
+    "collections.importShortened": "{count|Se recortó|Se recortaron} {count} {count|palabra o traducción demasiado larga|palabras o traducciones demasiado largas} (200 caracteres por palabra, 500 por traducción).",
     "words.collectionFull": "la colección está llena ({max} palabras); crea otra para seguir",
-    "collections.importSkipped": "Se omitieron {count} filas sin palabra o con una palabra repetida.",
-    "collections.importTruncated": "Solo caben las primeras {max} palabras; quedaron fuera {count} más.",
+    "collections.importSkipped": "{count|Se omitió|Se omitieron} {count} {count|fila|filas} sin palabra o con una palabra repetida.",
+    "collections.importTruncated": "Solo caben las primeras {max} palabras; {count|quedó|quedaron} fuera {count} más.",
     "collections.exportEmpty": "La colección está vacía: no hay nada que exportar",
   },
 };
@@ -485,9 +487,18 @@ export class I18n {
 
   static t(key, vars = {}) {
     const text = TRANSLATIONS[I18n.lang][key] ?? TRANSLATIONS.en[key] ?? key;
-    return text.replace(/\{(\w+)\}/g, (match, name) =>
-      name in vars ? String(vars[name]) : match
-    );
+    return text
+      .replace(/\{(\w+)\|([^}]+)\}/g, (match, name, forms) =>
+        name in vars ? I18n.pluralForm(vars[name], forms.split("|")) : match
+      )
+      .replace(/\{(\w+)\}/g, (match, name) => (name in vars ? String(vars[name]) : match));
+  }
+
+  // A form for each of the language's categories, in this order. Whatever else it has (Spanish
+  // calls a million "many") takes the last form.
+  static pluralForm(count, forms) {
+    const category = new Intl.PluralRules(I18n.lang).select(count);
+    return forms[["one", "few", "many"].indexOf(category)] ?? forms.at(-1);
   }
 
   // Saves the language in use, even one taken from the browser: the word list pages load none of

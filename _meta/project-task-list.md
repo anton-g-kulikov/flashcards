@@ -219,6 +219,13 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Note:** no analytics on these pages; Search Console shows how they do. They follow the app's
   language once someone has opened the app; a new visitor sees each page as written.
 
+### TASK-019 — Singular counts (2026-11-06)
+
+- **Goal:** stop showing "1 words" and "1 palabras".
+- **Done:** `{count|word|words}` in a translation picks the form for the number, through
+  `Intl.PluralRules`, and verbs follow it too. Russian mostly keeps its "Слов: 5" wording, which
+  needs no plural.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).
