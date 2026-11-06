@@ -645,7 +645,7 @@ class WordManager {
     const { word, translation } = languagePair(collection.language);
     const missing = [...new Set([word, translation])].filter((code) => code && !hasVoice(code));
     hint.hidden = missing.length === 0;
-    hint.textContent = I18n.t("collections.noVoice", { languages: missing.map(languageName).join(", ") });
+    hint.textContent = I18n.t("collections.noVoice", { languages: missing.map((code) => I18n.languageName(code)).join(", ") });
   }
 
   updateVoiceHints() {

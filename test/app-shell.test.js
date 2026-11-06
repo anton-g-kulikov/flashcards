@@ -183,3 +183,12 @@ describe("landing page", () => {
   });
 });
 
+// A leftover bare name only fails at run time: in 1.19.0 one took My Cards down
+describe("language names", () => {
+  it("come from I18n everywhere", () => {
+    for (const file of ["public/src/study.js", "public/src/features/vocabulary-manager/word-manager.js"]) {
+      assert.doesNotMatch(readFileSync(file, "utf8"), /(?<![\w.])languageName\b/, file);
+    }
+  });
+});
+
