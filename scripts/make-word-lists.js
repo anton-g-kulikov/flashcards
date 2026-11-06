@@ -1,7 +1,9 @@
 // Writes a public page for each starter collection to public/words/, so a search for "Spanish A1
 // verbs" can find the site: the full word list as plain HTML, in the language of the people who
-// would search for it (the translation's language). It also lists the pages in sitemap.xml and
-// links them from the landing page's table. test/crawl.test.js fails if any of this is out of date.
+// would search for it (the translation's language). The page's text also comes in every interface
+// language, for src/ui/word-list-language.js to show someone who uses the app in another one. It
+// also lists the pages in sitemap.xml and links them from the landing page's table.
+// test/crawl.test.js fails if any of this is out of date.
 // Run from the repository root after changing public/collections/:
 //   node scripts/make-word-lists.js
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -20,15 +22,21 @@ export const escapeHtml = (value) =>
   String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 // Russian needs each name in two cases; a new language or word type goes here
-const RU_LANGUAGES = { en: ["Английские", "английских"] };
+const RU_LANGUAGES = {
+  en: ["Английские", "английских"],
+  es: ["Испанские", "испанских"],
+  fr: ["Французские", "французских"],
+  it: ["Итальянские", "итальянских"],
+};
 const RU_KINDS = {
   Nouns: ["существительные", "существительных"],
   Verbs: ["глаголы", "глаголов"],
   Adjectives: ["прилагательные", "прилагательных"],
   Adverbs: ["наречия", "наречий"],
 };
+const ES_KINDS = { Nouns: "Sustantivos", Verbs: "Verbos", Adjectives: "Adjetivos", Adverbs: "Adverbios" };
 
-// The page's words, by the language it is written in
+// The page's words, in each interface language
 const READERS = {
   en: {
     heading: ({ word, level, kind }) => `${languageName(word, "en")} ${level} ${kind}`,
@@ -44,17 +52,35 @@ const READERS = {
   },
   ru: {
     heading: ({ word, level, kind }) => `${RU_LANGUAGES[word][0]} ${RU_KINDS[kind][0]} ${level}`,
-    title: ({ word, level, kind, count }) =>
-      `${count} ${RU_LANGUAGES[word][1]} ${RU_KINDS[kind][1]} ${level} с переводом на русский`,
-    description: ({ word, level, kind, count, examples }) =>
-      `${count} ${RU_LANGUAGES[word][1]} ${RU_KINDS[kind][1]} ${level} с переводом на русский: ` +
+    title: ({ word, translation, level, kind, count }) =>
+      `${count} ${RU_LANGUAGES[word][1]} ${RU_KINDS[kind][1]} ${level} с переводом на ${languageName(translation, "ru")}`,
+    description: ({ word, translation, level, kind, count, examples }) =>
+      `${count} ${RU_LANGUAGES[word][1]} ${RU_KINDS[kind][1]} ${level} с переводом на ${languageName(translation, "ru")}: ` +
       `${examples.join(", ")} и другие. Учите их по карточкам с интервальным повторением.`,
     pitch: "Учите эти слова по карточкам и в тестах, с интервальным повторением. Войдите и добавьте этот список одним нажатием в разделе «Мои карточки».",
     action: "Учить эти слова",
     back: "Назад в YourFlashCards",
     more: ({ word }) => `Другие списки ${RU_LANGUAGES[word][1]} слов`,
   },
+  es: {
+    heading: ({ word, level, kind }) => `${ES_KINDS[kind]} en ${languageName(word, "es")} ${level}`,
+    title: ({ word, translation, level, kind, count }) =>
+      `${count} ${ES_KINDS[kind].toLowerCase()} en ${languageName(word, "es")} ${level} con traducción al ${languageName(translation, "es")}`,
+    description: ({ word, translation, level, kind, count, examples }) =>
+      `${count} ${ES_KINDS[kind].toLowerCase()} en ${languageName(word, "es")} ${level} con traducción al ` +
+      `${languageName(translation, "es")}: ${examples.join(", ")} y más. Estúdialas con tarjetas y repetición espaciada.`,
+    pitch: "Estudia estas palabras con tarjetas y cuestionarios, con repetición espaciada. Inicia sesión y añade esta lista desde Mis tarjetas con un toque.",
+    action: "Estudiar estas palabras",
+    back: "Volver a YourFlashCards",
+    more: ({ word }) => `Más listas de palabras en ${languageName(word, "es")}`,
+  },
 };
+
+// A text's translations, as attributes for word-list-language.js
+const translated = (prefix, pick) =>
+  Object.entries(READERS)
+    .map(([code, reader]) => ` data-${prefix}-${code}="${escapeHtml(pick(reader, code))}"`)
+    .join("");
 
 export const pageName = ({ name }) => `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.html`;
 
@@ -80,12 +106,16 @@ function renderPage(entry, cards, siblings) {
   const title = escapeHtml(reader.title(facts));
   const description = escapeHtml(reader.description(facts));
   const rows = cards
-    .map((card) => `            <tr><td lang="${word}">${escapeHtml(card.word)}</td><td>${escapeHtml(card.translation)}</td></tr>`)
+    .map(
+      (card) =>
+        `            <tr><td lang="${word}">${escapeHtml(card.word)}</td><td lang="${translation}">${escapeHtml(card.translation)}</td></tr>`
+    )
     .join("\n");
   const links = siblings
     .map(({ entry: other, cards: otherCards }) => {
-      const label = reader.heading(describeCollection(other, otherCards));
-      return `          <li><a href="${pageName(other)}">${escapeHtml(label)}</a></li>`;
+      const otherFacts = describeCollection(other, otherCards);
+      const labels = translated("text", (language) => language.heading(otherFacts));
+      return `          <li><a href="${pageName(other)}"${labels}>${escapeHtml(reader.heading(otherFacts))}</a></li>`;
     })
     .join("\n");
 
@@ -95,7 +125,7 @@ function renderPage(entry, cards, siblings) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>${title}</title>
+    <title${translated("text", (language) => language.title(facts))}>${title}</title>
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${url}" />
     <meta property="og:type" content="website" />
@@ -124,7 +154,7 @@ function renderPage(entry, cards, siblings) {
   <body>
     <div class="app-container">
       <header class="topbar">
-        <a href="/" class="icon-btn" aria-label="${reader.back}" title="${reader.back}">
+        <a href="/" class="icon-btn" aria-label="${reader.back}" title="${reader.back}"${translated("label", (language) => language.back)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -135,26 +165,27 @@ function renderPage(entry, cards, siblings) {
       </header>
 
       <article class="panel prose word-list">
-        <h1>${escapeHtml(reader.heading(facts))}</h1>
-        <p>${reader.pitch}</p>
-        <a href="/" class="primary-btn word-list-action">${reader.action}</a>
+        <h1${translated("text", (language) => language.heading(facts))}>${escapeHtml(reader.heading(facts))}</h1>
+        <p${translated("text", (language) => language.pitch)}>${reader.pitch}</p>
+        <a href="/" class="primary-btn word-list-action"${translated("text", (language) => language.action)}>${reader.action}</a>
         <table class="word-table">
           <thead>
             <tr>
-              <th scope="col">${capitalize(languageName(word, translation))}</th>
-              <th scope="col">${capitalize(languageName(translation, translation))}</th>
+              <th scope="col"${translated("text", (_, code) => capitalize(languageName(word, code)))}>${capitalize(languageName(word, translation))}</th>
+              <th scope="col"${translated("text", (_, code) => capitalize(languageName(translation, code)))}>${capitalize(languageName(translation, translation))}</th>
             </tr>
           </thead>
           <tbody>
 ${rows}
           </tbody>
         </table>
-        <h2>${escapeHtml(reader.more(facts))}</h2>
+        <h2${translated("text", (language) => language.more(facts))}>${escapeHtml(reader.more(facts))}</h2>
         <ul>
 ${links}
         </ul>
       </article>
     </div>
+    <script src="/src/ui/word-list-language.js"></script>
   </body>
 </html>
 `;

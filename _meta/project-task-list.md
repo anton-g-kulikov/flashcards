@@ -216,7 +216,8 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
 - **Done:** a public page for each starter collection at `/words/`, with the whole list, a link to
   sign in and links to the same language's other lists. Generated from the collections, listed in
   the sitemap and linked from the landing table. English-to-Russian pages are written in Russian.
-- **Note:** no analytics on these pages; Search Console shows how they do.
+- **Note:** no analytics on these pages; Search Console shows how they do. They follow the app's
+  language once someone has opened the app; a new visitor sees each page as written.
 
 ## Backlog
 

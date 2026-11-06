@@ -16,6 +16,8 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   });
 }
 
+I18n.remember();
+
 function showVersion() {
   const footerVersion = document.getElementById("footer-version");
   if (footerVersion) footerVersion.textContent = I18n.t("footer.version", { version: VERSION });

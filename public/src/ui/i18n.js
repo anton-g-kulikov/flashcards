@@ -490,6 +490,16 @@ export class I18n {
     );
   }
 
+  // Saves the language in use, even one taken from the browser: the word list pages load none of
+  // this and can only follow a saved language (see word-list-language.js)
+  static remember() {
+    try {
+      localStorage.setItem(STORAGE_KEY, I18n.lang);
+    } catch (error) {
+      // Those pages then stay as written
+    }
+  }
+
   // A language's name in the interface language, as a list entry would start
   static languageName(code) {
     const name = new Intl.DisplayNames([I18n.lang], { type: "language" }).of(code);

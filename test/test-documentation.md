@@ -111,6 +111,7 @@ Collection documents and a card's `collectionId` / a collection's `active` flag 
 | Link previews | `og:description` matches the page's description; `og:image` is on the site and exists |
 | JSON-LD | parses, and names the site as a `WebSite` at the canonical address |
 | Word list pages | one per starter collection and none extra; the same as a fresh `scripts/make-word-lists.js` run; every word shown; unique titles (at most 60 characters) and descriptions (at most 160); a canonical address; links only to pages that exist; nothing inline; linked from the landing table; all in the sitemap |
+| Word list page language | all text comes in English, Russian and Spanish; `word-list-language.js` leaves a page as written with nothing saved, never reads the browser's language, shows a saved language and ignores an unknown one; it reads the app's storage key, and app pages save the language in use |
 
 ## Manual: end-to-end on the emulators
 
