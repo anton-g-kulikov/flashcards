@@ -37,7 +37,7 @@ function saveMode(mode) {
 
 // Marks the mode's button and shows its section
 function showMode(mode) {
-  document.querySelectorAll(".mode-btn").forEach((button) => {
+  document.querySelectorAll(".app-container .mode-btn").forEach((button) => {
     const active = button.dataset.mode === mode;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
@@ -59,7 +59,7 @@ class StudyPage {
     this.flashcards = new FlashcardMode(this);
     this.quiz = new QuizMode(this);
 
-    document.querySelectorAll(".mode-btn").forEach((button) => {
+    document.querySelectorAll(".app-container .mode-btn").forEach((button) => {
       button.addEventListener("click", () => this.setMode(button.dataset.mode, { byUser: true }));
     });
     const resetButton = document.getElementById("resetProgressBtn");

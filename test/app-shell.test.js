@@ -173,9 +173,16 @@ describe("landing page", () => {
   const html = readFileSync("public/index.html", "utf8");
 
   it("has its feature cards reachable by keyboard, and sign-in at both ends and by the collections", () => {
-    assert.equal(html.match(/class="flashcard landing-card" role="button" tabindex="0"/g).length, 7);
+    assert.equal(html.match(/class="flashcard landing-card" role="button" tabindex="0"/g).length, 5);
     assert.equal(html.match(/class="google-signin-btn"/g).length, 3);
     assert.equal(html.match(/class="auth-error"/g).length, 3);
+  });
+
+  it("has a demo the study page's mode buttons leave alone", () => {
+    assert.ok(html.includes('class="demo"'));
+    assert.equal(html.match(/data-demo="(flashcard|quiz)" data-i18n="mode\./g).length, 2);
+    const study = readFileSync("public/src/study.js", "utf8");
+    assert.doesNotMatch(study, /querySelectorAll\("\.mode-btn"\)/);
   });
 
   it("lists every starter collection, as index.json has it", () => {

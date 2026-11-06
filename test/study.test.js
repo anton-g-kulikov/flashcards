@@ -9,6 +9,7 @@ import {
   RETRY_GAP,
   retryLater,
 } from "../public/src/features/study/progress.js";
+import { demoCards } from "../public/src/features/study/demo-words.js";
 import { studyDirection } from "../public/src/features/study/direction.js";
 import { initialMode } from "../public/src/features/study/mode.js";
 import { dragAxis, swipeDirection } from "../public/src/features/study/swipe.js";
@@ -300,5 +301,17 @@ describe("studyDirection", () => {
     assert.equal(studyDirection([{}]).first.language, "");
     assert.deepEqual([studyDirection([]).reversed, studyDirection([]).mixed], [false, false]);
   });
+});
+
+describe("demoCards", () => {
+  for (const lang of ["en", "ru", "es"]) {
+    it(`gives ${lang} speakers enough words for the quiz, in another language`, () => {
+      const cards = demoCards(lang);
+      assert.ok(distinctTranslations(cards) >= MAX_OPTIONS);
+      assert.ok(cards.every((c) => c.word && c.translation && c.word !== c.translation));
+      assert.ok(cards.every((c) => c.languages.word !== c.languages.translation));
+      assert.ok(cards.every((c) => c.languages.translation === lang));
+    });
+  }
 });
 

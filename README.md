@@ -9,8 +9,8 @@ back online).
 
 ## Using it
 
-Signed out, the study page is a landing page that explains the app, with feature cards that turn
-over like real flashcards. Sign in with Google to reach:
+Signed out, the study page is a landing page that explains the app, where you can try both study
+modes on a few words without an account. Sign in with Google to reach:
 
 - **Study** (`index.html`): learn the words of every collection that's switched on, in Flash Mode
   or a multiple-choice Quiz Mode. See [How studying works](#how-studying-works).

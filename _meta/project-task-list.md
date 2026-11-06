@@ -226,6 +226,14 @@ Temporal tracking for Flashcards. Evergreen behavior lives in `../README.md`; te
   `Intl.PluralRules`, and verbs follow it too. Russian mostly keeps its "Слов: 5" wording, which
   needs no plural.
 
+### TASK-020 — Try both modes on the landing page (2026-11-06)
+
+- **Goal:** show the product without screenshots.
+- **Done:** a working demo in "Two ways to study", with the app's mode switcher. It runs the real
+  Flash Mode and Quiz Mode on five words, so tapping, swiping and missed words behave as they do in
+  the app. It ends on a card with a sign-in button. Nothing is saved or counted in analytics.
+- **Note:** Spanish speakers get English words, since Spanish words would teach them nothing.
+
 ## Backlog
 
 - Spaced repetition: a daily limit on new words (an import of 100 makes all 100 due at once).

@@ -144,27 +144,39 @@
 
         <section class="landing-section">
           <h2 data-i18n="landing.modes.title">Two ways to study</h2>
-          <div class="landing-grid">
-            <div class="flashcard-container">
-              <div class="flashcard landing-card" role="button" tabindex="0">
-                <div class="card-face card-front">
-                  <h3 class="spanish-word" data-i18n="mode.flashcards">Flash Mode</h3>
-                  <span class="landing-turn" data-i18n="landing.turn">Tap to turn</span>
+          <!-- The app's own modes on a few words (landing-demo.js) -->
+          <div class="demo">
+            <div class="mode-selector" role="group">
+              <button type="button" class="mode-btn" data-demo="flashcard" data-i18n="mode.flashcards">Flash Mode</button>
+              <button type="button" class="mode-btn" data-demo="quiz" data-i18n="mode.quiz">Quiz Mode</button>
+            </div>
+            <p class="demo-help" data-demo="flashcard" data-i18n="landing.flash.text">See the word and tap the card to turn it. Swipe right if you know it, left if you don't.</p>
+            <p class="demo-help hidden" data-demo="quiz" data-i18n="landing.quiz.text">Pick the right translation from up to four options. Get it right the first time and the word moves up.</p>
+            <div class="demo-stage">
+              <div class="demo-flash">
+                <div class="flashcard-container">
+                  <div class="flashcard" role="button" tabindex="0"></div>
                 </div>
-                <div class="card-face card-back">
-                  <p data-i18n="landing.flash.text">See the word and tap the card to turn it. Swipe right if you know it, left if you don't.</p>
+                <div class="card-actions">
+                  <button type="button" class="action-btn dont-know-btn" data-i18n="card.dontKnow">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 2.5-2.5 3-2.5 5" />
+                      <circle cx="12" cy="17" r="0.1" />
+                    </svg>
+                    <span>I Don't Know...</span>
+                  </button>
+                  <button type="button" class="action-btn know-btn" data-i18n="card.know">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <span>I Know This!</span>
+                  </button>
                 </div>
               </div>
-            </div>
-            <div class="flashcard-container">
-              <div class="flashcard landing-card" role="button" tabindex="0">
-                <div class="card-face card-front">
-                  <h3 class="spanish-word" data-i18n="mode.quiz">Quiz Mode</h3>
-                  <span class="landing-turn" data-i18n="landing.turn">Tap to turn</span>
-                </div>
-                <div class="card-face card-back">
-                  <p data-i18n="landing.quiz.text">Pick the right translation from up to four options. Get it right the first time and the word moves up.</p>
-                </div>
+              <div class="demo-quiz hidden">
+                <div class="quiz-question" aria-live="polite"></div>
+                <div class="quiz-options"></div>
               </div>
             </div>
           </div>

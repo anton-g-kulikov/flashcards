@@ -3,6 +3,7 @@
 // phone there is no hover to show the "Tap to turn" hint. The table of starter collections can be
 // narrowed to one language pair; all its rows stay in the HTML, for search engines.
 import { onActivate } from "../features/study/message-card.js";
+import "./landing-demo.js";
 import { fillLanguageFilter } from "./language-filter.js";
 
 const STAGGER_MS = 90; // cards side by side wiggle one after the other
@@ -26,7 +27,12 @@ const observer = new IntersectionObserver(
   },
   { threshold: FULLY_SHOWN }
 );
-cards.forEach((card) => observer.observe(card.parentElement));
+[...cards, document.querySelector(".demo .flashcard")].forEach((card) => {
+  const wrapper = card.parentElement;
+  observer.observe(wrapper);
+  // A finished animation would otherwise hold the wrapper still, and the demo card swipes
+  wrapper.addEventListener("animationend", () => wrapper.classList.remove("wiggle"));
+});
 
 const filter = document.getElementById("starterFilter");
 const rows = [...document.querySelectorAll(".landing-table tbody tr")];

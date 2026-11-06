@@ -20,11 +20,11 @@ const CHECK_ICON = "M20 6L9 17l-5-5";
 const CROSS_ICON = "M18 6L6 18M6 6l12 12";
 
 export class QuizMode {
-  // study: { cards, progress, changed(), caughtUpMessage() }
-  constructor(study) {
+  // study: { cards, progress, changed(), caughtUpMessage(), demo? }; root: the elements it runs in
+  constructor(study, root = document.getElementById("quizMode")) {
     this.study = study;
-    this.questionEl = document.getElementById("quizQuestion");
-    this.optionsEl = document.getElementById("quizOptions");
+    this.questionEl = root.querySelector(".quiz-question");
+    this.optionsEl = root.querySelector(".quiz-options");
     this.current = null; // the card being asked about
     this.recent = []; // ids of the cards asked last, most recent first (see pickQuestion)
     this.firstTry = true;
@@ -127,7 +127,7 @@ export class QuizMode {
     if (this.answered || button.classList.contains("flipped")) return;
     const { progress } = this.study;
     const correct = option.id === this.current.id;
-    Analytics.quizAnswer(correct);
+    if (!this.study.demo) Analytics.quizAnswer(correct);
 
     const back = button.querySelector(".quiz-card-back");
     back.classList.add(correct ? "correct" : "wrong");

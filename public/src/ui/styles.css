@@ -1447,6 +1447,39 @@ body.auth-pending .auth-gate .auth-loading {
   }
 }
 
+/* The app's modes to try: one column, the width of the study page on a phone */
+.demo {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.demo .mode-selector {
+  margin: 0 0 var(--spacing-3);
+}
+
+.demo-help {
+  min-height: 4.4em;
+  margin: 0 0 var(--spacing-2);
+  color: var(--color-text-light);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+/* Tall enough for either mode, so the page doesn't jump on a switch */
+.demo-stage {
+  min-height: 330px;
+}
+
+.demo .flashcard {
+  height: 240px;
+  min-height: 0;
+}
+
+.demo-signin {
+  margin-top: var(--spacing-3);
+  font-style: normal;
+}
+
 /* Spaced repetition: the growing gaps between reviews */
 .landing-steps {
   display: flex;

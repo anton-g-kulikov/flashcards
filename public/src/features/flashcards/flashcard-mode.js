@@ -13,12 +13,12 @@ import { dragAxis, swipeDirection } from "../study/swipe.js";
 const SWIPE_MS = 280; // the .leaving-left/right transition in styles.css
 
 export class FlashcardMode {
-  // study: { cards, progress, changed(), caughtUpMessage() }
-  constructor(study) {
+  // study: { cards, progress, changed(), caughtUpMessage(), demo? }; root: the elements it runs in
+  constructor(study, root = document.getElementById("flashcardMode")) {
     this.study = study;
-    this.card = document.getElementById("flashcard");
+    this.card = root.querySelector(".flashcard");
     this.container = this.card.parentElement;
-    this.actions = document.getElementById("cardActions");
+    this.actions = root.querySelector(".card-actions");
     this.deck = [];
     this.flipped = false;
     this.waitingForNext = false; // "I don't know" was pressed: the button says Next
@@ -28,8 +28,8 @@ export class FlashcardMode {
 
     onActivate(this.card, () => this.tapCard());
     this.initSwipe();
-    document.getElementById("knowBtn").addEventListener("click", () => this.mark(true));
-    this.dontKnowBtn = document.getElementById("dontKnowBtn");
+    root.querySelector(".know-btn").addEventListener("click", () => this.mark(true));
+    this.dontKnowBtn = root.querySelector(".dont-know-btn");
     this.dontKnowBtn.addEventListener("click", () => {
       if (this.busy) return;
       if (this.waitingForNext) this.leave("left");
@@ -179,7 +179,7 @@ export class FlashcardMode {
     const { progress } = this.study;
     if (known) progress.right(card.id);
     else progress.wrong(card.id);
-    Analytics.cardMarked(known);
+    if (!this.study.demo) Analytics.cardMarked(known);
     this.study.changed();
 
     if (known) {

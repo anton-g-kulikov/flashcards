@@ -204,3 +204,8 @@ With `npm run dev`, at http://127.0.0.1:5050:
 21. Language filter: the dropdown above the landing table and the one under Import in My Cards list
    every language pair in the interface language. Choosing one leaves only its collections, and
    switching the interface language keeps the choice.
+22. Landing demo: signed out, tap, swipe and both buttons work in Flash Mode as they do in the app,
+   and a missed word comes back after the others. In Quiz Mode a wrong pick turns over. Both end on
+   a card whose button starts sign-in. Switching mode or language starts over. Spanish shows English
+   words. After signing in, the app's own mode buttons work and the study numbers are untouched by
+   the demo. Try the swipe with a finger on a real phone.
