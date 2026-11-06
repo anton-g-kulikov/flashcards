@@ -202,3 +202,8 @@ translation, and check the spelling (and, for nouns, the articles).
 
 Only share lists you made yourself or are allowed to share. I'll review the words, put the file in
 place and add it to the app's list.
+
+## License
+
+Code and collections are [MIT licensed](LICENSE). A collection you send in is added under the same
+licence, so anyone can use it.
